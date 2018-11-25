@@ -25,16 +25,13 @@ const styles = theme => ({
         minWidth: 0, // So the Typography noWrap works
         paddingRight: 50,
         paddingLeft: 140,
-    },
-    grid_item: {
-        marginBottom: 50,
-    },
-    grid: {
-        paddingTop: 10,
+        overflow: "scroll"
     },
     card: {
         width: 800,
-        minHeight: 1000
+        minHeight: 500,
+        paddingTop: 10,
+        paddingBottom: 50,
     },
     inner_grid: {
         paddingLeft: 20,
@@ -54,14 +51,20 @@ const styles = theme => ({
         paddingLeft: "5%"
     },
     expand_heading: {
-        fontSize: theme.typography.pxToRem(15),
-        flexBasis: '33.33%',
+        fontSize: theme.typography.pxToRem(16),
+        flexBasis: '25%',
         flexShrink: 0,
+        overflow: "hidden",
+        marginTop: 10
     },
     expand_secondaryHeading: {
         fontSize: theme.typography.pxToRem(15),
         color: theme.palette.text.secondary,
     },
+    expand_secondaryHeading_green: {
+        fontSize: theme.typography.pxToRem(15),
+        color: 'rgba(99, 214, 70)',
+    }
 });
 
 class Content extends React.Component {
@@ -96,95 +99,108 @@ class Content extends React.Component {
                 <Grid
                     container
                     justify="flex-start"
-                    className={classes.grid}
                     direction="column"
                     alignItems="center"
                 >
-                    <Grid item className={classes.grid_item}>
-                        <Card className={classes.card}>
-                            <CardHeader //this height is 74px
-                                title={"Class List"}
-                                subheader={"see your created and enrolled class here"}
-                            />
-                            <Grid
-                                  container
-                                  direction="row"
-                                  justify="space-evenly"
-                                  alignItems="flex-start"
-                            >
-                                <Grid item>
-                                    <CreateClass {...other}/>
-                                </Grid>
-                                <Grid item>
-                                    <EnrollClass {...other}/>
-                                </Grid>
+                    <Card className={classes.card}>
+                        <CardHeader //this height is 74px
+                            title={"Class List"}
+                            subheader={"see your created and enrolled class here"}
+                        />
+                        <Grid
+                              container
+                              direction="row"
+                              justify="space-evenly"
+                              alignItems="flex-start"
+                        >
+                            <Grid item>
+                                <CreateClass {...other}/>
                             </Grid>
+                            <Grid item>
+                                <EnrollClass {...other}/>
+                            </Grid>
+                        </Grid>
 
-                            {/*Created Class*/}
-                            <Grid className={classes.inner_grid} container direction="column" alignItems="flex-start" justify="flex-start">
-                                <Grid item>
-                                    <Typography variant="subheading">Created Class</Typography>
-                                </Grid>
+                        {/*Created Class*/}
+                        <Grid className={classes.inner_grid} container direction="column" alignItems="flex-start" justify="flex-start">
+                            <Grid item>
+                                <Typography variant="subheading">Created Class</Typography>
                             </Grid>
-                            <Divider className={classes.divider}/>
-                            <div className={classes.ex_root}>
-                            {
-                                (this.props.createdClass.length > 0) ?
-                                    this.props.createdClass.map((c, index) => (
-                                                <ExpansionPanel key={index} expanded={expanded === index} onChange={this.handleChange(index)}>
-                                                    <ExpansionPanelSummary expandIcon={<ExpandMore />}>
-                                                        <Typography className={classes.expand_heading}>{c}</Typography>
-                                                        <Typography className={classes.expand_secondaryHeading}>Status: ready Student No: 0/5</Typography>
-                                                    </ExpansionPanelSummary>
-                                                    <ExpansionPanelDetails>
-                                                        <Button variant="outlined"
-                                                                onClick={() => this.startClass(c)}
-                                                                disabled={this.isStarting(self, c)}
-                                                        >Start</Button>
-                                                        <Button variant="outlined"
-                                                                onClick={() => this.joinClass(self, c)}
-                                                                disabled={!this.isStarting(self, c)}
-                                                        >Enter</Button>
-                                                        <Button variant="outlined">Students</Button>
-                                                        <Button variant="outlined"><Settings/></Button>
-                                                    </ExpansionPanelDetails>
-                                                </ExpansionPanel>
-                                    )) :
-                                    <Typography variant="body1">No Created Class</Typography>
-                            }
-                            </div>
+                        </Grid>
+                        <Divider className={classes.divider}/>
+                        <div className={classes.ex_root}>
+                        {
+                            (this.props.createdClass.length > 0) ?
+                                this.props.createdClass.map((c, index) => (
+                                            <ExpansionPanel
+                                                key={index} expanded={expanded === index}
+                                                onChange={this.handleChange(index)}
+                                                // classes={this.isStarting(self, c) && {root: classes.root}}
+                                            >
+                                                <ExpansionPanelSummary expandIcon={<ExpandMore />}>
+                                                    <Typography className={classes.expand_heading}>{c}</Typography>
+                                                    <div>
+                                                        {this.isStarting(self, c) ?
+                                                            <Typography
+                                                                className={classes.expand_secondaryHeading_green}
+                                                            >Status: Starting</Typography> :
+                                                            <Typography
+                                                                className={classes.expand_secondaryHeading}
+                                                            >Status: ready</Typography>
+                                                        }
+                                                        <Typography
+                                                            className={classes.expand_secondaryHeading}
+                                                        >Student No: 0/5</Typography>
+                                                    </div>
+                                                </ExpansionPanelSummary>
+                                                <ExpansionPanelDetails>
+                                                    <Button variant="outlined"
+                                                            onClick={() => this.startClass(c)}
+                                                            disabled={this.isStarting(self, c)}
+                                                    >Start</Button>
+                                                    <Button variant="outlined"
+                                                            onClick={() => this.joinClass(self, c)}
+                                                            disabled={!this.isStarting(self, c)}
+                                                    >Enter</Button>
+                                                    <Button variant="outlined">Students</Button>
+                                                    <Button variant="outlined"><Settings/></Button>
+                                                </ExpansionPanelDetails>
+                                            </ExpansionPanel>
+                                )) :
+                                <Typography variant="body1">No Created Class</Typography>
+                        }
+                        </div>
 
-                            {/*Enrolled Class*/}
-                            <Grid className={classes.inner_grid} container direction="column" alignItems="flex-start" justify="flex-start">
-                                <Grid item>
-                                    <Typography variant="subheading">Enrolled Class</Typography>
-                                </Grid>
+                        {/*Enrolled Class*/}
+                        <Grid className={classes.inner_grid} container direction="column" alignItems="flex-start" justify="flex-start">
+                            <Grid item>
+                                <Typography variant="subheading">Enrolled Class</Typography>
                             </Grid>
-                            <Divider className={classes.divider}/>
-                            <div className={classes.ex_root}>
-                            {
-                                (this.props.enrolledClass.length > 0) ?
-                                    this.props.enrolledClass.map((en, index) => (
-                                        <ExpansionPanel key={index} expanded={expanded === "enroll" + index} onChange={this.handleChange("enroll" + index)}>
-                                            <ExpansionPanelSummary expandIcon={<ExpandMore />}>
-                                                <Typography className={classes.expand_heading}>{en.class_name} (teacher: {en.owner})</Typography>
-                                                <Typography className={classes.expand_secondaryHeading}>Status: ready Student No: 0/5</Typography>
-                                            </ExpansionPanelSummary>
-                                            <ExpansionPanelDetails>
-                                                {/*Should not join a not started class*/}
-                                                <Button variant="outlined"
-                                                        onClick={() => this.joinClass(en.owner, en.name)}
-                                                        disabled={!this.isStarting(en.owner, en.class_name)}
-                                                >Enter</Button>
-                                                <Button variant="outlined"><Settings/></Button>
-                                            </ExpansionPanelDetails>
-                                        </ExpansionPanel>
-                                    )) :
-                                    <Typography variant="body1">No Enrolled Class</Typography>
-                            }
-                            </div>
-                        </Card>
-                    </Grid>
+                        </Grid>
+                        <Divider className={classes.divider}/>
+                        <div className={classes.ex_root}>
+                        {
+                            (this.props.enrolledClass.length > 0) ?
+                                this.props.enrolledClass.map((en, index) => (
+                                    <ExpansionPanel key={index} expanded={expanded === "enroll" + index} onChange={this.handleChange("enroll" + index)}>
+                                        <ExpansionPanelSummary expandIcon={<ExpandMore />}>
+                                            <Typography className={classes.expand_heading}>{en.class_name} (teacher: {en.owner})</Typography>
+                                            <Typography className={classes.expand_secondaryHeading}>Status: ready Student No: 0/5</Typography>
+                                        </ExpansionPanelSummary>
+                                        <ExpansionPanelDetails>
+                                            {/*Should not join a not started class*/}
+                                            <Button variant="outlined"
+                                                    onClick={() => this.joinClass(en.owner, en.class_name)}
+                                                    disabled={!this.isStarting(en.owner, en.class_name)}
+                                            >Enter</Button>
+                                            <Button variant="outlined"><Settings/></Button>
+                                        </ExpansionPanelDetails>
+                                    </ExpansionPanel>
+                                )) :
+                                <Typography variant="body1">No Enrolled Class</Typography>
+                        }
+                        </div>
+                    </Card>
                 </Grid>
             </main>
         )

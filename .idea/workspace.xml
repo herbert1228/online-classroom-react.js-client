@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ff1c42f9-6a5b-4331-bd1b-a970e4e8fec0" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Components/Locations/ClassList.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/Components/Locations/ClassList.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -30,8 +30,8 @@
       <file leaf-file-name="Classroom.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Components/Locations/Classroom.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="663">
-              <caret line="39" column="77" selection-start-line="39" selection-start-column="77" selection-end-line="39" selection-end-column="77" />
+            <state relative-caret-position="414">
+              <caret line="23" column="25" selection-start-line="23" selection-start-column="25" selection-end-line="23" selection-end-column="25" />
               <folding>
                 <element signature="e#0#26#0" expanded="true" />
               </folding>
@@ -42,8 +42,8 @@
       <file leaf-file-name="App.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/App.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2587">
-              <caret line="258" column="45" lean-forward="true" selection-start-line="258" selection-start-column="45" selection-end-line="258" selection-end-column="45" />
+            <state relative-caret-position="420">
+              <caret line="30" column="51" lean-forward="true" selection-start-line="30" selection-start-column="25" selection-end-line="30" selection-end-column="51" />
               <folding>
                 <element signature="e#0#25#0" expanded="true" />
               </folding>
@@ -51,24 +51,14 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ClassList.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="ClassList.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Components/Locations/ClassList.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="234">
-              <caret line="180" column="57" lean-forward="true" selection-start-line="180" selection-start-column="57" selection-end-line="180" selection-end-column="57" />
+            <state relative-caret-position="245">
+              <caret line="57" column="21" selection-start-line="57" selection-start-column="21" selection-end-line="57" selection-end-column="21" />
               <folding>
                 <element signature="e#0#26#0" expanded="true" />
-                <element signature="e#511#1664#0" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/.gitignore">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="36">
-              <caret line="2" column="7" lean-forward="true" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="7" />
             </state>
           </provider>
         </entry>
@@ -121,10 +111,10 @@
         <option value="$PROJECT_DIR$/src/Components/DrawerLeft.js" />
         <option value="$PROJECT_DIR$/src/Components/NotificationBar.js" />
         <option value="$PROJECT_DIR$/src/RegisterBtn.js" />
-        <option value="$PROJECT_DIR$/src/Components/Locations/Classroom.js" />
         <option value="$PROJECT_DIR$/src/App.js" />
-        <option value="$PROJECT_DIR$/src/Components/Locations/ClassList.js" />
         <option value="$PROJECT_DIR$/.gitignore" />
+        <option value="$PROJECT_DIR$/src/Components/Locations/Classroom.js" />
+        <option value="$PROJECT_DIR$/src/Components/Locations/ClassList.js" />
       </list>
     </option>
   </component>
@@ -198,7 +188,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="SearchEverywhereHistoryKey" value="Con&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/Locations/Content.js&#10;Reg&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/RegisterBtn.js&#10;Drawer&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/DrawerLeft.js&#10;Enr&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/Locations/PopupFunction/EnrollClass.js&#10;Lef&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/DrawerLeft.js&#10;Sket&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/Drawer_Components/Sketch.js&#10;White&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/compile/production/myWebsite/client/Components/Drawer_Components/Whiteboard.js&#10;List&#9;null&#9;null&#10;Dra&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/DrawerLeft.js&#10;create&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/Locations/PopupFunction/CreateClass.js&#10;Crea&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/Locations/PopupFunction/CreateClass.js&#10;reg&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/RegisterBtn.js&#10;Hea&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/Header.js&#10;Cre&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/Locations/PopupFunction/CreateClass.js&#10;Create&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/Locations/PopupFunction/CreateClass.js&#10;Enro&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/Locations/PopupFunction/EnrollClass.js&#10;card&#9;null&#9;null&#10;Le&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/Drawer_Components/DrawerLeftList.js" />
+    <property name="SearchEverywhereHistoryKey" value="Hea&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/Header.js&#10;Con&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/Locations/Content.js&#10;Reg&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/RegisterBtn.js&#10;Drawer&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/DrawerLeft.js&#10;Enr&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/Locations/PopupFunction/EnrollClass.js&#10;Lef&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/DrawerLeft.js&#10;Sket&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/Drawer_Components/Sketch.js&#10;White&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/compile/production/myWebsite/client/Components/Drawer_Components/Whiteboard.js&#10;List&#9;null&#9;null&#10;Dra&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/DrawerLeft.js&#10;create&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/Locations/PopupFunction/CreateClass.js&#10;Crea&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/Locations/PopupFunction/CreateClass.js&#10;reg&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/RegisterBtn.js&#10;Cre&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/Locations/PopupFunction/CreateClass.js&#10;Create&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/Locations/PopupFunction/CreateClass.js&#10;Enro&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/Locations/PopupFunction/EnrollClass.js&#10;card&#9;null&#9;null&#10;Le&#9;FILE&#9;file:///Users/herbert/classroom/react_classroom/src/Components/Drawer_Components/DrawerLeftList.js" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="go.gopath.indexing.explicitly.defined" value="true" />
@@ -324,12 +314,12 @@
       <updated>1542810912077</updated>
       <workItem from="1542810913649" duration="17273000" />
       <workItem from="1542854083802" duration="18628000" />
-      <workItem from="1543055529938" duration="14134000" />
+      <workItem from="1543055529938" duration="17084000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="50035000" />
+    <option name="totallyTimeSpent" value="52985000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -362,8 +352,8 @@
       <window_info anchor="right" id="Capture Analysis" order="6" />
       <window_info anchor="bottom" id="Run" order="8" weight="0.2447466" />
       <window_info anchor="bottom" id="Version Control" order="4" />
-      <window_info anchor="bottom" id="Terminal" order="5" visible="true" weight="0.58467245" />
-      <window_info active="true" anchor="right" content_ui="combo" id="Project" order="1" visible="true" weight="0.18911175" />
+      <window_info anchor="bottom" id="Terminal" order="5" weight="0.58467245" />
+      <window_info anchor="right" content_ui="combo" id="Project" order="1" visible="true" weight="0.18911175" />
       <window_info anchor="bottom" id="Find" order="7" weight="0.32880098" />
       <window_info id="Learn" order="6" />
       <window_info anchor="right" id="SciView" order="11" weight="0.3297568" />
@@ -404,7 +394,6 @@
           <caret line="162" column="56" selection-start-line="162" selection-start-column="56" selection-end-line="162" selection-end-column="56" />
           <folding>
             <element signature="e#0#26#0" expanded="true" />
-            <element signature="e#511#1664#0" />
           </folding>
         </state>
       </provider>
@@ -452,7 +441,6 @@
           <caret line="95" column="76" selection-start-line="95" selection-start-column="76" selection-end-line="95" selection-end-column="76" />
           <folding>
             <element signature="e#0#26#0" expanded="true" />
-            <element signature="e#511#1664#0" />
           </folding>
         </state>
       </provider>
@@ -536,13 +524,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1130">
           <caret line="151" column="33" selection-start-line="151" selection-start-column="28" selection-end-line="151" selection-end-column="33" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Components/Header.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="273">
-          <caret line="54" column="21" lean-forward="true" selection-start-line="54" selection-start-column="21" selection-end-line="54" selection-end-column="21" />
         </state>
       </provider>
     </entry>
@@ -709,16 +690,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Components/Locations/Classroom.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="663">
-          <caret line="39" column="77" selection-start-line="39" selection-start-column="77" selection-end-line="39" selection-end-column="77" />
-          <folding>
-            <element signature="e#0#26#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Components/Locations/PopupFunction/EnrollClass.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="105">
@@ -729,10 +700,37 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="36">
+          <caret line="2" column="7" lean-forward="true" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Components/Locations/Classroom.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="414">
+          <caret line="23" column="25" selection-start-line="23" selection-start-column="25" selection-end-line="23" selection-end-column="25" />
+          <folding>
+            <element signature="e#0#26#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Components/Header.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="945">
+          <caret line="54" column="21" lean-forward="true" selection-start-line="54" selection-start-column="21" selection-end-line="54" selection-end-column="21" />
+          <folding>
+            <element signature="e#0#26#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/App.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2587">
-          <caret line="258" column="45" lean-forward="true" selection-start-line="258" selection-start-column="45" selection-end-line="258" selection-end-column="45" />
+        <state relative-caret-position="420">
+          <caret line="30" column="51" lean-forward="true" selection-start-line="30" selection-start-column="25" selection-end-line="30" selection-end-column="51" />
           <folding>
             <element signature="e#0#25#0" expanded="true" />
           </folding>
@@ -741,19 +739,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Components/Locations/ClassList.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="234">
-          <caret line="180" column="57" lean-forward="true" selection-start-line="180" selection-start-column="57" selection-end-line="180" selection-end-column="57" />
+        <state relative-caret-position="245">
+          <caret line="57" column="21" selection-start-line="57" selection-start-column="21" selection-end-line="57" selection-end-column="21" />
           <folding>
             <element signature="e#0#26#0" expanded="true" />
-            <element signature="e#511#1664#0" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="36">
-          <caret line="2" column="7" lean-forward="true" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="7" />
         </state>
       </provider>
     </entry>
