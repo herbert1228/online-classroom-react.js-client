@@ -37,8 +37,17 @@ class Content extends React.Component {
                 <Typography variant="display3"  noWrap>
                     Welcome to the classroom !
                 </Typography>
-                <Typography noWrap>
+                <Typography variant="subheading" gutterBottom noWrap>
                     Currently only Classroom Page (First Icon) and ClassList Page (Second Icon) is not empty.
+                </Typography>
+                <Typography variant="subheading" gutterBottom noWrap>
+                    Safari cannot render react/vue correctly, so please browse with chrome/firefox, maybe we will figure it out later.
+                </Typography>
+                <Typography variant="subheading" gutterBottom noWrap>
+                    All layouts are temporary, for testing only.
+                </Typography>
+                <Typography variant="caption" gutterBottom noWrap>
+                    Copyright © 2019 Overcoded All rights reserved
                 </Typography>
             </main>
         )

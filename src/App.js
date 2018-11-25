@@ -41,7 +41,8 @@ const styles = theme => ({
     }
 })
 
-const url = "ws://localhost:8500" //'ws://overcoded.tk:8500'
+const url = "ws://localhost:8500"
+// const url = "ws://overcoded.tk:8500"
 
 class App extends React.Component {
     static propTypes = {
@@ -60,6 +61,7 @@ class App extends React.Component {
             createdClass: [],
             enrolledClass: [],
             startedClass: [],
+            session_user: [],
             joined: null,
             showNotification: false,
             notificationMessage: "",
@@ -82,8 +84,10 @@ class App extends React.Component {
                     this.ws_init()
                     this.handleNotification("LOGIN REJECTED! (reason: already logged in)")
                 } else {
-                    window.confirm("Disconnected, press OK to reconnect") && this.ws_init()
+                    // window.confirm("Disconnected, press OK to reconnect") && this.ws_init()
+                    this.ws_init()
                 }
+                this.setState({joined: null})
             }
             this.ws.onopen = () => {
                 if (cookies.get("name")) {
@@ -174,10 +178,13 @@ class App extends React.Component {
                 this.handleNotification("subscribe " + event.owner + "'s " + event.class_name + " success")
                 break
             case "subscribe_class failed":
-                this.handleNotification("subscribe " + this.state.t_name + "'s " + this.state.class_name + " failed")
+                this.handleNotification("subscribe " + event.owner + "'s " + event.class_name + " failed")
                 break
             case "get_started_class":
                 this.setState({startedClass: event.started_class})
+                break
+            case "get_session_user":
+                this.setState({session_user: event.session_user})
                 break
             default:
                 break

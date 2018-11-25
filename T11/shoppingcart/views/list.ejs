@@ -1,0 +1,9 @@
+<HTML><BODY>
+<H1>Showing <%= c.length %> Products</H1>
+<p><a href=/T11/shoppingcartcart>shopping cart</a></p>
+<ol>
+  <% c.forEach(function(cafe) { %>
+  <li><a href=/showdetails?id=<%= cafe.id %>><%= cafe.name %></a></li>
+  <% });                        %>
+</ol>
+</BODY></HTML>

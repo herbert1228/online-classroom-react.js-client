@@ -1,0 +1,20 @@
+<HTML><BODY>
+<H1>Shopping Cart: (<%= c.length %> items)</H1>
+<p><a href=/emptycart>Empty shopping cart</a></p>
+<table>
+  <tr>
+    <th>Product</th>
+    <th>Price</th>
+    <th>Qty</th>
+  </tr>
+  <% c.forEach(function(p) { %>
+    <tr>
+      <td><a href=/showdetails?id=<%= p.id %>><%= p.name %></a></td>
+      <td><%= p.price %></td>
+      <td><%= p.qty %></td>
+    </tr>
+  <% });                     %>
+</table>
+<br>
+</script>
+</BODY></HTML>
