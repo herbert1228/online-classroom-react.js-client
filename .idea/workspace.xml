@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="ff1c42f9-6a5b-4331-bd1b-a970e4e8fec0" name="Default" comment="" />
+    <list default="true" id="ff1c42f9-6a5b-4331-bd1b-a970e4e8fec0" name="Default" comment="">
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -49,15 +51,24 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ClassList.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="ClassList.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Components/Locations/ClassList.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="544">
-              <caret line="176" column="67" selection-start-line="176" selection-start-column="67" selection-end-line="176" selection-end-column="67" />
+            <state relative-caret-position="234">
+              <caret line="180" column="57" lean-forward="true" selection-start-line="180" selection-start-column="57" selection-end-line="180" selection-end-column="57" />
               <folding>
                 <element signature="e#0#26#0" expanded="true" />
                 <element signature="e#511#1664#0" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/.gitignore">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="36">
+              <caret line="2" column="7" lean-forward="true" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="7" />
             </state>
           </provider>
         </entry>
@@ -80,6 +91,9 @@
     </replaceStrings>
   </component>
   <component name="GOROOT" path="/usr/local/Cellar/go/1.10.3/libexec" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
@@ -110,6 +124,7 @@
         <option value="$PROJECT_DIR$/src/Components/Locations/Classroom.js" />
         <option value="$PROJECT_DIR$/src/App.js" />
         <option value="$PROJECT_DIR$/src/Components/Locations/ClassList.js" />
+        <option value="$PROJECT_DIR$/.gitignore" />
       </list>
     </option>
   </component>
@@ -137,6 +152,7 @@
     <option name="width" value="1440" />
     <option name="height" value="900" />
   </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
@@ -308,12 +324,12 @@
       <updated>1542810912077</updated>
       <workItem from="1542810913649" duration="17273000" />
       <workItem from="1542854083802" duration="18628000" />
-      <workItem from="1543055529938" duration="13765000" />
+      <workItem from="1543055529938" duration="14134000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="49666000" />
+    <option name="totallyTimeSpent" value="50035000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -345,9 +361,9 @@
       <window_info anchor="bottom" id="Regex Tester" order="3" />
       <window_info anchor="right" id="Capture Analysis" order="6" />
       <window_info anchor="bottom" id="Run" order="8" weight="0.2447466" />
-      <window_info anchor="bottom" id="Version Control" order="4" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Terminal" order="5" weight="0.31396785" />
-      <window_info anchor="right" content_ui="combo" id="Project" order="1" visible="true" weight="0.18911175" />
+      <window_info anchor="bottom" id="Version Control" order="4" />
+      <window_info anchor="bottom" id="Terminal" order="5" visible="true" weight="0.58467245" />
+      <window_info active="true" anchor="right" content_ui="combo" id="Project" order="1" visible="true" weight="0.18911175" />
       <window_info anchor="bottom" id="Find" order="7" weight="0.32880098" />
       <window_info id="Learn" order="6" />
       <window_info anchor="right" id="SciView" order="11" weight="0.3297568" />
@@ -372,16 +388,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/App.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3294">
-          <caret line="183" column="47" selection-start-line="183" selection-start-column="47" selection-end-line="183" selection-end-column="47" />
-          <folding>
-            <element signature="e#0#25#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Components/Locations/Content.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="504">
@@ -735,12 +741,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Components/Locations/ClassList.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="544">
-          <caret line="176" column="67" selection-start-line="176" selection-start-column="67" selection-end-line="176" selection-end-column="67" />
+        <state relative-caret-position="234">
+          <caret line="180" column="57" lean-forward="true" selection-start-line="180" selection-start-column="57" selection-end-line="180" selection-end-column="57" />
           <folding>
             <element signature="e#0#26#0" expanded="true" />
             <element signature="e#511#1664#0" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="36">
+          <caret line="2" column="7" lean-forward="true" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="7" />
         </state>
       </provider>
     </entry>
