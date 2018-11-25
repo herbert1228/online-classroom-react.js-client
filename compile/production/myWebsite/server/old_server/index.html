@@ -1,0 +1,43 @@
+
+<textarea id="output">
+</textarea>
+
+<input id="input" type="text">
+
+<button id="button">Send</button>
+
+<script>
+
+var button = document.querySelector("#button")
+var input = document.querySelector("#input")
+var output = document.querySelector("#output")
+
+button.onclick = function () {
+  console.log("typed", input.value)
+  socket.send(JSON.stringify({type: "speak", message: input.value}))
+  input.value = ""
+}
+
+
+var socket = new WebSocket("ws://localhost:8080")
+
+var message = {
+    name: 'channel add',
+    data: {
+        name: 'Hardware Support'
+    }
+};
+
+socket.onopen = function () {
+  console.log("connected")
+  // var name = prompt("What's your name")
+  socket.send(JSON.stringify(message))
+}
+
+// socket.onmessage = function (e) {
+//   console.log(e.data)
+//   obj = JSON.parse(e.data)
+//   output.value += obj.sender + ": " + obj.message + "\n"
+// }
+
+</script>
