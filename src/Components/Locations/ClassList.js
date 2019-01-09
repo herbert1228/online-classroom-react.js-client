@@ -52,7 +52,7 @@ const styles = theme => ({
     },
     expand_heading: {
         fontSize: theme.typography.pxToRem(16),
-        flexBasis: '25%',
+        flexBasis: '30%',
         flexShrink: 0,
         overflow: "hidden",
         marginTop: 10
@@ -67,11 +67,17 @@ const styles = theme => ({
     }
 });
 
-class Content extends React.Component {
-    state = {expanded: null}
+class ClassList extends React.Component {
+    state = {expanded: null, expandedEnroll: null}
     handleChange = panel => (event, expanded) => {
         this.setState({
             expanded: expanded ? panel : false,
+        });
+    }
+
+    handleChangeEnroll = panel => (event, expanded) => {
+        this.setState({
+            expandedEnroll: expanded ? panel : false,
         });
     }
 
@@ -92,7 +98,7 @@ class Content extends React.Component {
 
     render() {
         const { classes, self, ...other } = this.props
-        const { expanded } = this.state
+        const { expanded, expandedEnroll } = this.state
         return (
             <main className={classes.content}>
                 <div className={classes.toolbar}/>
@@ -182,10 +188,22 @@ class Content extends React.Component {
                         {
                             (this.props.enrolledClass.length > 0) ?
                                 this.props.enrolledClass.map((en, index) => (
-                                    <ExpansionPanel key={index} expanded={expanded === "enroll" + index} onChange={this.handleChange("enroll" + index)}>
+                                    <ExpansionPanel key={index} expanded={expandedEnroll === index} onChange={this.handleChangeEnroll(index)}>
                                         <ExpansionPanelSummary expandIcon={<ExpandMore />}>
                                             <Typography className={classes.expand_heading}>{en.class_name} (teacher: {en.owner})</Typography>
-                                            <Typography className={classes.expand_secondaryHeading}>Status: ready Student No: 0/5</Typography>
+                                            <div>
+                                                {this.isStarting(en.owner, en.class_name) ?
+                                                    <Typography
+                                                        className={classes.expand_secondaryHeading_green}
+                                                    >Status: Starting</Typography> :
+                                                    <Typography
+                                                        className={classes.expand_secondaryHeading}
+                                                    >Status: ready</Typography>
+                                                }
+                                                <Typography
+                                                    className={classes.expand_secondaryHeading}
+                                                >Student No: 0/5</Typography>
+                                            </div>
                                         </ExpansionPanelSummary>
                                         <ExpansionPanelDetails>
                                             {/*Should not join a not started class*/}
@@ -207,8 +225,8 @@ class Content extends React.Component {
     }
 }
 
-Content.propTypes = {
+ClassList.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Content);
+export default withStyles(styles)(ClassList);

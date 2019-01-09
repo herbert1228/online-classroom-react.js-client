@@ -7,7 +7,7 @@ import {Cookies, withCookies} from 'react-cookie'
 import {Button, TextField, withStyles, Grid} from '@material-ui/core'
 import DrawerLeft from './Components/DrawerLeft'
 import './css/App.css'
-import Background from './css/classroom.jpg';
+import Background from './css/classroom.jpg'
 
 const styles = theme => ({
     root: {
@@ -42,6 +42,7 @@ const styles = theme => ({
 })
 
 const url = "ws://localhost:8500"
+// const url = "ws://192.168.8.6:8500"
 // const url = "ws://overcoded.tk:8500"
 
 class App extends React.Component {
@@ -65,8 +66,9 @@ class App extends React.Component {
             joined: null,
             showNotification: false,
             notificationMessage: "",
-            connected: false
-        };
+            connected: false,
+            otherId: null
+        }
     }
 
     notificationQueue = []
@@ -85,7 +87,7 @@ class App extends React.Component {
                     this.handleNotification("LOGIN REJECTED! (reason: already logged in)")
                 } else {
                     // window.confirm("Disconnected, press OK to reconnect") && this.ws_init()
-                    this.ws_init()
+                    setTimeout(() => this.ws_init(), 2000)
                 }
                 this.setState({joined: null})
             }
@@ -160,13 +162,13 @@ class App extends React.Component {
                 this.handleNotification("created class failed")
                 break
             case "join_class success":
+                this.handleNotification(`join ${event.owner}'s class: ${event.class_name} success`)
                 this.setState({joined: {owner: event.owner, class_name: event.class_name}}, () => this.changeScene(1))
                 break
             case "join_class failed":
                 this.handleNotification("join class failed")
                 break
             case "start_class success":
-                this.ws.send(JSON.stringify({type: "get_started_class"}))
                 this.handleNotification("start class success")
                 break
             case "start_class failed":
@@ -185,6 +187,10 @@ class App extends React.Component {
                 break
             case "get_session_user":
                 this.setState({session_user: event.session_user})
+                break
+            case "leave_class success":
+                this.handleNotification("leave_class success")
+                this.setState({session_user: [], joined: null})
                 break
             default:
                 break

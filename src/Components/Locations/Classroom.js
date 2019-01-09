@@ -5,7 +5,7 @@ import Typography from '@material-ui/core/Typography'
 import {Grid, Button} from '@material-ui/core'
 import 'whatwg-fetch'
 import UserCard from '../Content_Components/UserCard'
-
+import ClassMenu from '../Classroom_Components/ClassMenu'
 
 const styles = theme => ({
     toolbar: {
@@ -27,13 +27,14 @@ const styles = theme => ({
         marginBottom: 50,
     },
     grid: {
-        paddingTop: 30,
+        paddingTop: 0,
     }
-});
+})
 
-class Content extends React.Component {
+class Classroom extends React.Component {
     render() {
-        const { classes, ...other } = this.props;
+        const { classes, ...other } = this.props
+
         return (
             <main className={classes.content}>
                 <div className={classes.toolbar}/>
@@ -45,9 +46,7 @@ class Content extends React.Component {
                     >Select a classroom here!</Button>
                 }
                 {(this.props.joined != null) &&
-                    <Typography variant="headline" gutterBottom>
-                        Class: {this.props.joined.class_name}, Teacher: {this.props.joined.owner}
-                    </Typography>
+                    <ClassMenu {...other}/>
                 }
                 <Grid
                     container
@@ -56,8 +55,8 @@ class Content extends React.Component {
                     alignItems="flex-start"
                     className={classes.grid}
                 >
-                    {(this.props.users != null) && this.props.users.map(user => (
-                        <Grid key={user.name} item className={classes.grid_item}>
+                    {(this.props.session_user != null) && this.props.session_user.map(user => (
+                        <Grid key={user} item className={classes.grid_item}>
                             <UserCard {...other} user={user}/>
                         </Grid>
                     ))}
@@ -67,8 +66,8 @@ class Content extends React.Component {
     }
 }
 
-Content.propTypes = {
+Classroom.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Content);
+export default withStyles(styles)(Classroom);
