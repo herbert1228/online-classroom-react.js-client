@@ -1,248 +1,148 @@
-import React from 'react';
-// import PropTypes from 'prop-types'
-import {withStyles} from '@material-ui/core/styles'
-// import {Card, CardHeader, Avatar, IconButton, Divider} from '@material-ui/core'
 
-const styles = theme => ({
+import React from 'react'
+import {
+    withStyles
+} from '@material-ui/core/styles'
 
-})
+const styles = theme => ({})
 
 class RemoteStream extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            isChannelReady: false,
-            // isInitiator: false,
-            isStarted: false,
-            remoteStream: null,
-            pc: null,
-            turnReady: null,
-            pcConfig: {
-                'iceServers': [{
-                    'urls': 'stun:stun.l.google.com:19302'
-                }]
-            }
-        }
-        this.sendMessage = this.sendMessage.bind(this)
-        this.setLocalAndSendMessage = this.setLocalAndSendMessage.bind(this)
-    }
-
-    componentWillReceiveProps({camOpen}) {
-        if (camOpen === false) {
-            console.log("disable webcam", camOpen)
-        }
-    }
-
-    componentWillMount() {
-        try {
-            this.setState({pc: new RTCPeerConnection(null)}, () => {
-                this.pc = this.state.pc
-                this.pc.onicecandidate = this.handleIceCandidate;
-                this.pc.onaddstream = this.handleRemoteStreamAdded;
-                this.pc.onremovestream = this.handleRemoteStreamRemoved;
-                console.log('Created RTCPeerConnnection');
-            })
-        } catch (e) {
-            console.log('Failed to create PeerConnection, exception: ' + e.message);
-            alert('Cannot create RTCPeerConnection object.');
+    state = {
+        requesting: false,
+        turnReady: null,
+        pcConfig: {
+            'iceServers': [{
+                'urls': 'stun:stun.l.google.com:19302'
+            }]
         }
     }
 
     componentDidMount() {
-        const {isStarted, pc} = this.state
-        const {self, user} = this.props
-        let sdpConstraints = { // Set up audio and video regardless of what devices are present.
-            offerToReceiveAudio: true,
-            offerToReceiveVideo: true
-        };
+        if (this.props.user === "Teacher") 
+            return
+        const { requesting } = this.state
 
-        // this.props.ws.send(JSON.stringify({type: "create or join"}))
-        console.log(self, 'Attempting to join stream of', user)
+        this.peerConn = new RTCPeerConnection(this.state.pcConfig)
+        this.peerConn.ontrack = this.gotRemoteStream
+        this.peerConn.onicecandidate = this.iceCallbackRemote
+        console.log(`${this.props.user}: created remote peer connection object`)
 
         this.props.ws.addEventListener("message", e => {
             const event = JSON.parse(e.data)
-            if (event.stream_owner === user) {
-                console.log('Stream received message:', event.type)
-                const {stream_owner} = event
+            if (event.type === "join") {
+                console.log('Received a request to join room from:') // + event.joiner_pid)
+            }
+            if (event.stream_owner === this.props.user) {
+                console.log('Stream', this.props.user, 'received message:', event.type)
                 switch (event.type) {
-                    // case "created": // TODO remove after ensured this msg is not possible to receive
-                    //     console.log("Error: remote stream received 'created' message!")
-                    //     break
-                    // case "join": //for localStream
-                    //     console.log('Another peer made a request to join room ' + stream_owner)
-                    //     console.log('This peer is the initiator of room ' + stream_owner + '!')
-                    //     this.setState({isChannelReady: true})
-                    //     break
-                    case "joined":
-                        console.log('remote stream joined: ' + stream_owner);
-                        this.setState({isChannelReady: true})
-                        break
                     case "got user media":
-                        this.maybeStart()
+                        if (!requesting) {
+                            this.requestOffer()
+                        }
                         break
                     case "offer":
-                        if (!isStarted) {
-                            this.maybeStart()
-                            pc.setRemoteDescription(new RTCSessionDescription(event)) //rebuild the message of offer
-                            this.doAnswer()
-                        }
-                        break
-                    case "answer":
-                        if (isStarted) {
-                            pc.setRemoteDescription(new RTCSessionDescription(event)) //rebuild the message of answer
-                        }
+                        this.setRemoteDescriptionForPeerConn(event)
                         break
                     case "candidate":
-                        if (isStarted) {
-                            let candidate = new RTCIceCandidate({
-                                sdpMLineIndex: event.label,
-                                candidate: event.candidate
-                            })
-                            pc.addIceCandidate(candidate)
-                        }
-                        break
-                    case "bye":
-                        if (isStarted) {
-                            this.handleRemoteHangup()
+                        if (requesting) {
+                            this.peerConn.addIceCandidate(event.candidate)
                         }
                         break
                     default:
+                        console.log(`Not Controlledd:`)
+                        console.log({...event})
                         break
                 }
             }
         })
 
-        if (window.location.hostname !== 'localhost') {
-            this.requestTurn(
-                'https://computeengineondemand.appspot.com/turn?username=41784574&key=4080218913'
-            )
+        if (this.props.peerConn.includes(this.props.user)) {
+            this.requestOffer()
         }
+        // this.requestTurn("https://computeengineondemand.appspot.com/turn?username=41784574&key=4080218913")
+    }
 
-        // window.onbeforeunload = function() { // replace with componentWillUnmount // test will this works on leave(no longer visible)
-        //     sendMessage('bye');
-        // };
+    componentWillUnmount() {
+        console.info(`closing remote stream: ${this.props.user}...`)
     }
 
     sendMessage(message) {
-        console.log('Client sending message: ', message);
-        this.props.ws.send(JSON.stringify({type: "stream_message", message}));
+        console.log('Remote sending message: ', message)
+        this.props.ws.send(JSON.stringify({ type: "stream_message", message }))
     }
 
-    maybeStart() {
-        console.log('>>>>>>> maybeStart() of owner: ', this.props.user, this.state.isStarted, this.state.isChannelReady);
-        if (!this.state.isStarted && this.state.isChannelReady) {
-            console.log('>>>>>> creating peer connection');
-            this.setState({isStarted: true})
-        }
+    sendDirectMessage(message, to) {
+        console.log(`Remote sending message to ${to}: `, message)
+        message.to = to
+        this.props.ws.send(JSON.stringify({ type: "class_direct_message", message }))
     }
 
-    handleIceCandidate(event) {
-        console.log('icecandidate event: ', event);
-        if (event.candidate) {
-            this.sendMessage({
-                type: 'candidate',
-                label: event.candidate.sdpMLineIndex,
-                id: event.candidate.sdpMid,
-                candidate: event.candidate.candidate
-            });
-        } else {
-            console.log('End of candidates.');
-        }
+    requestOffer = () => {
+        this.setState({ requesting: true })
+        this.sendMessage({ type: "request_offer", stream_owner: this.props.user }) //TODO include self in json for opponent to reply        
     }
 
-    handleCreateOfferError(event) {
-        console.log('createOffer() error: ', event);
+    setRemoteDescriptionForPeerConn = (desc) => {
+        const { peerConn } = this
+        peerConn.setRemoteDescription(desc)
+        peerConn.createAnswer()
+            .then(this.gotDescriptionRemote, this.onCreateSessionDescriptionError)
+            .then(this.setState({ peerConn }))
+            .catch(this.setState({ peerConn }))
     }
 
-    doCall() {
-        console.log('Sending offer to peer');
-        this.state.pc.createOffer(this.setLocalAndSendMessage, this.handleCreateOfferError);
+    gotDescriptionRemote = (desc) => { // send answer to streamer
+        this.peerConn.setLocalDescription(desc)
+        const modDesc = { desc }
+        modDesc.stream_owner = this.props.user
+        modDesc.type = "answer"
+        this.sendDirectMessage(modDesc, this.props.user)
     }
 
-    doAnswer() {
-        console.log('Sending answer to peer.');
-        this.state.pc.createAnswer().then(
-            this.setLocalAndSendMessage,
-            this.onCreateSessionDescriptionError
-        );
+    onCreateSessionDescriptionError = (err) => {
+        console.log(`Failed to create session desc for ${this.props.user}: ${err.toString()}`)
     }
 
-    setLocalAndSendMessage(sessionDescription) {
-        this.state.pc.setLocalDescription(sessionDescription);
-        console.log('setLocalAndSendMessage sending message', sessionDescription);
-        this.sendMessage(sessionDescription);
-    }
-
-    onCreateSessionDescriptionError(error) {
-        console.trace('Failed to create session description: ' + error.toString());
-    }
-
-    requestTurn(turnURL) {
-        let turnExists = false
-        for (let i in this.state.pcConfig.iceServers) {
-            if (this.state.pcConfig.iceServers[i].urls.substr(0, 5) === 'turn:') {
-                turnExists = true
-                this.setState({turnReady: true})
-                break
+    gotRemoteStream = (e) => {
+        if (this.remoteVideo !== null) {
+            if (this.remoteVideo.srcObject !== e.streams[0]) {
+                this.remoteVideo.srcObject = e.streams[0]
+                console.log(`${this.props.user}'s pc: received remote stream`)
             }
         }
-        if (!turnExists) {
-            console.log('Getting TURN server from ', turnURL)
-            // No TURN server. Get one from computeengineondemand.appspot.com:
-            let xhr = new XMLHttpRequest()
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    let turnServer = JSON.parse(xhr.responseText)
-                    console.log('Got TURN server: ', turnServer)
-                    this.state.pcConfig.iceServers.push({
-                        'urls': 'turn:' + turnServer.username + '@' + turnServer.turn,
-                        'credential': turnServer.password
-                    })
-                    this.setState({turnReady: true})
-                }
-            }
-            xhr.open('GET', turnURL, true)
-            xhr.send()
-        }
     }
 
-    handleRemoteStreamAdded(event) {
-        console.log('Remote stream added.');
-        this.setState({remoteStream: event.stream})
-        this.remoteVideo.srcObject = this.state.remoteStream;
+    iceCallbackRemote = (event) => {
+        this.peerConn.addIceCandidate(event.candidate)
+            .then(this.onAddIceCandidateSuccess, this.onAddIceCandidateError)
+        this.sendMessage({ type: "candidate", candidate: event.candidate, stream_owner: this.props.user })
+        console.log(`${this.props.user}'s pc New ICE candidate: ${event.candidate ? event.candidate.candidate : "(null)"}`)
     }
 
-    handleRemoteStreamRemoved(event) {
-        console.log('Remote stream removed. Event: ', event);
+    onAddIceCandidateSuccess = () => {
+        console.log("AddIceCandidateSuccess")
     }
 
-    hangup() {
-        console.log('Hanging up.')
-        this.stop()
-        this.sendMessage('bye')
-    }
-
-    handleRemoteHangup() {
-        console.log('Session terminated.')
-        this.stop()
-        // isInitiator = false
-    }
-
-    stop() {
-        this.setState({isStarted: false})
-        this.state.pc.close()
-        this.setState({pc: null})
+    onAddIceCandidateError = (e) => {
+        console.log(`Failed to add ICE candidate: ${e.toString()}`)
     }
 
     render() {
-        // const {classes, user} = this.props;
-
+        // const {classes, user} = this.props
+        const {small} = this.props
         return (
-            <div>
-                <video width="460" height="300" autoPlay muted playsInline ref={video => {this.remoteVideo = video}}></video>
+            <div >
+                <video
+                    width={small? "92" : "460"}
+                    height={small ? "60" : "300"}
+                    autoPlay muted playsInline ref={
+                        video => {
+                            this.remoteVideo = video
+                        }
+                    } > </video>
             </div>
         )
     }
 }
 
-export default withStyles(styles)(RemoteStream);
+export default withStyles(styles)(RemoteStream)

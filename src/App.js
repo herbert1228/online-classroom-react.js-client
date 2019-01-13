@@ -41,9 +41,9 @@ const styles = theme => ({
     }
 })
 
-const url = "ws://localhost:8500"
+// const url = "ws://localhost:8500"
 // const url = "ws://192.168.8.6:8500"
-// const url = "ws://overcoded.tk:8500"
+const url = "ws://overcoded.tk:8500"
 
 class App extends React.Component {
     static propTypes = {
@@ -67,7 +67,8 @@ class App extends React.Component {
             showNotification: false,
             notificationMessage: "",
             connected: false,
-            otherId: null
+            otherId: null,
+            peerConn: null
         }
     }
 
@@ -110,7 +111,7 @@ class App extends React.Component {
     }
 
     message(e) {
-        console.log("onmessage", JSON.parse(e.data))
+        // console.log("onmessage", JSON.parse(e.data))
         const event = JSON.parse(e.data)
         const {cookies} = this.props
         switch (event.type) {
@@ -187,6 +188,9 @@ class App extends React.Component {
                 break
             case "get_session_user":
                 this.setState({session_user: event.session_user})
+                break
+            case "get_exist_peer_conn":
+                this.setState({ peerConn: event.exist_peer_conn })
                 break
             case "leave_class success":
                 this.handleNotification("leave_class success")

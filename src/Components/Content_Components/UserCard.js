@@ -3,7 +3,7 @@ import React from 'react';
 import {withStyles} from '@material-ui/core/styles'
 import {Card, CardHeader, Avatar, Divider} from '@material-ui/core'
 import { Pencil, TOOL_PENCIL } from "./tools";
-import LocalStream from '../Classroom_Components/TryLocalStream'
+import LocalStream from '../Classroom_Components/LocalStream'
 import RemoteStream from '../Classroom_Components/RemoteStream'
 import UserCardMenu from '../Classroom_Components/UserCardMenu'
 // import { findDOMNode } from 'react-dom'
