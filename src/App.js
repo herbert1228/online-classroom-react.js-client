@@ -9,6 +9,19 @@ import DrawerLeft from './Components/DrawerLeft'
 import './css/App.css'
 import Background from './css/classroom.jpg'
 
+// PLEASE DELETE THIS AFTER DEBUGGING
+var DEBUG = false
+;(function () {
+    var send = WebSocket.prototype.send
+    WebSocket.prototype.send = function (msg) {
+        if (DEBUG) {
+            console.log("websocket send", msg)
+        }
+        return send.call(this, msg)
+    }
+})()
+
+
 const styles = theme => ({
     root: {
         flexGrow: 1,
@@ -41,9 +54,13 @@ const styles = theme => ({
     }
 })
 
-// const url = "ws://localhost:8500"
-// const url = "ws://192.168.8.6:8500"
-const url = "ws://overcoded.tk:8500"
+// const url = process.env.localserver ? 
+//     `ws://${window.location.hostname}:8500/` :
+//     "ws://overcoded.tk:8500"
+// console.log(process.env)
+
+const url = `ws://${window.location.hostname}:8500/`
+// const url = "ws://overcoded.tk:8500"
 
 class App extends React.Component {
     static propTypes = {
@@ -78,7 +95,7 @@ class App extends React.Component {
         const {cookies} = this.props
         this.setState({ws: new WebSocket(url)}, () => {
             this.ws = this.state.ws
-            this.ws.onmessage = this.message.bind(this)
+            this.ws.onmessage = this.message
             this.ws.onerror = (e) => console.log(e)
             this.ws.onclose = (e) => {
                 if (this.state.self === null) {
@@ -110,7 +127,7 @@ class App extends React.Component {
         this.ws_init()
     }
 
-    message(e) {
+    message = (e) => {
         // console.log("onmessage", JSON.parse(e.data))
         const event = JSON.parse(e.data)
         const {cookies} = this.props
@@ -134,6 +151,7 @@ class App extends React.Component {
                 console.log("login_failed")
                 break
             case 'login_success':
+                console.log(this.state)
                 this.setState({self: this.state.loginName, connected: true})
                 this.ws.send(JSON.stringify({type: "get_created_class"}))
                 this.ws.send(JSON.stringify({type: "get_subscribed_class"}))

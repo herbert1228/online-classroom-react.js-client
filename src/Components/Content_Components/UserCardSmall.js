@@ -66,6 +66,7 @@ function Webcam(props) {
                 height={300 / 5 + 15}
                 {...props}
                 small={true}
+                key={user}
             />
         )
     }

@@ -31,6 +31,15 @@ const styles = theme => ({
         padding: 20,
         backgroundColor: "rgba(15,25,30,0.15)",
         borderRadius: 25
+    },
+    notJoined: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translateX(-55%) translateY(-60%)'
+    },
+    btn_notJoinged: {
+        marginLeft: 35
     }
 })
 
@@ -41,12 +50,15 @@ class Classroom extends React.Component {
         return (
             <main className={classes.content}>
                 <div className={classes.toolbar} />
-                {(this.props.joined == null) && <Typography variant="headline" gutterBottom>Not joined a classroom yet</Typography>}
-                {(this.props.joined == null) &&
-                    <Button
-                        onClick={() => this.props.changeScene(2)}
-                        size="small"
-                    >Select a classroom here!</Button>
+                {(this.props.joined == null) && 
+                    <div className={classes.notJoined}>
+                        <Typography variant="headline" gutterBottom>Not joined a classroom yet</Typography>
+                        <Button 
+                        className={classes.btn_notJoinged}
+                            onClick={() => this.props.changeScene(2)}
+                            size="small"
+                        >Select a classroom here!</Button>
+                    </div>
                 }
                 {(this.props.joined != null) &&
                     <ClassMenu {...other} />

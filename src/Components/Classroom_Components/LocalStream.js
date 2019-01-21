@@ -16,17 +16,24 @@ class LocalStream extends React.Component {
 
     state = {
         started: false,
-        called: true,
+        called: false,
         peerConn: null,
         turnReady: null,
         pcConfig: {
             'iceServers': [{
                 'urls': 'stun:stun.l.google.com:19302'
-            }]
+            }
+            , {
+                'urls': 'turn:overcoded.tk:3478',
+                'username': 'user',
+                'credential': "root"
+            }
+        ]
         }
     }
 
     async componentDidMount() {
+        this.props.ws.addEventListener("message", this.wsEventListener)
         try {
             const stream = await navigator.mediaDevices
                 .getUserMedia({
@@ -40,7 +47,7 @@ class LocalStream extends React.Component {
 
         this.props.ws.addEventListener("message", e => {
             const event = JSON.parse(e.data)
-            if (event.stream_owner === this.props.user) {
+            if (event.stream_owner === this.props.user || event.to === this.props.user) {
                 if (event.type === "request_offer") {
                     console.log('Stream', this.props.user, 'received message:', event.type)
                     this.inRequestForPeerConn(event.from)
@@ -51,46 +58,61 @@ class LocalStream extends React.Component {
     }
 
     componentWillUnmount() {
-        console.info("closing local stream...")
+        // this.props.ws.removeEventListener("message", this.wsEventListener)
+        for (let target in this.pc) {
+            if (typeof target === typeof RTCPeerConnection)
+            target.close()
+        }
+        if (this.localStream !== undefined) {
+            this.localStream.getTracks()[0].stop()
+        }
+        console.info(`closing Local stream...`)
     }
 
     preparePeerConnection(from, callback) {
-        const { called } = this.state
-
         this.pc[from].onicecandidate = (event) => this.iceCallbackLocal(event, from)
         console.log(`Local: created remote peer connection object`)
 
-        this.props.ws.addEventListener("message", e => {
-            const event = JSON.parse(e.data)
-            if (event.stream_owner === this.props.user) {
-                console.log('Stream', this.props.user, 'received message:', event.type)
-                switch (event.type) {
-                    case "answer":
-                        if (called) {
-                            this.pc[from].setRemoteDescription(event.desc)
-                        }
-                        break
-                    case "candidate":
-                        if (called) {
-                            this.pc[from].addIceCandidate(event.candidate)
-                        }
-                        break
-                    case "bye":
-                        if (called) {
-                            this.handleRemoteHangup()
-                        }
-                        break
-                    default:
-                        break
-                }
-            }
-        })
         callback()
     }
 
-    sendMessage(message) {
+    wsEventListener = (e) => {
+        const { called } = this.state
+
+        const event = JSON.parse(e.data)
+        console.log("received message", event)
+        if (event.stream_owner === this.props.user || event.to === this.props.user) {
+            console.log('Stream', this.props.user, 'received message:', event.type)
+            switch (event.type) {
+                case "answer":
+                    if (called) {
+                        this.pc[event.from].setRemoteDescription(event.desc)
+                    }
+                    break
+                case "candidate":
+                    if (called && event.candidate !== null) {
+                        try{
+                            this.pc[event.from].addIceCandidate(event.candidate)
+                        } catch (_ignore){
+                            console.log("Catch ERROR")
+                            console.log(event)
+                        }
+                    }
+                    break
+                case "bye":
+                    if (called) {
+                        this.handleRemoteHangup()
+                    }
+                    break
+                default:
+                    break
+            }
+        }
+    }
+
+    sendBroadcastMessage(message) {
         console.log('Local sending message: ', message)
-        this.props.ws.send(JSON.stringify({ type: "stream_message", message }))
+        this.props.ws.send(JSON.stringify({ type: "class_broadcast_message", message }))
     }
 
     sendDirectMessage(message, to) {
@@ -100,7 +122,7 @@ class LocalStream extends React.Component {
     }
 
     call = () => {
-        this.sendMessage({ type: "got user media" })
+        this.sendBroadcastMessage({ type: "got user media" })
         this.setState({ called: true })
         console.log("Starting calls")
         const audioTracks = this.localStream.getAudioTracks()
@@ -150,7 +172,7 @@ class LocalStream extends React.Component {
     iceCallbackLocal = (event, from) => {
         this.pc[from].addIceCandidate(event.candidate)
             .then(this.onAddIceCandidateSuccess, this.onAddIceCandidateError)
-        this.sendMessage({ type: "candidate", candidate: event.candidate })
+        this.sendDirectMessage({ type: "candidate", candidate: event.candidate, stream_owner: this.props.user }, from)            
         console.log(`Local pc: New Ice candidate: ${event.candidate ? event.candidate.candidate : "(null)"}`)
     }
 
