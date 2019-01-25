@@ -220,6 +220,15 @@ class App extends React.Component {
     }
 
     changeScene(target) {
+        if (this.state.joined && target !== 1) {
+            // should stop pc instead of leaving the classroom
+            let message = {
+                type: "leave_class",
+                owner: this.state.joined.owner,
+                class_name: this.state.joined.class_name
+            }
+            this.ws.send(JSON.stringify(message))
+        }
         this.setState({location: target})
         const {cookies} = this.props
         cookies.set("location", target)
@@ -227,15 +236,15 @@ class App extends React.Component {
 
     handleDrawer = () => {
         this.setState({open: !this.state.open});
-    };
+    }
 
     handleName(e) {
         this.setState({loginName: e.target.value});
-    };
+    }
 
     handlePassword(e) {
         this.setState({loginPassword: e.target.value});
-    };
+    }
 
     keyPress(e) {
         if (e.keyCode === 13) {
@@ -344,7 +353,7 @@ class App extends React.Component {
                     />
                 </Fragment>
             )
-        } else {return (<p> </p>)}
+        } else {return (<p>Server down</p>)}
     }
 }
 

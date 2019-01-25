@@ -2,7 +2,9 @@ import React from 'react'
 import {
     withStyles
 } from '@material-ui/core/styles'
-import { Button } from '@material-ui/core';
+import {
+    Button
+} from '@material-ui/core';
 
 const styles = theme => ({})
 
@@ -14,7 +16,7 @@ const offerOptions = {
 class LocalStream extends React.Component {
     pc = {}
 
-    state = {
+    defaultState = {
         started: false,
         called: false,
         peerConn: null,
@@ -22,18 +24,19 @@ class LocalStream extends React.Component {
         pcConfig: {
             'iceServers': [{
                 'urls': 'stun:stun.l.google.com:19302'
-            }
-            , {
+            }, {
                 'urls': 'turn:overcoded.tk:3478',
                 'username': 'user',
                 'credential': "root"
-            }
-        ]
+            }]
         }
     }
 
+    state = this.defaultState
+
     async componentDidMount() {
-        this.props.ws.addEventListener("message", this.wsEventListener)
+        console.info(`!!!!!!!! ${this.state.started}`)
+
         try {
             const stream = await navigator.mediaDevices
                 .getUserMedia({
@@ -42,29 +45,44 @@ class LocalStream extends React.Component {
                 })
 
             this.gotStream(stream)
-            await this.setState({ called: false, started: true }) // state changes before stream is added
-        } catch (e) { console.log("getUserMedia() error: ", e) }
-
+            await this.setState({
+                called: false,
+                started: true
+            }) // state changes before stream is added
+            console.info("!!!turned to true!!!")
+        } catch (e) {
+            console.log("getUserMedia() error: ", e)
+        }
+        this.props.ws.addEventListener("message", this.wsEventListener)
         this.props.ws.addEventListener("message", e => {
             const event = JSON.parse(e.data)
             if (event.stream_owner === this.props.user || event.to === this.props.user) {
                 if (event.type === "request_offer") {
                     console.log('Stream', this.props.user, 'received message:', event.type)
+                    console.info(`### ${this.state.started}`)
                     this.inRequestForPeerConn(event.from)
                 }
             }
         })
-        // this.requestTurn("https://computeengineondemand.appspot.com/turn?username=41784574&key=4080218913")
+        console.info(`!!!!!!!!2 ${this.state.started}`)
     }
 
     componentWillUnmount() {
-        // this.props.ws.removeEventListener("message", this.wsEventListener)
+        this.stop()
+    }
+
+    stop = () => {
+        this.setState(this.defaultState)
+        this.props.ws.removeEventListener("message", this.wsEventListener)
         for (let target in this.pc) {
-            if (typeof target === typeof RTCPeerConnection)
-            target.close()
+            // if (typeof target === typeof RTCPeerConnection)
+            // target.close()
+            this.pc[target].close()
+            this.pc[target] = null
         }
         if (this.localStream !== undefined) {
             this.localStream.getTracks()[0].stop()
+            this.localStream.getTracks()[1].stop()
         }
         console.info(`closing Local stream...`)
     }
@@ -77,7 +95,9 @@ class LocalStream extends React.Component {
     }
 
     wsEventListener = (e) => {
-        const { called } = this.state
+        const {
+            called
+        } = this.state
 
         const event = JSON.parse(e.data)
         console.log("received message", event)
@@ -91,9 +111,9 @@ class LocalStream extends React.Component {
                     break
                 case "candidate":
                     if (called && event.candidate !== null) {
-                        try{
+                        try {
                             this.pc[event.from].addIceCandidate(event.candidate)
-                        } catch (_ignore){
+                        } catch (_ignore) {
                             console.log("Catch ERROR")
                             console.log(event)
                         }
@@ -111,19 +131,26 @@ class LocalStream extends React.Component {
     }
 
     sendBroadcastMessage(message) {
-        console.log('Local sending message: ', message)
-        this.props.ws.send(JSON.stringify({ type: "class_broadcast_message", message }))
+        console.log('Local sending message: ', message.type)
+        this.props.ws.send(JSON.stringify({
+            type: "class_broadcast_message",
+            message
+        }))
     }
 
     sendDirectMessage(message, to) {
-        console.log(`Local sending message to ${to}: `, message)
+        console.log(`Local sending message to ${to}: `, message.type)
         message.to = to
-        this.props.ws.send(JSON.stringify({ type: "class_direct_message", message }))
+        this.props.ws.send(JSON.stringify({
+            type: "class_direct_message",
+            message
+        }))
     }
 
     call = () => {
-        this.sendBroadcastMessage({ type: "got user media" })
-        this.setState({ called: true })
+        this.setState({
+            called: true
+        })
         console.log("Starting calls")
         const audioTracks = this.localStream.getAudioTracks()
         const videoTracks = this.localStream.getVideoTracks()
@@ -133,9 +160,13 @@ class LocalStream extends React.Component {
         if (videoTracks.length > 0) {
             console.log(`Using video device: ${videoTracks[0].label}`)
         }
+        this.sendBroadcastMessage({
+            type: "got user media"
+        })
     }
 
     inRequestForPeerConn = (from) => {
+        console.log(`%%% ${this.state.started}`)
         console.log(this.pc[from])
         if (this.pc[from] !== undefined && this.pc[from] !== null) {
             // window.alert(`clearing ${from}'s pc`)
@@ -172,8 +203,13 @@ class LocalStream extends React.Component {
     iceCallbackLocal = (event, from) => {
         this.pc[from].addIceCandidate(event.candidate)
             .then(this.onAddIceCandidateSuccess, this.onAddIceCandidateError)
-        this.sendDirectMessage({ type: "candidate", candidate: event.candidate, stream_owner: this.props.user }, from)            
-        console.log(`Local pc: New Ice candidate: ${event.candidate ? event.candidate.candidate : "(null)"}`)
+        this.sendDirectMessage({
+            type: "candidate",
+            candidate: event.candidate,
+            stream_owner: this.props.user
+        }, from)
+        // console.log(`Local pc: New Ice candidate: ${event.candidate ? event.candidate.candidate : "(null)"}`)
+        // console.log(`Local pc: New Ice candidate: ${event.candidate ? `NOT null` : "(null)"}`)
     }
 
     onAddIceCandidateSuccess = () => {
@@ -181,57 +217,32 @@ class LocalStream extends React.Component {
     }
 
     onAddIceCandidateError = (e) => {
-        console.log(`Failed to add ICE candidate: ${e.toString()}`)
+        // console.log(`Failed to add ICE candidate: ${e.toString()}`)
+        // console.log(`Failed to add ICE candidate`)
     }
 
     onCreateSessionDescriptionError = (err) => {
-        console.log(`Local: Failed to create session description: ${err.toString}`)
-    }
-
-    requestTurn(turnURL) {
-        let turnExists = false
-        for (let i in this.state.pcConfig.iceServers) {
-            if (this.state.pcConfig.iceServers[i].urls.substr(0, 5) === 'turn:') {
-                turnExists = true
-                this.setState({ turnReady: true })
-                break
-            }
-        }
-        if (!turnExists) {
-            console.log('Getting TURN server from ', turnURL)
-            // No TURN server. Get one from computeengineondemand.appspot.com:
-            let xhr = new XMLHttpRequest()
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    let turnServer = JSON.parse(xhr.responseText)
-                    console.log('Got TURN server: ', turnServer)
-                    this.state.pcConfig.iceServers.push({
-                        'urls': 'turn:' + turnServer.username + '@' + turnServer.turn,
-                        'credential': turnServer.password
-                    })
-                    this.setState({ turnReady: true })
-                }
-            }
-            xhr.open('GET', turnURL, true)
-            xhr.send()
-        }
+        // console.log(`Local: Failed to create session description: ${err.toString}`)
+        console.log(`Local: Failed to create session description`)
     }
 
     render() {
         // const {classes, user} = this.props
 
-        return (
-            <div >
-                <video
-                    width="460"
-                    height="300"
-                    autoPlay muted playsInline ref={
-                        video => {
-                            this.localVideo = video
-                        }
-                    } > </video>
-                {/* <Button onClick={this.start} disabled={this.state.started}>Start</Button> */}
-                <Button onClick={this.call} disabled={this.state.called}>Call</Button>
+        return ( <div>
+            <video width = "460"
+            height = "300"
+            autoPlay muted playsInline ref = {
+                video => {
+                    this.localVideo = video
+                }
+            } > </video> { /* <Button onClick={this.start} disabled={this.state.started}>Start</Button> */ } 
+            <Button onClick = {
+                this.call
+            }
+            disabled = {
+                this.state.called
+            } > Call </Button> 
             </div>
         )
     }
