@@ -8,6 +8,7 @@ import DrawerLeft from './Components/DrawerLeft'
 import './css/App.css'
 import Login from './Login'
 import { connect } from 'react-redux'
+import {store} from './index'
 import { connection as conn } from './interface/connection'
 
 const styles = theme => ({
@@ -18,13 +19,6 @@ const styles = theme => ({
         overflow: 'hidden',
         position: 'relative',
         display: 'flex',
-    },
-    flex: {
-        flexGrow: 1,
-    },
-    menuButton: {
-        marginLeft: -12,
-        marginRight: 20,
     }
 })
 
@@ -102,6 +96,26 @@ class App extends React.Component {
         }
     }
 
+    componentDidMount() {
+        conn.addListener("socketclose", this.handleSocketClose)
+    }
+
+    handleSocketClose = () => {
+        const {cookies} = this.props
+        // if (this.props.self === null) {
+        //     cookies.remove("name")
+        //     cookies.remove("password")     
+        //     conn.connect(url)
+        //     this.props.handleNotification("LOGIN REJECTED! (reason: already logged in)")
+        // } else {
+            store.dispatch({type: "logout"})
+            // window.confirm("Disconnected, press OK to reconnect") && this.ws_init()
+            console.log("attempting to reconnect...")
+            setTimeout(() => conn.connect(), 2000)
+        // }
+        this.setState({joined: null})
+    }
+
     changeScene(target) {
         if (this.state.joined && target !== 1) {
             // should stop pc instead of leaving the classroom
@@ -112,7 +126,7 @@ class App extends React.Component {
                     if (res.type !== "ok") throw new Error("invalid leave_class")
                 })
         }
-        this.props.dispatch({type: "changeLocation", target})
+        store.dispatch({type: "changeLocation", target})
         const {cookies} = this.props
         cookies.set("location", target)
     }

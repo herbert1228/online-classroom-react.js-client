@@ -23,9 +23,9 @@ const styles = theme => ({
         height: "100vh"
     },
     bigAvatar: {
-        margin: 10,
-        width: 60,
-        height: 60,
+        margin: 30,
+        width: 90,
+        height: 90,
     },
     textField: {
         background: 'rgba(255,255,255,1)',
@@ -33,11 +33,14 @@ const styles = theme => ({
         borderRadius: 51,
         paddingLeft: 45,
         paddingRight: 45
+    },
+    loginForm: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translateX(-50%) translateY(-50%)'
     }
 })
-
-const url = `ws://${window.location.hostname}:8500/`
-// const url = "ws://overcoded.tk:8500"
 
 class Login extends React.Component {
     // static propTypes = {
@@ -53,8 +56,7 @@ class Login extends React.Component {
 
     componentDidMount() {
         const {cookies} = this.props
-        conn.connect(url)
-        conn.addListener("socketclose", this.handleSocketClose)
+        conn.connect()
         conn.addListener("socketopen", () => {
             this.setState({connected: true})
             if (cookies.get("name")) {
@@ -67,20 +69,6 @@ class Login extends React.Component {
                 store.dispatch({type: "changeLocation", target: parseInt(cookies.get("location"), 10)})
             }
         })
-    }
-
-    handleSocketClose = () => {
-        const {cookies} = this.props
-        if (this.props.self === null) {
-            cookies.remove("name")
-            cookies.remove("password")
-            conn.connect(url)
-            this.props.handleNotification("LOGIN REJECTED! (reason: already logged in)")
-        } else {
-            // window.confirm("Disconnected, press OK to reconnect") && this.ws_init()
-            setTimeout(() => conn.connect(url), 2000)
-        }
-        this.setState({joined: null})
     }
 
     handleLogin = async () => {
@@ -105,20 +93,14 @@ class Login extends React.Component {
             cookies.set("name", this.state.loginName) // option: {path: "/"}
             cookies.set("password", this.state.loginPassword)
             this.setState({loginPassword: ""})
+            this.props.handleNotification("Welcome Herbert")
         } else {
             if (result["type"] === "reject") {
                 if (result["reason"] === "invalid_params") this.props.handleNotification("Invalid username or password")
                 //TODO prompt and force login 
                 if (result["reason"] === "already_logged_in") this.props.handleNotification("Already logged in")
             }
-             this.props.handleNotification("login_failed") //TODO provide more info
         }
-        // case 'logout_success':
-        //         cookies.remove("name") //noneed
-        //         cookies.remove("password") //noneed
-        //         cookies.remove("location") //noneed
-        //         this.setState({self: null, loginPassword: "dev", loginName: "dev", location: 0, open: false}) //set self only
-        //         break
     }
 
     handleName = (e) => {
@@ -138,18 +120,22 @@ class Login extends React.Component {
 
     handleClickShowPassword = () => {
         this.setState(state => ({ showPassword: !state.showPassword }));
-      }
+    }
 
     render() {
         const {classes} = this.props
         return (
             <Fragment>
             {this.state.connected &&
+                <div className={classes.loginBg}></div>}
+            {this.state.connected &&
                 <Grid container 
                     direction="column"
                     justify="center"
                     alignItems="center"
-                    className={classes.loginBg}>
+                    className={classes.loginForm}
+                    spacing={16}
+                    >
                     <Grid item>
                         <Avatar 
                             className={classes.bigAvatar} >A</Avatar>
@@ -159,23 +145,25 @@ class Login extends React.Component {
 
                     <Grid item> 
                         <TextField
-                            label="Enter Your Name"
+                            label="Username"
                             value={this.state.loginName}
                             onChange={this.handleName.bind(this)}
                             onKeyDown={this.keyPress}
                             autoFocus={true}
                             variant="filled"
+                            style={{width: 160}}
                         />
                     </Grid>
 
                     <Grid item>
                         <TextField
-                            id="filled-adornment-password"
                             variant="filled"
                             type={this.state.showPassword ? 'text' : 'password'}
                             label="Password"
                             value={this.state.password}
                             onChange={this.handlePassword.bind(this)}
+                            onKeyDown={this.keyPress}
+                            style={{width: 160}}
                             InputProps={{
                                 endAdornment: (
                                 <InputAdornment position="end">
