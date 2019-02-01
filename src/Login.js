@@ -160,7 +160,7 @@ class Login extends React.Component {
                             variant="filled"
                             type={this.state.showPassword ? 'text' : 'password'}
                             label="Password"
-                            value={this.state.password}
+                            value={this.state.loginPassword}
                             onChange={this.handlePassword.bind(this)}
                             onKeyDown={this.keyPress}
                             style={{width: 160}}
