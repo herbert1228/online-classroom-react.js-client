@@ -48,9 +48,9 @@ class RemoteStream extends React.Component {
 
     wsEventListener = (e) => {
         const event = JSON.parse(e.data)
-        if (event.type === "join") {
-            console.log('Received a request to join room from:') // + event.joiner_pid)
-        }
+        // if (event.type === "join") {
+        //     console.log('Received a request to join room from:') // + event.joiner_pid)
+        // }
         if (event.stream_owner === this.props.user) {
             console.log('Stream', this.props.user, 'received message:', event.type)
             switch (event.type) {

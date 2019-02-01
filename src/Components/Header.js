@@ -14,15 +14,17 @@ const styles = theme => ({
             duration: theme.transitions.duration.leavingScreen,
         }),
         position: 'fixed',
-    },
-    appBarShift: {
         marginLeft: drawerWidth,
         width: `calc(100% - ${drawerWidth}px)`,
-        transition: theme.transitions.create(['width', 'margin'], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-        }),
     },
+    // appBarShift: {
+    //     marginLeft: drawerWidth,
+    //     width: `calc(100% - ${drawerWidth}px)`,
+    //     transition: theme.transitions.create(['width', 'margin'], {
+    //         easing: theme.transitions.easing.sharp,
+    //         duration: theme.transitions.duration.enteringScreen,
+    //     }),
+    // },
     menuButton: {
         marginLeft: -12,
         marginRight: 20,
@@ -45,7 +47,7 @@ class Header extends React.Component {
         const {classes, open} = this.props;
         return (
             <AppBar position="absolute" color="primary"
-                    className={classNames(classes.appBar, open && classes.appBarShift)}
+                    className={classNames(classes.appBar)}
             >
                 <Toolbar>
                     <IconButton

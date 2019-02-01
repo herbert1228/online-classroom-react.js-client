@@ -7,6 +7,7 @@ import LocalStream from '../Classroom_Components/LocalStream'
 import RemoteStream from '../Classroom_Components/RemoteStream'
 import UserCardMenu from '../Classroom_Components/UserCardMenu'
 // import { findDOMNode } from 'react-dom'
+// import PaintEditor from 'scratch-paint';
 
 const styles = theme => ({
     card: {
@@ -47,7 +48,7 @@ class UserCard extends React.Component {
     }
 
     componentDidMount() {
-        // // this.canvas = findDOMNode(this.canvasRef);
+        // this.canvas = findDOMNode(this.canvasRef);
         // this.canvas = document.getElementById(this.props.user + "-canvas");
         // this.ctx = this.canvas.getContext('2d');
         // this.setState({tool: toolsMap[TOOL_PENCIL](this.ctx)});
@@ -143,6 +144,21 @@ class UserCard extends React.Component {
     disableWebcam() {
         this.setState({camOpen: false})
     }
+
+    // render2() {
+    //     return(
+    //         <PaintEditor
+    //             // image={optionalImage}
+    //             // imageId={"optionalId"}
+    //             // imageFormat='svg'
+    //             // rotationCenterX={optionalCenterPointX}
+    //             // rotationCenterY={optionalCenterPointY}
+    //             // rtl={true|false}
+    //             // onUpdateImage={handleUpdateImageFunction}
+    //             // zoomLevelId={optionalZoomLevelId}
+    //         />
+    //     )
+    // }
 
     render() {
         const {user} = this.props;

@@ -7,7 +7,7 @@ import Mailbox from './Locations/Mailbox'
 import Notebooks from './Locations/Notebooks'
 import NotificationBar from './NotificationBar'
 
-const drawerWidth = 240;
+const drawerWidth = 220;
 
 export {
     Header, Content, Footer, drawerWidth, Classroom, ClassList, Mailbox, Notebooks, NotificationBar

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import {withStyles} from '@material-ui/core/styles'
 import Typography from '@material-ui/core/Typography'
 import 'whatwg-fetch'
+import {drawerWidth} from '../index'
 
 const styles = theme => ({
     toolbar: {
@@ -18,7 +19,9 @@ const styles = theme => ({
         padding: theme.spacing.unit * 5,
         minWidth: 0, // So the Typography noWrap works
         paddingRight: 250,
-        paddingLeft: 120,
+        paddingLeft: 60,
+        marginLeft: drawerWidth,
+        width: `calc(100% - ${drawerWidth}px)`,
     },
     grid_item: {
         marginBottom: 50,

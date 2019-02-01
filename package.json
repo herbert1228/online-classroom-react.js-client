@@ -19,6 +19,7 @@
     "react-router-dom": "^4.3.1",
     "react-scripts": "1.1.4",
     "redux": "^4.0.1",
+    "scratch-paint": "^0.2.0-prerelease.20190114205252",
     "simple-peer": "^9.1.2",
     "typeface-roboto": "0.0.54",
     "uuid": "^3.3.2",
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "babel-plugin-transform-decorators": "^6.24.1",
+    "react-redux": "^6.0.0",
     "ws": "^6.1.2"
   }
 }

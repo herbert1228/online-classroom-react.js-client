@@ -5,8 +5,10 @@ import registerServiceWorker from './registerServiceWorker';
 import {createMuiTheme, MuiThemeProvider} from '@material-ui/core/styles'
 import {amber, blueGrey} from '@material-ui/core/colors'
 import {BrowserRouter as Router, Route} from "react-router-dom"
-
+import { Provider } from 'react-redux'
+import { createStore } from 'redux'
 import ReactDOM from 'react-dom'
+// import { connection as conn } from './interface/connection'
 
 let themeType = 'light';
 
@@ -16,19 +18,52 @@ const theme = createMuiTheme({
         secondary: amber,
         type: themeType
     }
-});
+})
+
+const initialState = {
+    createdClass: [],
+    enrolledClass: [],
+    startedClass: [],
+    session_user: [],
+    location: 0,
+    self: null
+}
+
+//TODO Should I do calculations in reducer?
+function reducer(state = initialState, action) {
+    switch(action.type) {
+        case "get_created_class":
+            return {...state, createdClass: action.result}
+        case "get_enrolled_class":
+            return {...state, enrolledClass: action.result}
+        case "get_started_class":
+            return {...state, startedClass: action.result}
+        case "changeLocation":
+            return {...state, location: action.target}
+        case "logout":
+            return {...state, self: null}
+        case "login":
+            return {...state, self: action.loginName}
+        default: 
+            return state
+    }
+}
+
+export const store = createStore(reducer, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
 
 function Index() {
     return (
-        <MuiThemeProvider theme={theme}>
-            <Router>
-                <div>
-                    <Route path="/" exact component={props => <App/>}/>
-                    <Route path="/upload" exact component={props => <Upload/>}/>
-                </div>
-            </Router>
-            {/* <App/> */}
-        </MuiThemeProvider>
+        <Provider store={store}>
+            <MuiThemeProvider theme={theme}>
+                <Router>
+                    <div>
+                        <Route path="/" exact component={props => <App/>}/>
+                        <Route path="/upload" exact component={props => <Upload/>}/>
+                    </div>
+                </Router>
+                {/* <App/> */}
+            </MuiThemeProvider>
+        </Provider>
     )
 }
 

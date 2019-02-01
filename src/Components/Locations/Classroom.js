@@ -46,7 +46,6 @@ const styles = theme => ({
 class Classroom extends React.Component {
     render() {
         const { classes, ...other } = this.props
-
         return (
             <main className={classes.content}>
                 <div className={classes.toolbar} />

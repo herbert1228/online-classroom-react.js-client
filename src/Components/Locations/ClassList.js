@@ -69,6 +69,11 @@ const styles = theme => ({
 
 class ClassList extends React.Component {
     state = {expanded: null, expandedEnroll: null}
+
+    componentDidMount() {
+
+    }
+    
     handleChange = panel => (event, expanded) => {
         this.setState({
             expanded: expanded ? panel : false,
