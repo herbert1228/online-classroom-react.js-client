@@ -2,6 +2,7 @@ import React from 'react';
 import {Button, Menu, MenuItem} from '@material-ui/core'
 import Leave from '@material-ui/icons/DirectionsRun'
 import {withStyles} from '@material-ui/core/styles'
+import { connect } from 'tls';
 
 const styles = theme => ({
     menu: {
@@ -16,10 +17,15 @@ class ClassMenu extends React.Component {
         anchorEl: null,
     }
 
-    leave() {
+    async leave() {
         this.handleClose()
         let message = {type:"leave_class", owner: this.props.joined.owner, class_name: this.props.joined.class_name}
         this.props.ws.send(JSON.stringify(message))
+        const response = await connect.call("leave_class")
+        if (response.type === "ok") {
+            this.props.handleNotification("leave_class success")
+            // this.setState({session_user: [], joined: null}) //TODO 
+        } else throw new Error("invalid action: leave class")
     }
 
     handleClick = event => {

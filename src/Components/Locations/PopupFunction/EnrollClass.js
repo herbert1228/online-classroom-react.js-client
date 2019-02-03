@@ -32,19 +32,29 @@ export default class CreateClass extends React.Component {
 
     handleSubmit() {
         conn.call("subscribe_class", {owner: this.state.t_name, class_name: this.state.class_name})
-            .then((response) => {
+            .then(async (response) => {
                 if (response.type === "ok") {
-                    Promise.all(conn.call("get_subscribed_class"), conn.call("get_started_class"))
-                        .then(([subscribed, started]) => {
-                            store.dispatch({
-                                type: "get_subscribed_class",
-                                result: subscribed 
-                            })
-                            store.dispatch({
-                                type: "get_started_class",
-                                result: started 
-                            })
-                        })
+                    // Promise.all(conn.call("get_subscribed_class"), conn.call("get_started_class"))
+                    //     .then(([subscribed, started]) => {
+                    //         store.dispatch({
+                    //             type: "get_subscribed_class",
+                    //             result: subscribed.result
+                    //         })
+                    //         store.dispatch({
+                    //             type: "get_started_class",
+                    //             result: started.result 
+                    //         })
+                    //     })
+                    const subscribed = await conn.call("get_subscribed_class")
+                    const started = await conn.call("get_started_class")
+                    store.dispatch({
+                        type: "get_subscribed_class",
+                        result: subscribed.result
+                    })
+                    store.dispatch({
+                        type: "get_started_class",
+                        result: started.result
+                    })
                     this.props.handleNotification(`Subscribed ${this.state.t_name}'s class: ${this.state.class_name}`)
                 }
                 if (response.type === "reject") this.props.handleNotification("Subscribe class FAILED")

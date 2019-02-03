@@ -26,11 +26,12 @@ const initialState = {
     startedClass: [],
     session_user: [],
     location: 0,
-    self: null
+    self: null,
+    joined: null,
 }
 
-//TODO Should I do calculations in reducer?
 function reducer(state = initialState, action) {
+    // console.log(action)
     switch(action.type) {
         case "get_created_class":
             return {...state, createdClass: action.result}
@@ -44,6 +45,8 @@ function reducer(state = initialState, action) {
             return {...state, self: null}
         case "login":
             return {...state, self: action.loginName}
+        case "joinClass":
+            return {...state, joined: {owner: action.owner, class_name: action.class_name}}
         default: 
             return state
     }

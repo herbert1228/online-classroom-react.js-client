@@ -1,6 +1,8 @@
 import React, {Fragment} from 'react';
 import PopoverWithBtn from '../../PopoverWithBtn'
 import {Button, DialogActions, DialogContent, DialogContentText, TextField} from "@material-ui/core";
+import { connection as conn } from '../../../interface/connection'
+import {store} from '../../../index'
 
 export default class CreateClass extends React.Component {
     state = {
@@ -23,9 +25,25 @@ export default class CreateClass extends React.Component {
         }
     }
 
-    handleSubmit() {
-        let message = {type: "create_class", class_name: this.state.class_name}
-        this.props.ws.send(JSON.stringify(message))
+    async handleSubmit() {
+        const response = await conn.call("create_class", {class_name: this.state.class_name})
+        if (response.type === "ok") {
+            // [created, subscribed] = Promise.all(conn.call(), conn.call())
+            const created = await conn.call("get_created_class")
+            const subscribed = await conn.call("get_subscribed_class")
+            store.dispatch({
+                type:"get_created_class", 
+                result: created.result
+            })
+            store.dispatch({
+                type: "get_subscribed_class",
+                result: subscribed.result
+            })
+            this.props.handleNotification("created class success")
+        }
+        if (response.type === "reject") {
+            this.props.handleNotification(`created class failed, reason: ${response.reason}`)
+        }
         this.setState({open: false})
     }
 

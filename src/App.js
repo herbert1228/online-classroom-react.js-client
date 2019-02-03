@@ -41,7 +41,6 @@ class App extends React.Component {
     }
 
     state = {
-        joined: null,
         showNotification: false,
         notificationMessage: "",
         otherId: null,
@@ -50,43 +49,18 @@ class App extends React.Component {
     notificationQueue = []
 
     message = (e) => {
-        const event = JSON.parse(e.data)
-        switch (event.type) {
-            case "get_created_class":
-                this.setState({createdClass: event.created_classes})
-                break
-            case "get_subscribed_class":
-                this.setState({enrolledClass: event.subscribed_class})
-                break
-            case "create_class_success":
-                this.ws.send(JSON.stringify({type: "get_created_class"}))
-                this.ws.send(JSON.stringify({type: "get_subscribed_class"}))
-                this.handleNotification("created class success")
-                break
-            case "create_class_failed":
-                this.handleNotification("created class failed")
-                break
-            case "join_class success":
-                this.handleNotification(`join ${event.owner}'s class: ${event.class_name} success`)
-                this.setState({joined: {owner: event.owner, class_name: event.class_name}}, () => this.changeScene(1))
-                break
-            case "join_class failed":
-                this.handleNotification("join class failed")
-                break
-            case "get_session_user":
-                this.setState({session_user: event.session_user})
-                break
-            case "leave_class success":
-                this.handleNotification("leave_class success")
-                this.setState({session_user: [], joined: null})
-                break
-            default:
-                break
-        }
+            // if (leave_class){
+            // this.props.handleNotification("leave_class success")
+            // this.setState({session_user: [], joined: null}) //TODO 
+            // }
+            // case "get_session_user":
+            //     this.setState({session_user: event.session_user})
+            //     break
     }
 
     componentDidMount() {
         conn.addListener("socketclose", this.handleSocketClose)
+        conn.addListener("get_started_class", (e) => this.handleGetStartedClass(e))
     }
     
     componentWillUnmount() {
@@ -101,6 +75,13 @@ class App extends React.Component {
             conn.connect()
         }, 2000)
         this.setState({joined: null})
+    }
+
+    handleGetStartedClass = (e) => {
+        store.dispatch({
+            type: "get_started_class",
+            result: e.result
+        })
     }
 
     changeScene(target) {
@@ -190,7 +171,8 @@ function mapStateToProps(state) {
         startedClass: state.startedClass,
         session_user: state.session_user,
         location: state.location,
-        self: state.self
+        self: state.self,
+        joined: state.joined
     }
 }
 

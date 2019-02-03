@@ -75,17 +75,20 @@ class Login extends React.Component {
             store.dispatch({type:"login", loginName: this.state.loginName})
             this.setState({connected: true})
             //TODO listen the following events
+            const created = await conn.call("get_created_class")
+            const subscribed = await conn.call("get_subscribed_class")
+            const started = await conn.call("get_started_class")
             store.dispatch({
                 type:"get_created_class", 
-                result: await conn.call("get_created_class")
+                result: created.result
             })
             store.dispatch({
                 type: "get_subscribed_class",
-                result: await conn.call("get_subscribed_class")
+                result: subscribed.result
             })
             store.dispatch({
                 type: "get_started_class",
-                result: await conn.call("get_started_class")
+                result: started.result
             })
             cookies.set("name", this.state.loginName) // option: {path: "/"}
             cookies.set("password", this.state.loginPassword)

@@ -9,6 +9,7 @@ import {Settings, ExpandMore} from '@material-ui/icons'
 import CreateClass from './PopupFunction/CreateClass'
 import EnrollClass from './PopupFunction/EnrollClass'
 import {connection as conn} from '../../interface/connection'
+import {store} from '../../index'
 
 const styles = theme => ({
     card: {
@@ -63,27 +64,34 @@ class ClassList extends React.Component {
     handleChange = panel => (event, expanded) => {
         this.setState({
             expanded: expanded ? panel : false,
-        });
+        })
     }
 
     handleChangeEnroll = panel => (event, expanded) => {
         this.setState({
             expandedEnroll: expanded ? panel : false,
-        });
+        })
     }
 
-    joinClass(owner, class_name) {
-        let message = {type:"join_class", owner, class_name}
-        this.props.ws.send(JSON.stringify(message))
+    async joinClass(owner, class_name) {
+        const response = await conn.call("join_class", {owner, class_name})
+        if (response.type === "ok") {
+            store.dispatch({type: "joinClass", owner, class_name: class_name})
+            this.props.handleNotification(`join ${owner}'s class: ${class_name} success`)
+            this.props.changeScene(1)
+        }
+        if (response.type === "reject") {
+            this.props.handleNotification(`join class failed, reason: ${response.reason}`)
+        }
     }
 
     async startClass(class_name) {
         const response = await conn.call("start_class", {class_name})
         if (response.type === "ok") {
-            this.handleNotification("start class success")
+            this.props.handleNotification("start class success")
         }
         if (response.type === "reject") {
-            this.handleNotification(response.reason)
+            this.props.handleNotification(response.reason)
         }
     }
 
