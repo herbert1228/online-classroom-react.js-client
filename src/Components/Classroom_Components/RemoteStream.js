@@ -33,9 +33,12 @@ class RemoteStream extends React.Component {
 
         this.props.ws.addEventListener("message", this.wsEventListener)
 
-        if (this.props.peerConn.includes(this.props.user)) {
-            this.requestOffer()
-        }
+        // case "get_exist_peer_conn":
+        // this.setState({ peerConn: event.exist_peer_conn })
+        // break
+        // if (this.props.peerConn.includes(this.props.user)) {
+        //     this.requestOffer()
+        // }
     }
 
     componentWillUnmount() {

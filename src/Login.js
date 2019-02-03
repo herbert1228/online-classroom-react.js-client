@@ -1,10 +1,9 @@
 import React, { Fragment } from 'react'
-import {Button, TextField, Grid, withStyles, Avatar} from "@material-ui/core"
-import RegisterBtn from './RegisterBtn'
+import {Button, TextField, Grid, withStyles, Avatar, Fade} from "@material-ui/core"
+import RegisterBtn from './Components/RegisterBtn'
 import Background from './css/classroom.jpg'
 import {withCookies} from 'react-cookie'
 import {connection as conn} from './interface/connection'
-import {instanceOf} from 'prop-types'
 import {compose} from 'redux'
 import {store} from './index'
 import Loading from './Components/Loading'
@@ -27,13 +26,6 @@ const styles = theme => ({
         width: 90,
         height: 90,
     },
-    textField: {
-        background: 'rgba(255,255,255,1)',
-        margin: 10,
-        borderRadius: 51,
-        paddingLeft: 45,
-        paddingRight: 45
-    },
     loginForm: {
         position: 'absolute',
         top: '50%',
@@ -51,24 +43,29 @@ class Login extends React.Component {
         connected: false,
         loginName: "dev",
         loginPassword: "dev",
-        showPassword: false
+        showPassword: false,
+        fade: false
     }
 
     componentDidMount() {
-        const {cookies} = this.props
         conn.connect()
-        conn.addListener("socketopen", () => {
-            this.setState({connected: true})
-            if (cookies.get("name")) {
-                this.setState({loginName: cookies.get("name"), loginPassword: cookies.get("password")})
-                this.handleLogin()
-            } else {
-                this.setState({connected: true})
-            }
+        setInterval(() => this.setState({fade: true}), 500)
+        conn.addListener("socketopen", this.handleSocketOpen)
+    }
+
+    handleSocketOpen = () => {
+        conn.removeListener("socketopen", this.handleSocketOpen)
+        const {cookies} = this.props
+        this.setState({connected: true})
+        if (cookies.get("name")) {
+            this.setState({loginName: cookies.get("name"), loginPassword: cookies.get("password")})
+            this.handleLogin()
             if (cookies.get("location")) {
                 store.dispatch({type: "changeLocation", target: parseInt(cookies.get("location"), 10)})
             }
-        })
+        } else {
+            this.setState({connected: true})
+        }
     }
 
     handleLogin = async () => {
@@ -129,16 +126,16 @@ class Login extends React.Component {
             {this.state.connected &&
                 <div className={classes.loginBg}></div>}
             {this.state.connected &&
+            <Fade in={this.state.fade} timeout={{enter: 4500}}>
                 <Grid container 
                     direction="column"
                     justify="center"
                     alignItems="center"
                     className={classes.loginForm}
-                    spacing={16}
+                    spacing={16} // can be 8, 16, 24, 32 or 40dp wide
                     >
                     <Grid item>
-                        <Avatar 
-                            className={classes.bigAvatar} >A</Avatar>
+                        <Avatar className={classes.bigAvatar} >A</Avatar>
                     </Grid>
 
                     <Grid item>Name</Grid>
@@ -191,8 +188,9 @@ class Login extends React.Component {
                         </Button>
                     </Grid>
 
-                    <Grid item><RegisterBtn {...this.state}/></Grid>
+                    <Grid item><RegisterBtn {...this.state} {...this.props}/></Grid>
                 </Grid>
+                </Fade>
             }
             {!this.state.connected &&
                 <Loading/>

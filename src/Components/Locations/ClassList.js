@@ -8,30 +8,20 @@ import {Grid, Card, CardHeader,
 import {Settings, ExpandMore} from '@material-ui/icons'
 import CreateClass from './PopupFunction/CreateClass'
 import EnrollClass from './PopupFunction/EnrollClass'
-
+import {connection as conn} from '../../interface/connection'
 
 const styles = theme => ({
-    toolbar: {
-        display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            padding: '0 8px',
-    ...theme.mixins.toolbar,
-    },
-    content: {
-        flexGrow: 1,
-        backgroundColor: theme.palette.background.default,
-        padding: theme.spacing.unit * 5,
-        minWidth: 0, // So the Typography noWrap works
-        paddingRight: 50,
-        paddingLeft: 140,
-        overflow: "scroll"
-    },
     card: {
-        width: 800,
+        position: 'relative',
+        left: 50,
+        width: `calc(100% - 100px)`,
+        minWidth: 800,
         minHeight: 500,
         paddingTop: 10,
         paddingBottom: 50,
+        paddingLeft: 10,
+        marginBottom: 10,
+        overflowY: "auto" //TODO 'auto' || 'scroll'
     },
     inner_grid: {
         paddingLeft: 20,
@@ -70,10 +60,6 @@ const styles = theme => ({
 class ClassList extends React.Component {
     state = {expanded: null, expandedEnroll: null}
 
-    componentDidMount() {
-
-    }
-    
     handleChange = panel => (event, expanded) => {
         this.setState({
             expanded: expanded ? panel : false,
@@ -91,10 +77,14 @@ class ClassList extends React.Component {
         this.props.ws.send(JSON.stringify(message))
     }
 
-    startClass(class_name) {
-        let message = {type:"start_class", class_name}
-        this.props.ws.send(JSON.stringify(message))
-        console.log("starting: " + class_name)
+    async startClass(class_name) {
+        const response = await conn.call("start_class", {class_name})
+        if (response.type === "ok") {
+            this.handleNotification("start class success")
+        }
+        if (response.type === "reject") {
+            this.handleNotification(response.reason)
+        }
     }
 
     isStarting(owner, class_name) {
@@ -106,13 +96,12 @@ class ClassList extends React.Component {
         const { expanded, expandedEnroll } = this.state
         return (
             <main className={classes.content}>
-                <div className={classes.toolbar}/>
-                <Grid
+                {/* <Grid
                     container
                     justify="flex-start"
                     direction="column"
                     alignItems="center"
-                >
+                > */}
                     <Card className={classes.card}>
                         <CardHeader //this height is 74px
                             title={"Class List"}
@@ -224,7 +213,7 @@ class ClassList extends React.Component {
                         }
                         </div>
                     </Card>
-                </Grid>
+                {/* </Grid> */}
             </main>
         )
     }

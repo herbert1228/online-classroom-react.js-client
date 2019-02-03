@@ -28,7 +28,7 @@ const listener = {
     removeListener(type, callback) {
         if (listener[type]) {
             let i = listener[type].indexOf(callback)
-            listener.slice(i, 1)
+            listener[type].slice(i, 1)
         }
     },
     emit(type, params) {

@@ -5,6 +5,7 @@ import NoteIcon from '@material-ui/icons/BookmarkBorder';
 import MailIcon from '@material-ui/icons/MailOutline';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ReportIcon from '@material-ui/icons/Report';
+import HomeIcon from '@material-ui/icons/Home';
 // import {History, Locker, Sketch, Classroom} from './index'
 
 import {ListItem, ListItemIcon, ListItemText} from "@material-ui/core";
@@ -13,6 +14,12 @@ export class ListItems1 extends React.Component {
     render() {
         return (
             <div style={{paddingTop: 7}}>
+                <ListItem button onClick={() => this.props.changeScene(0)} disabled={this.props.location === 0}>
+                    <ListItemIcon>
+                        <HomeIcon/>
+                    </ListItemIcon>
+                    <ListItemText primary="Home"/>
+                </ListItem>
                 <ListItem button onClick={() => this.props.changeScene(1)} disabled={this.props.location === 1}>
                     <ListItemIcon>
                         <SuperUserIcon/>

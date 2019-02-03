@@ -1,6 +1,7 @@
 import React, {Fragment} from 'react';
-import PopoverWithBtn from './Components/PopoverWithBtn'
+import PopoverWithBtn from './PopoverWithBtn'
 import {Button, DialogActions, DialogContent, DialogContentText, TextField} from "@material-ui/core";
+import {connection as conn} from '../interface/connection'
 
 export default class RegisterBtn extends React.Component {
     state = {
@@ -28,9 +29,13 @@ export default class RegisterBtn extends React.Component {
         }
     }
 
-    handleSubmit() {
-        let message = {type: "register", username: this.state.name, password: this.state.password}
-        this.props.ws.send(JSON.stringify(message))
+    async handleSubmit() {
+        const result = await conn.call("register", {username: this.state.name, password: this.state.password})
+        if (result.type === "ok") {
+            this.props.handleNotification("registered")
+        } else if (result.type === "reject") {
+            this.props.handleNotification(result.reason)
+        }
         this.setState({open: false})
     }
 

@@ -10,6 +10,7 @@ import Login from './Login'
 import { connect } from 'react-redux'
 import {store} from './index'
 import { connection as conn } from './interface/connection'
+import {drawerWidth} from './Components/index'
 
 const styles = theme => ({
     root: {
@@ -19,7 +20,19 @@ const styles = theme => ({
         overflow: 'hidden',
         position: 'relative',
         display: 'flex',
-    }
+    },
+    content: {
+        // flexGrow: 1,
+        // display: 'flex',
+        // justifyContent: 'flex-start',
+        float: 'left',
+        backgroundColor: theme.palette.background.default,
+        padding: theme.spacing.unit * 5,
+        paddingLeft: 20,
+        marginLeft: drawerWidth,
+        width: `calc(100% - ${drawerWidth}px)`,
+        minWidth: 0, // So the Typography noWrap works
+    },
 })
 
 class App extends React.Component {
@@ -32,7 +45,6 @@ class App extends React.Component {
         showNotification: false,
         notificationMessage: "",
         otherId: null,
-        peerConn: null
     }
 
     notificationQueue = []
@@ -40,12 +52,6 @@ class App extends React.Component {
     message = (e) => {
         const event = JSON.parse(e.data)
         switch (event.type) {
-            case "register_success":
-                this.handleNotification("registered")
-                break
-            case "register_failed":
-                this.handleNotification("register failed")
-                break
             case "get_created_class":
                 this.setState({createdClass: event.created_classes})
                 break
@@ -67,25 +73,8 @@ class App extends React.Component {
             case "join_class failed":
                 this.handleNotification("join class failed")
                 break
-            case "start_class success":
-                this.handleNotification("start class success")
-                break
-            case "start_class failed":
-                this.handleNotification("start class failed")
-                break
-            case "subscribe_class success":
-                this.ws.send(JSON.stringify({type: "get_subscribed_class"}))
-                this.ws.send(JSON.stringify({type: "get_started_class"}))
-                this.handleNotification("subscribe " + event.owner + "'s " + event.class_name + " success")
-                break
-            case "subscribe_class failed":
-                this.handleNotification("subscribe " + event.owner + "'s " + event.class_name + " failed")
-                break
             case "get_session_user":
                 this.setState({session_user: event.session_user})
-                break
-            case "get_exist_peer_conn":
-                this.setState({ peerConn: event.exist_peer_conn })
                 break
             case "leave_class success":
                 this.handleNotification("leave_class success")
@@ -99,20 +88,18 @@ class App extends React.Component {
     componentDidMount() {
         conn.addListener("socketclose", this.handleSocketClose)
     }
+    
+    componentWillUnmount() {
+        conn.removeListener("socketclose", this.handleSocketClose)
+    }
 
     handleSocketClose = () => {
-        const {cookies} = this.props
-        // if (this.props.self === null) {
-        //     cookies.remove("name")
-        //     cookies.remove("password")     
-        //     conn.connect(url)
-        //     this.props.handleNotification("LOGIN REJECTED! (reason: already logged in)")
-        // } else {
-            store.dispatch({type: "logout"})
-            // window.confirm("Disconnected, press OK to reconnect") && this.ws_init()
-            console.log("attempting to reconnect...")
-            setTimeout(() => conn.connect(), 2000)
-        // }
+        //TODO relogin here
+        console.log("attempting to reconnect...")
+        setTimeout(() => {
+            store.dispatch({type: "logout"}) //TODO error: cannot set self to null
+            conn.connect()
+        }, 2000)
         this.setState({joined: null})
     }
 
@@ -164,20 +151,22 @@ class App extends React.Component {
                             message={this.state.notificationMessage}
                             open={this.state.showNotification}
                             handleClose={this.handleDismissNotification.bind(this)}
-                            handleExited={this.processQueue}
-                        />
+                            handleExited={this.processQueue}/>
                 {(this.props.self) &&
                     <div className={classes.root}>
                         <DrawerLeft
                             open={this.state.open}
                             changeScene={this.changeScene.bind(this)}
                             location={this.props.location}
+                            handleNotification={this.handleNotification}
                         />
-                        {this.props.location === 0 &&<Content {...this.state} {...this.props} />}
-                        {this.props.location === 1 &&<Classroom {...this.state} {...this.props} changeScene={this.changeScene.bind(this)}/>}
-                        {this.props.location === 2 &&<ClassList {...this.state} {...this.props} changeScene={this.changeScene.bind(this)}/>}
-                        {this.props.location === 3 &&<Notebooks {...this.state} {...this.props}/>}
-                        {this.props.location === 4 &&<Mailbox {...this.state} {...this.props}/>}
+                        <div className={classes.content}>
+                            {this.props.location === 0 &&<Content {...this.state} {...others} handleNotification={this.handleNotification}/>}
+                            {this.props.location === 1 &&<Classroom {...this.state} {...others} handleNotification={this.handleNotification} changeScene={this.changeScene.bind(this)}/>}
+                            {this.props.location === 2 &&<ClassList {...this.state} {...others} handleNotification={this.handleNotification} changeScene={this.changeScene.bind(this)}/>}
+                            {this.props.location === 3 &&<Notebooks {...this.state} {...others} handleNotification={this.handleNotification}/>}
+                            {this.props.location === 4 &&<Mailbox {...this.state} {...others} handleNotification={this.handleNotification}/>}
+                        </div>
                     </div>
                 }
                 {(!this.props.self) &&

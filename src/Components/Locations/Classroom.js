@@ -15,15 +15,15 @@ const styles = theme => ({
         justifyContent: 'flex-end',
         padding: '0 8px',
         ...theme.mixins.toolbar,
-    },
-    content: {
-        flexGrow: 1,
-        backgroundColor: theme.palette.background.default,
-        padding: theme.spacing.unit * 5,
         minWidth: 0, // So the Typography noWrap works
-        paddingRight: 45,
-        paddingLeft: 100,
     },
+    // content: {
+    //     flexGrow: 1,
+    //     backgroundColor: theme.palette.background.default,
+    //     padding: theme.spacing.unit * 5,
+    //     paddingRight: 45,
+    //     paddingLeft: 100,
+    // },
     grid_item: {
         marginBottom: 50,
     },
@@ -47,7 +47,7 @@ class Classroom extends React.Component {
     render() {
         const { classes, ...other } = this.props
         return (
-            <main className={classes.content}>
+            <main>
                 <div className={classes.toolbar} />
                 {(this.props.joined == null) && 
                     <div className={classes.notJoined}>
@@ -108,6 +108,6 @@ class Classroom extends React.Component {
 
 Classroom.propTypes = {
     classes: PropTypes.object.isRequired,
-};
+}
 
-export default withStyles(styles)(Classroom);
+export default withStyles(styles)(Classroom)

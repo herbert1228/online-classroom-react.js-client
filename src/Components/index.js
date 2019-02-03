@@ -1,4 +1,3 @@
-import Header from './Header'
 import Content from './Locations/Content'
 import Footer from './Unused/Footer'
 import Classroom from './Locations/Classroom'
@@ -10,5 +9,5 @@ import NotificationBar from './NotificationBar'
 const drawerWidth = 220;
 
 export {
-    Header, Content, Footer, drawerWidth, Classroom, ClassList, Mailbox, Notebooks, NotificationBar
+    Content, Footer, drawerWidth, Classroom, ClassList, Mailbox, Notebooks, NotificationBar
 }

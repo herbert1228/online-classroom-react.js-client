@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react'
 import { compose } from 'redux'
-import { Header, NotificationBar } from '../../Components'
-import RegisterBtn from '../../RegisterBtn'
+import { NotificationBar } from '../../Components'
+import RegisterBtn from '../RegisterBtn'
 // import { instanceOf } from 'prop-types'
 import { withCookies } from 'react-cookie'
 import { Button, TextField, withStyles, Grid } from '@material-ui/core'
@@ -210,10 +210,6 @@ class Upload extends React.Component {
         if (this.state.self) {
             return (
                 <div className={classes.root}>
-                    <Header
-                        onClickOpen={() => this.handleDrawer()}
-                        {...this.state}
-                    />
                     <div className={classes.dropzone}>
                         <Dropzone onDrop={this.handleDrop}>
                             {({ getRootProps, getInputProps, isDragActive }) => {
