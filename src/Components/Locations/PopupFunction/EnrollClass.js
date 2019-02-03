@@ -31,33 +31,33 @@ export default class CreateClass extends React.Component {
     }
 
     handleSubmit() {
-        conn.call("subscribe_class", {owner: this.state.t_name, class_name: this.state.class_name})
+        conn.call("enroll_class", {owner: this.state.t_name, class_name: this.state.class_name})
             .then(async (response) => {
                 if (response.type === "ok") {
-                    // Promise.all(conn.call("get_subscribed_class"), conn.call("get_started_class"))
-                    //     .then(([subscribed, started]) => {
+                    // Promise.all(conn.call("get_enrolled_class"), conn.call("get_started_class"))
+                    //     .then(([enrolled, started]) => {
                     //         store.dispatch({
-                    //             type: "get_subscribed_class",
-                    //             result: subscribed.result
+                    //             type: "get_enrolled_class",
+                    //             result: enrolled.result
                     //         })
                     //         store.dispatch({
                     //             type: "get_started_class",
                     //             result: started.result 
                     //         })
                     //     })
-                    const subscribed = await conn.call("get_subscribed_class")
+                    const enrolled = await conn.call("get_enrolled_class")
                     const started = await conn.call("get_started_class")
                     store.dispatch({
-                        type: "get_subscribed_class",
-                        result: subscribed.result
+                        type: "get_enrolled_class",
+                        result: enrolled.result
                     })
                     store.dispatch({
                         type: "get_started_class",
                         result: started.result
                     })
-                    this.props.handleNotification(`Subscribed ${this.state.t_name}'s class: ${this.state.class_name}`)
+                    this.props.handleNotification(`Enrolled ${this.state.t_name}'s class: ${this.state.class_name}`)
                 }
-                if (response.type === "reject") this.props.handleNotification("Subscribe class FAILED")
+                if (response.type === "reject") this.props.handleNotification("Enrolled class FAILED")
             })
         this.setState({open: false})
     }

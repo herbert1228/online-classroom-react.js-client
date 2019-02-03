@@ -76,15 +76,15 @@ class Login extends React.Component {
             this.setState({connected: true})
             //TODO listen the following events
             const created = await conn.call("get_created_class")
-            const subscribed = await conn.call("get_subscribed_class")
+            const enrolled = await conn.call("get_enrolled_class")
             const started = await conn.call("get_started_class")
             store.dispatch({
                 type:"get_created_class", 
                 result: created.result
             })
             store.dispatch({
-                type: "get_subscribed_class",
-                result: subscribed.result
+                type: "get_enrolled_class",
+                result: enrolled.result
             })
             store.dispatch({
                 type: "get_started_class",
@@ -93,7 +93,7 @@ class Login extends React.Component {
             cookies.set("name", this.state.loginName) // option: {path: "/"}
             cookies.set("password", this.state.loginPassword)
             this.setState({loginPassword: ""})
-            this.props.handleNotification("Welcome Herbert")
+            this.props.handleNotification(`Welcome ${this.state.loginName}`)
         } else {
             if (result["type"] === "reject") {
                 if (result["reason"] === "invalid_params") this.props.handleNotification("Invalid username or password")

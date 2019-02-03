@@ -61,6 +61,9 @@ class App extends React.Component {
     componentDidMount() {
         conn.addListener("socketclose", this.handleSocketClose)
         conn.addListener("get_started_class", (e) => this.handleGetStartedClass(e))
+        conn.addListener("broadcast_message", (e) => console.log(e))
+        conn.addListener("get_session_user", (e) => console.log(e))
+        conn.addListener("get_exist_peer_conn", (e) => console.log(e))
     }
     
     componentWillUnmount() {
@@ -140,6 +143,7 @@ class App extends React.Component {
                             changeScene={this.changeScene.bind(this)}
                             location={this.props.location}
                             handleNotification={this.handleNotification}
+                            {...others}
                         />
                         <div className={classes.content}>
                             {this.props.location === 0 &&<Content {...this.state} {...others} handleNotification={this.handleNotification}/>}

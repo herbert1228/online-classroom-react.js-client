@@ -1,10 +1,7 @@
 import React from 'react'
-import {
-    withStyles
-} from '@material-ui/core/styles'
-import {
-    Button
-} from '@material-ui/core';
+import {withStyles} from '@material-ui/core/styles'
+import {Button} from '@material-ui/core'
+import {connection as conn} from '../../interface/connection'
 
 const styles = theme => ({})
 
@@ -53,6 +50,7 @@ class LocalStream extends React.Component {
         } catch (e) {
             console.log("getUserMedia() error: ", e)
         }
+        conn.addListener("", () => {})
         this.props.ws.addEventListener("message", this.wsEventListener)
         this.props.ws.addEventListener("message", e => {
             const event = JSON.parse(e.data)
@@ -95,22 +93,16 @@ class LocalStream extends React.Component {
     }
 
     wsEventListener = (e) => {
-        const {
-            called
-        } = this.state
-
-        const event = JSON.parse(e.data)
-        console.log("received message", event)
         if (event.stream_owner === this.props.user || event.to === this.props.user) {
             console.log('Stream', this.props.user, 'received message:', event.type)
             switch (event.type) {
                 case "answer":
-                    if (called) {
+                    if (this.state.called) {
                         this.pc[event.from].setRemoteDescription(event.desc)
                     }
                     break
                 case "candidate":
-                    if (called && event.candidate !== null) {
+                    if (this.state.called && event.candidate !== null) {
                         try {
                             this.pc[event.from].addIceCandidate(event.candidate)
                         } catch (_ignore) {
@@ -120,7 +112,7 @@ class LocalStream extends React.Component {
                     }
                     break
                 case "bye":
-                    if (called) {
+                    if (this.state.called) {
                         this.handleRemoteHangup()
                     }
                     break

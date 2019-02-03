@@ -45,12 +45,11 @@ class UserSettings extends Component {
                         onClick={this.handleClickListItem}
                     >
                         <Avatar aria-label="user whiteboard" className={classes.avatar}>
-                            {/* {this.props.self.substring(0, 3)} */}
-                            HB
+                            {this.props.self.substring(0, 3)}
                         </Avatar>
                         <ListItemText
-                        // primary={this.props.self}
-                        primary="Herbert"
+                        primary={this.props.self}
+                        // primary="Herbert"
                         secondary="User Settings"
                         />
                     </ListItem>

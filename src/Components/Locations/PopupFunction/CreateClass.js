@@ -28,16 +28,16 @@ export default class CreateClass extends React.Component {
     async handleSubmit() {
         const response = await conn.call("create_class", {class_name: this.state.class_name})
         if (response.type === "ok") {
-            // [created, subscribed] = Promise.all(conn.call(), conn.call())
+            // [created, enrolled] = Promise.all(conn.call(), conn.call())
             const created = await conn.call("get_created_class")
-            const subscribed = await conn.call("get_subscribed_class")
+            const enrolled = await conn.call("get_enrolled_class")
             store.dispatch({
                 type:"get_created_class", 
                 result: created.result
             })
             store.dispatch({
-                type: "get_subscribed_class",
-                result: subscribed.result
+                type: "get_enrolled_class",
+                result: enrolled.result
             })
             this.props.handleNotification("created class success")
         }
