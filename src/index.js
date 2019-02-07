@@ -32,7 +32,7 @@ const initialState = {
 }
 
 function reducer(state = initialState, action) {
-    console.log(action)
+    // console.log(action)
     switch(action.type) {
         case "get_created_class":
             return {...state, createdClass: action.result}
@@ -52,6 +52,8 @@ function reducer(state = initialState, action) {
             return {...state, self: action.loginName}
         case "joinClass":
             return {...state, joined: {owner: action.owner, class_name: action.class_name}}
+        case "leaveClass":
+            return {...state, joined: null}
         default: 
             return state
     }

@@ -48,29 +48,9 @@ class App extends React.Component {
 
     notificationQueue = []
 
-    message = (e) => {
-            // if (leave_class){
-            // this.props.handleNotification("leave_class success")
-            // this.setState({session_user: [], joined: null}) //TODO 
-            // }
-            // case "get_session_user":
-            //     this.setState({session_user: event.session_user})
-            //     break
-    }
-
-    changeScene(target) {
-        if (this.state.joined && target !== 1) {
-            // should stop pc instead of leaving the classroom
-            conn.call(
-                "leave_class", 
-                {owner: this.state.joined.owner, class_name: this.state.joined.class_name})
-                .then(res => {
-                    if (res.type !== "ok") throw new Error("invalid leave_class")
-                })
-        }
+    changeScene = (target) => {
         store.dispatch({type: "changeLocation", target})
-        const {cookies} = this.props
-        cookies.set("location", target)
+        this.props.cookies.set("location", target)
     }
 
     handleNotification = (message) => {
@@ -111,15 +91,15 @@ class App extends React.Component {
                     <div className={classes.root}>
                         <DrawerLeft
                             open={this.state.open}
-                            changeScene={this.changeScene.bind(this)}
+                            changeScene={this.changeScene}
                             location={this.props.location}
                             handleNotification={this.handleNotification}
                             {...others}
                         />
                         <div className={classes.content}>
                             {this.props.location === 0 &&<Content {...this.state} {...others} handleNotification={this.handleNotification}/>}
-                            {this.props.location === 1 &&<Classroom {...this.state} {...others} handleNotification={this.handleNotification} changeScene={this.changeScene.bind(this)}/>}
-                            {this.props.location === 2 &&<ClassList {...this.state} {...others} handleNotification={this.handleNotification} changeScene={this.changeScene.bind(this)}/>}
+                            {this.props.location === 1 &&<Classroom {...this.state} {...others} handleNotification={this.handleNotification} changeScene={this.changeScene}/>}
+                            {this.props.location === 2 &&<ClassList {...this.state} {...others} handleNotification={this.handleNotification} changeScene={this.changeScene}/>}
                             {this.props.location === 3 &&<Notebooks {...this.state} {...others} handleNotification={this.handleNotification}/>}
                             {this.props.location === 4 &&<Mailbox {...this.state} {...others} handleNotification={this.handleNotification}/>}
                         </div>
