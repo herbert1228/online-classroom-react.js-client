@@ -1,7 +1,7 @@
 import React from 'react'
 import {withStyles} from '@material-ui/core/styles'
 import {Button} from '@material-ui/core'
-import {signalingChannel as channel} from '../../interface/connection'
+import {signalingChannel as channel, connection as conn} from '../../interface/connection'
 
 const styles = theme => ({})
 
@@ -50,36 +50,40 @@ class LocalStream extends React.Component {
         } catch (e) {
             console.log("getUserMedia() error: ", e)
         }
-        channel.listenRequestOffer(() => {
-            if (event.stream_owner === this.props.user || event.to === this.props.user) {
-                console.log('Stream', this.props.user, 'received message:', event.type)
-                console.info(`### ${this.state.started}`)
-                this.inRequestForPeerConn(event.from)
-            }
-        })
-        channel.listenCandidate("message", this.wsEventListener)
+        // channel.listenRequestOffer(() => {
+        //     if (event.stream_owner === this.props.user || event.to === this.props.user) {
+        //         console.log('Stream', this.props.user, 'received message:', event.type)
+        //         console.info(`### ${this.state.started}`)
+        //         this.inRequestForPeerConn(event.from)
+        //     }
+        // })
+        // channel.listenCandidate("message", this.wsEventListener)
+        // conn.addListener("request_offer", (e) => console.log(e))
+        // conn.addListener("answer", (e) => console.log(e))
+        // conn.addListener("candidate", (e) => console.log(e))
+        // conn.addListener("answer", (e) => console.log(e))
         console.info(`!!!!!!!!2 ${this.state.started}`)
     }
 
-    componentWillUnmount() {
-        this.stop()
-    }
+    // componentWillUnmount() {
+    //     this.stop()
+    // }
 
-    stop = () => {
-        this.setState(this.defaultState)
-        this.props.ws.removeEventListener("message", this.wsEventListener)
-        for (let target in this.pc) {
-            // if (typeof target === typeof RTCPeerConnection)
-            // target.close()
-            this.pc[target].close()
-            this.pc[target] = null
-        }
-        if (this.localStream !== undefined) {
-            this.localStream.getTracks()[0].stop()
-            this.localStream.getTracks()[1].stop()
-        }
-        console.info(`closing Local stream...`)
-    }
+    // stop = () => {
+    //     this.setState(this.defaultState)
+    //     this.props.ws.removeEventListener("message", this.wsEventListener)
+    //     for (let target in this.pc) {
+    //         // if (typeof target === typeof RTCPeerConnection)
+    //         // target.close()
+    //         this.pc[target].close()
+    //         this.pc[target] = null
+    //     }
+    //     if (this.localStream !== undefined) {
+    //         this.localStream.getTracks()[0].stop()
+    //         this.localStream.getTracks()[1].stop()
+    //     }
+    //     console.info(`closing Local stream...`)
+    // }
 
     preparePeerConnection(target, callback) {
         this.pc[target].onicecandidate = (event) => this.iceCallbackLocal(event, target)
@@ -88,7 +92,7 @@ class LocalStream extends React.Component {
         callback()
     }
 
-    wsEventListener = (e) => {
+    wsEventListener = (event) => {
         if (event.stream_owner === this.props.user || event.to === this.props.user) {
             console.log('Stream', this.props.user, 'received message:', event.type)
             switch (event.type) {
@@ -105,11 +109,6 @@ class LocalStream extends React.Component {
                             console.log("Catch ERROR")
                             console.log(event)
                         }
-                    }
-                    break
-                case "bye":
-                    if (this.state.called) {
-                        this.handleRemoteHangup()
                     }
                     break
                 default:
@@ -131,7 +130,7 @@ class LocalStream extends React.Component {
         if (videoTracks.length > 0) {
             console.log(`Using video device: ${videoTracks[0].label}`)
         }
-        channel.broadcast({type: "got user media"})
+        channel.gotUserMedia()
     }
 
     inRequestForPeerConn = (target) => {
@@ -152,7 +151,7 @@ class LocalStream extends React.Component {
                 })
                 console.log("added local stream to local peer connection")
                 this.pc[target].createOffer(offerOptions)
-                    .then((desc) => this.gotDescription(desc, target), this.onCreateSessionDescriptionError)
+                    .then((desc) => this.sendOfferDescription(desc, target), this.onCreateSessionDescriptionError)
             })
         }
     }
@@ -163,16 +162,15 @@ class LocalStream extends React.Component {
         this.localStream = stream //hide call btn after this
     }
 
-    gotDescription = (desc, target) => {
-        this.pc[target].setLocalDescription(desc)
-        desc.stream_owner = this.props.self
-        channel.sendTo(desc, target) //send in order to wait for answer
+    sendOfferDescription = (offerDesc, target) => {
+        this.pc[target].setLocalDescription(offerDesc)
+        channel.sendOffer(this.props.self, offerDesc, target) //send offer and wait for answer
     }
 
     iceCallbackLocal = (event, target) => {
         this.pc[target].addIceCandidate(event.candidate)
             .then(this.onAddIceCandidateSuccess, this.onAddIceCandidateError)
-            channel.sendCandidate(this.props.self, event.candidate, target)
+        channel.sendCandidate(this.props.self, event.candidate, target)
         // console.log(`Local pc: New Ice candidate: ${event.candidate ? event.candidate.candidate : "(null)"}`)
         // console.log(`Local pc: New Ice candidate: ${event.candidate ? `NOT null` : "(null)"}`)
     }
@@ -192,8 +190,6 @@ class LocalStream extends React.Component {
     }
 
     render() {
-        // const {classes, user} = this.props
-
         return ( <div>
             <video width = "460"
             height = "300"

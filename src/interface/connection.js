@@ -108,28 +108,58 @@ const connection = {
     },
     signalCast(type, params) {
         sendMessage(websocket, ["signal_cast", type, params])
+    },
+    signalCall(type, params) {
+        let id = genid()
+        sendMessage(websocket, ["signal_call", id, type, params])
+
+        return new Promise((resolve, reject) => {
+            callsInProgress[id] = resolve
+            setTimeout(
+                () => reject(new Error(`call timeout, type: ${type}, params: ${params}`)),
+                TIMEOUT
+            )
+        })
     }
 }
 
 const signalingChannel = {
-    createOffer() {
+    // createOffer() {
 
+    // },
+    // broadcast(message) {
+    //     console.log('Local sending message: ', message.type)
+    //     connection.cast("class_broadcast_message", message)
+    // },
+    // sendTo(message, to) {
+    //     console.log(`Local sending message to ${to}: `, message.type)
+    //     message.to = to
+    //     connection.signalCast("class_direct_message", message)
+    // },
+    requestOffer(to) {
+        console.log(`Sending request offer to ${to}: `)        
+        connection.cast("request_offer", to)
     },
-    broadcast(message) {
-        console.log('Local sending message: ', message.type)
-        connection.cast("class_broadcast_message", message)
+    sendOffer(stream_owner, offer, to) {
+        console.log(`Sending offer to ${to}: `, offer.type)
+        connection.signalCast("offer", {stream_owner, offer, to})
     },
-    sendTo(message, to) {
-        console.log(`Local sending message to ${to}: `, message.type)
-        message.to = to
-        connection.signalCast("class_direct_message", message)
+    sendAnswer(stream_owner, answer, to) {
+        console.log(`Sending answer to ${to}: `, answer.type)
+        connection.signalCast("answer", {stream_owner, answer, to})
     },
     sendCandidate(stream_owner, candidate, to) {
         console.log(`Sending candidate to ${to}: `, candidate.type)
         connection.signalCast("candidate", {stream_owner, candidate, to})
     },
-    listenRequestOffer(callback) {
-        listener.addListener("request_offer", callback)
+    // listenRequestOffer(callback) {
+    //     listener.addListener("request_offer", callback)
+    // },
+    setListenerForLocal() {
+
+    },
+    setListenerForRemote() {
+        
     },
     gotUserMedia() {
         connection.signalCast("got_media", null)

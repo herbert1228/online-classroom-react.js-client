@@ -1,6 +1,6 @@
 import React from 'react'
 import {withStyles} from '@material-ui/core/styles'
-import {signalingChannel as channal} from '../../interface/connection'
+import {signalingChannel as channel, connection as conn} from '../../interface/connection'
 
 const styles = theme => ({})
 
@@ -30,7 +30,10 @@ class RemoteStream extends React.Component {
         this.peerConn.onicecandidate = this.iceCallbackRemote
         console.log(`${this.props.user}: created remote peer connection object`)
 
-        this.props.ws.addEventListener("message", this.wsEventListener)
+        conn.addListener("got user media", (e) => console.log(e))
+        conn.addListener("offer", (e) => console.log(e))
+        conn.addListener("candidate", (e) => console.log(e))
+        // this.props.ws.addEventListener("message", this.wsEventListener)
 
         // case "get_exist_peer_conn":
         // this.setState({ peerConn: event.exist_peer_conn })
@@ -40,13 +43,13 @@ class RemoteStream extends React.Component {
         // }
     }
 
-    componentWillUnmount() {
-        this.props.ws.removeEventListener("message", this.wsEventListener)
-        if (this.peerConn) {
-            this.peerConn.close()
-        }
-        console.info(`closing remote stream: ${this.props.user}...`)
-    }
+    // componentWillUnmount() {
+    //     this.props.ws.removeEventListener("message", this.wsEventListener)
+    //     if (this.peerConn) {
+    //         this.peerConn.close()
+    //     }
+    //     console.info(`closing remote stream: ${this.props.user}...`)
+    // }
 
     wsEventListener = (e) => {
         const event = JSON.parse(e.data)
@@ -88,32 +91,18 @@ class RemoteStream extends React.Component {
             requesting: true
         })
         // this.sendMessage({ type: "request_offer", stream_owner: this.props.user }) //TODO include self in json for opponent to reply        
-        channal.sendTo({type: "request_offer"}, this.props.user)
+        channel.requestOffer(this.props.user)
     }
 
-    setRemoteDescriptionForPeerConn = (desc) => {
-        const {
-            peerConn
-        } = this
-        peerConn.setRemoteDescription(desc)
-        peerConn.createAnswer()
+    setRemoteDescriptionForPeerConn = (offerDesc) => {
+        this.peerConn.setRemoteDescription(offerDesc)
+        this.peerConn.createAnswer()
             .then(this.gotDescriptionRemote, this.onCreateSessionDescriptionError)
-            .then(this.setState({
-                peerConn
-            }))
-            .catch(this.setState({
-                peerConn
-            }))
     }
 
-    gotDescriptionRemote = (desc) => { // send answer to streamer
-        this.peerConn.setLocalDescription(desc)
-        const modDesc = {
-            desc
-        }
-        modDesc.stream_owner = this.props.user
-        modDesc.type = "answer"
-        channal.sendTo(modDesc, this.props.user)
+    gotDescriptionRemote = (answerDesc) => { // send answer to streamer
+        this.peerConn.setLocalDescription(answerDesc)
+        channel.sendAnswer(this.props.user, answerDesc, this.props.user)
     }
 
     onCreateSessionDescriptionError = (err) => {
