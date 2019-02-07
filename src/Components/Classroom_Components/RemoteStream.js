@@ -38,21 +38,24 @@ class RemoteStream extends React.Component {
                 console.log(this.state)
             }
         })
-        conn.addListener("offer", (e) => this.setRemoteDescriptionForPeerConn(e.offer))
+        conn.addListener("offer", (e) => {
+            console.log("received offer from", e.from)
+            this.setRemoteDescriptionForPeerConn(e.offer)
+        })
         conn.addListener("candidate", (e) => {
-            if (e.from !== this.props.self) return
+            if (e.stream_owner !== this.props.user) return
             if (!this.state.requesting) return
             if (e.candidate == null) return
             console.log("Remote adding ice from", e.from)
-            this.peerConn.addIceCandidate(e.candidate)
+            setTimeout(() => this.peerConn.addIceCandidate(e.candidate), 1000)
         })
 
         // case "get_exist_peer_conn":
         // this.setState({ peerConn: event.exist_peer_conn })
         // break
-        // if (this.props.peerConn.includes(this.props.user)) {
-        //     this.requestOffer()
-        // }
+        if (this.props.peerConn.includes(this.props.user)) {
+            this.requestOffer()
+        }
     }
 
     // componentWillUnmount() {
@@ -100,10 +103,12 @@ class RemoteStream extends React.Component {
     }
 
     iceCallbackRemote = (event) => {
-        this.peerConn.addIceCandidate(event.candidate)
-            .then(this.onAddIceCandidateSuccess, this.onAddIceCandidateError)
-        channel.sendCandidate(this.props.user, event.candidate, this.props.user)
-        console.log(`${this.props.user}'s pc New ICE candidate: ${event.candidate ? event.candidate.candidate : "(null)"}`)
+        setTimeout(() => {
+            this.peerConn.addIceCandidate(event.candidate)
+                .then(this.onAddIceCandidateSuccess, this.onAddIceCandidateError)
+            channel.sendCandidate(this.props.user, event.candidate, this.props.user)
+            console.log(`${this.props.user}'s pc New ICE candidate: ${event.candidate ? event.candidate.candidate : "(null)"}`)
+        }, 1000)
     }
 
     onAddIceCandidateSuccess = () => {

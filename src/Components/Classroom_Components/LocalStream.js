@@ -18,6 +18,7 @@ class LocalStream extends React.Component {
         called: false,
         peerConn: null,
         turnReady: null,
+        // gotAnswer: [],
         pcConfig: {
             'iceServers': [{
                 'urls': 'stun:stun.l.google.com:19302'
@@ -55,14 +56,15 @@ class LocalStream extends React.Component {
         conn.addListener("request_offer", (from) => this.inRequestForPeerConn(from))
         conn.addListener("answer", (e) => {
             if (this.state.called) {
+                console.log("received answer from", e.from)
                 this.pc[e.from].setRemoteDescription(e.answer)
             }
         })
         conn.addListener("candidate", (e) => {
-            if (e.from !== this.props.self) return
+            if (e.stream_owner !== this.props.self) return
             if (this.state.called && e.candidate === null) return
             try {
-                this.pc[e.from].addIceCandidate(e.candidate)
+                setTimeout(() => this.pc[e.from].addIceCandidate(e.candidate), 1000)
                 console.log("Local adding ice from", e.from)
             } catch (_ignore) {
                 console.log("Catch ERROR")
@@ -71,25 +73,26 @@ class LocalStream extends React.Component {
         })
     }
 
-    // componentWillUnmount() {
-    //     this.stop()
-    // }
+    componentWillUnmount() {
+        this.stop()
+    }
 
-    // stop = () => {
-    //     this.setState(this.defaultState)
-    //     this.props.ws.removeEventListener("message", this.wsEventListener)
-    //     for (let target in this.pc) {
-    //         // if (typeof target === typeof RTCPeerConnection)
-    //         // target.close()
-    //         this.pc[target].close()
-    //         this.pc[target] = null
-    //     }
-    //     if (this.localStream !== undefined) {
-    //         this.localStream.getTracks()[0].stop()
-    //         this.localStream.getTracks()[1].stop()
-    //     }
-    //     console.info(`closing Local stream...`)
-    // }
+    stop = () => {
+        this.setState(this.defaultState)
+        // this.props.ws.removeEventListener("message", this.wsEventListener)
+        for (let target in this.pc) {
+            // if (typeof target === typeof RTCPeerConnection)
+            // target.close()
+            this.pc[target].close()
+            this.pc[target] = null
+        }
+        if (this.localStream !== undefined) {
+            this.localStream.getTracks()[0].stop()
+            this.localStream.getTracks()[1].stop()
+        }
+        //gotAnswer
+        console.info(`closing Local stream...`)
+    }
 
     call = () => {
         this.setState({
@@ -126,7 +129,7 @@ class LocalStream extends React.Component {
             })
             console.log("added local stream to local peer connection")
             this.pc[target].createOffer(offerOptions)
-                .then((desc) => this.sendOfferDescription(desc, target), this.onCreateSessionDescriptionError)
+                .then((desc) => this.sendOfferDescription(desc, target), this.onCreateOfferDescriptionError)
         }
     }
 
@@ -141,12 +144,19 @@ class LocalStream extends React.Component {
         channel.sendOffer(this.props.self, offerDesc, target) //send offer and wait for answer
     }
 
+    onCreateOfferDescriptionError = (err) => {
+        // console.log(`Local: Failed to create session description: ${err.toString}`)
+        console.log(`Local: Failed to create session description`)
+    }
+
     iceCallbackLocal = (event, target) => {
-        this.pc[target].addIceCandidate(event.candidate)
-            .then(this.onAddIceCandidateSuccess, this.onAddIceCandidateError)
-        channel.sendCandidate(this.props.self, event.candidate, target)
-        // console.log(`Local pc: New Ice candidate: ${event.candidate ? event.candidate.candidate : "(null)"}`)
-        // console.log(`Local pc: New Ice candidate: ${event.candidate ? `NOT null` : "(null)"}`)
+        setTimeout(() => {
+            this.pc[target].addIceCandidate(event.candidate)
+                .then(this.onAddIceCandidateSuccess, this.onAddIceCandidateError)
+            channel.sendCandidate(this.props.self, event.candidate, target)
+            // console.log(`Local pc: New Ice candidate: ${event.candidate ? event.candidate.candidate : "(null)"}`)
+            // console.log(`Local pc: New Ice candidate: ${event.candidate ? `NOT null` : "(null)"}`)
+        }, 1000)
     }
 
     onAddIceCandidateSuccess = () => {
@@ -154,13 +164,7 @@ class LocalStream extends React.Component {
     }
 
     onAddIceCandidateError = (e) => {
-        // console.log(`Failed to add ICE candidate: ${e.toString()}`)
-        // console.log(`Failed to add ICE candidate`)
-    }
-
-    onCreateSessionDescriptionError = (err) => {
-        // console.log(`Local: Failed to create session description: ${err.toString}`)
-        console.log(`Local: Failed to create session description`)
+        console.log(`AddIceCandidateFailed: ${e.toString()}`)
     }
 
     render() {
