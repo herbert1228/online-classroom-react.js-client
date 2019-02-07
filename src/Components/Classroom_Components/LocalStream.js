@@ -1,7 +1,7 @@
 import React from 'react'
 import {withStyles} from '@material-ui/core/styles'
 import {Button} from '@material-ui/core'
-import {connection as conn} from '../../interface/connection'
+import {signalingChannel as channel} from '../../interface/connection'
 
 const styles = theme => ({})
 
@@ -50,18 +50,14 @@ class LocalStream extends React.Component {
         } catch (e) {
             console.log("getUserMedia() error: ", e)
         }
-        conn.addListener("", () => {})
-        this.props.ws.addEventListener("message", this.wsEventListener)
-        this.props.ws.addEventListener("message", e => {
-            const event = JSON.parse(e.data)
+        channel.listenRequestOffer(() => {
             if (event.stream_owner === this.props.user || event.to === this.props.user) {
-                if (event.type === "request_offer") {
-                    console.log('Stream', this.props.user, 'received message:', event.type)
-                    console.info(`### ${this.state.started}`)
-                    this.inRequestForPeerConn(event.from)
-                }
+                console.log('Stream', this.props.user, 'received message:', event.type)
+                console.info(`### ${this.state.started}`)
+                this.inRequestForPeerConn(event.from)
             }
         })
+        channel.listenCandidate("message", this.wsEventListener)
         console.info(`!!!!!!!!2 ${this.state.started}`)
     }
 
@@ -85,8 +81,8 @@ class LocalStream extends React.Component {
         console.info(`closing Local stream...`)
     }
 
-    preparePeerConnection(from, callback) {
-        this.pc[from].onicecandidate = (event) => this.iceCallbackLocal(event, from)
+    preparePeerConnection(target, callback) {
+        this.pc[target].onicecandidate = (event) => this.iceCallbackLocal(event, target)
         console.log(`Local: created remote peer connection object`)
 
         callback()
@@ -122,23 +118,6 @@ class LocalStream extends React.Component {
         }
     }
 
-    sendBroadcastMessage(message) {
-        console.log('Local sending message: ', message.type)
-        this.props.ws.send(JSON.stringify({
-            type: "class_broadcast_message",
-            message
-        }))
-    }
-
-    sendDirectMessage(message, to) {
-        console.log(`Local sending message to ${to}: `, message.type)
-        message.to = to
-        this.props.ws.send(JSON.stringify({
-            type: "class_direct_message",
-            message
-        }))
-    }
-
     call = () => {
         this.setState({
             called: true
@@ -152,30 +131,28 @@ class LocalStream extends React.Component {
         if (videoTracks.length > 0) {
             console.log(`Using video device: ${videoTracks[0].label}`)
         }
-        this.sendBroadcastMessage({
-            type: "got user media"
-        })
+        channel.broadcast({type: "got user media"})
     }
 
-    inRequestForPeerConn = (from) => {
+    inRequestForPeerConn = (target) => {
         console.log(`%%% ${this.state.started}`)
-        console.log(this.pc[from])
-        if (this.pc[from] !== undefined && this.pc[from] !== null) {
-            // window.alert(`clearing ${from}'s pc`)
-            this.pc[from].close()
-            this.pc[from] = null
+        console.log(this.pc[target])
+        if (this.pc[target] !== undefined && this.pc[target] !== null) {
+            // window.alert(`clearing ${target}'s pc`)
+            this.pc[target].close()
+            this.pc[target] = null
         }
-        console.log(this.pc[from])
+        console.log(this.pc[target])
         if (this.state.started) {
-            this.pc[from] = new RTCPeerConnection(this.state.pcConfig)
-            this.preparePeerConnection(from, () => {
+            this.pc[target] = new RTCPeerConnection(this.state.pcConfig)
+            this.preparePeerConnection(target, () => {
                 this.localStream.getTracks().forEach(track => {
                     console.log(`Adding track: ${JSON.stringify(track)}`)
-                    this.pc[from].addTrack(track, this.localStream)
+                    this.pc[target].addTrack(track, this.localStream)
                 })
                 console.log("added local stream to local peer connection")
-                this.pc[from].createOffer(offerOptions)
-                    .then((desc) => this.gotDescription(desc, from), this.onCreateSessionDescriptionError)
+                this.pc[target].createOffer(offerOptions)
+                    .then((desc) => this.gotDescription(desc, target), this.onCreateSessionDescriptionError)
             })
         }
     }
@@ -186,20 +163,16 @@ class LocalStream extends React.Component {
         this.localStream = stream //hide call btn after this
     }
 
-    gotDescription = (desc, from) => {
-        this.pc[from].setLocalDescription(desc)
+    gotDescription = (desc, target) => {
+        this.pc[target].setLocalDescription(desc)
         desc.stream_owner = this.props.self
-        this.sendDirectMessage(desc, from) //send in order to wait for answer
+        channel.sendTo(desc, target) //send in order to wait for answer
     }
 
-    iceCallbackLocal = (event, from) => {
-        this.pc[from].addIceCandidate(event.candidate)
+    iceCallbackLocal = (event, target) => {
+        this.pc[target].addIceCandidate(event.candidate)
             .then(this.onAddIceCandidateSuccess, this.onAddIceCandidateError)
-        this.sendDirectMessage({
-            type: "candidate",
-            candidate: event.candidate,
-            stream_owner: this.props.user
-        }, from)
+            channel.sendCandidate(this.props.self, event.candidate, target)
         // console.log(`Local pc: New Ice candidate: ${event.candidate ? event.candidate.candidate : "(null)"}`)
         // console.log(`Local pc: New Ice candidate: ${event.candidate ? `NOT null` : "(null)"}`)
     }

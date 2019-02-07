@@ -105,9 +105,38 @@ const connection = {
     },
     removeListener(type, callback) {
         listener.removeListener(type, callback)
+    },
+    signalCast(type, params) {
+        sendMessage(websocket, ["signal_cast", type, params])
+    }
+}
+
+const signalingChannel = {
+    createOffer() {
+
+    },
+    broadcast(message) {
+        console.log('Local sending message: ', message.type)
+        connection.cast("class_broadcast_message", message)
+    },
+    sendTo(message, to) {
+        console.log(`Local sending message to ${to}: `, message.type)
+        message.to = to
+        connection.signalCast("class_direct_message", message)
+    },
+    sendCandidate(stream_owner, candidate, to) {
+        console.log(`Sending candidate to ${to}: `, candidate.type)
+        connection.signalCast("candidate", {stream_owner, candidate, to})
+    },
+    listenRequestOffer(callback) {
+        listener.addListener("request_offer", callback)
+    },
+    gotUserMedia() {
+        connection.signalCast("got_media", null)
     }
 }
 
 export {
-    connection
+    connection,
+    signalingChannel
 }

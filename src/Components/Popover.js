@@ -27,9 +27,9 @@ class Popover extends React.Component {
                         {children}
                     </DialogContentText>
                 </DialogContent>
-                {/*<DialogActions>*/}
-                {/*<Button color="primary">Create</Button>*/}
-                {/*</DialogActions>*/}
+                <DialogActions>
+                    <Button color="primary">Create</Button>
+                </DialogActions>
             </Dialog>
         )
     }

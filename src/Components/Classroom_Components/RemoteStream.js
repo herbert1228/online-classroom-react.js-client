@@ -1,7 +1,6 @@
 import React from 'react'
-import {
-    withStyles
-} from '@material-ui/core/styles'
+import {withStyles} from '@material-ui/core/styles'
+import {signalingChannel as channal} from '../../interface/connection'
 
 const styles = theme => ({})
 
@@ -84,23 +83,12 @@ class RemoteStream extends React.Component {
         }
     }
 
-    sendDirectMessage(message, to) {
-        console.log(`Remote sending message to ${to}: `, message)
-        message.to = to
-        this.props.ws.send(JSON.stringify({
-            type: "class_direct_message",
-            message
-        }))
-    }
-
     requestOffer = () => {
         this.setState({
             requesting: true
         })
         // this.sendMessage({ type: "request_offer", stream_owner: this.props.user }) //TODO include self in json for opponent to reply        
-        this.sendDirectMessage({
-            type: "request_offer"
-        }, this.props.user)
+        channal.sendTo({type: "request_offer"}, this.props.user)
     }
 
     setRemoteDescriptionForPeerConn = (desc) => {
@@ -125,7 +113,7 @@ class RemoteStream extends React.Component {
         }
         modDesc.stream_owner = this.props.user
         modDesc.type = "answer"
-        this.sendDirectMessage(modDesc, this.props.user)
+        channal.sendTo(modDesc, this.props.user)
     }
 
     onCreateSessionDescriptionError = (err) => {
@@ -148,11 +136,7 @@ class RemoteStream extends React.Component {
     iceCallbackRemote = (event) => {
         this.peerConn.addIceCandidate(event.candidate)
             .then(this.onAddIceCandidateSuccess, this.onAddIceCandidateError)
-        this.sendDirectMessage({
-            type: "candidate",
-            candidate: event.candidate,
-            stream_owner: this.props.user
-        }, this.props.user)
+        channel.sendCandidate(this.props.user, event.candidate, this.props.user)
         console.log(`${this.props.user}'s pc New ICE candidate: ${event.candidate ? event.candidate.candidate : "(null)"}`)
     }
 
