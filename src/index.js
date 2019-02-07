@@ -8,7 +8,7 @@ import {BrowserRouter as Router, Route} from "react-router-dom"
 import { Provider } from 'react-redux'
 import { createStore } from 'redux'
 import ReactDOM from 'react-dom'
-// import { connection as conn } from './interface/connection'
+import { connection as conn } from './interface/connection'
 
 let themeType = 'light';
 
@@ -25,6 +25,7 @@ const initialState = {
     enrolledClass: [],
     startedClass: [],
     session_user: [],
+    peerConn: [],
     location: 0,
     self: null,
     joined: null,
@@ -39,6 +40,10 @@ function reducer(state = initialState, action) {
             return {...state, enrolledClass: action.result}
         case "get_started_class":
             return {...state, startedClass: action.result}
+        case "get_session_user":
+            return {...state, session_user: action.result}
+        case "get_exist_peer_conn":
+            return {...state, peerConn: action.result}
         case "changeLocation":
             return {...state, location: action.target}
         case "logout":
@@ -54,23 +59,47 @@ function reducer(state = initialState, action) {
 
 export const store = createStore(reducer, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
 
-function Index() {
-    return (
-        <Provider store={store}>
-            <MuiThemeProvider theme={theme}>
-                <Router>
-                    <div>
-                        <Route path="/" exact component={props => <App/>}/>
-                        <Route path="/upload" exact component={props => <Upload/>}/>
-                    </div>
-                </Router>
-                {/* <App/> */}
-            </MuiThemeProvider>
-        </Provider>
-    )
+class Index extends React.Component {
+    componentDidMount() {
+        conn.connect()
+        conn.addListener("socketclose", this.handleSocketClose)
+        conn.addListener("get_started_class", (e) => this.dispatch("get_started_class", e.result))
+        conn.addListener("broadcast_message", (e) => console.log(e.result))
+        conn.addListener("get_session_user", (e) => this.dispatch("get_session_user", e.result))
+        conn.addListener("get_exist_peer_conn", (e) => this.dispatch("get_exist_peer_conn", e.result))
+    }
+
+    dispatch = (type, result) => {
+        store.dispatch({type, result})
+    }
+
+    handleSocketClose = () => {
+        //TODO relogin here
+        console.log("attempting to reconnect...")
+        setTimeout(() => {
+            store.dispatch({type: "logout"}) //TODO error: cannot set self to null
+            conn.connect()
+        }, 2000)
+        this.setState({joined: null})
+    }
+
+    render() {
+        return (
+            <Provider store={store}>
+                <MuiThemeProvider theme={theme}>
+                    <Router>
+                        <div>
+                            <Route path="/" exact component={props => <App/>}/>
+                            <Route path="/upload" exact component={props => <Upload/>}/>
+                        </div>
+                    </Router>
+                    {/* <App/> */}
+                </MuiThemeProvider>
+            </Provider>
+        )
+    }
 }
 
-// ReactDOM.render(<Test />, document.getElementById('root'));
 ReactDOM.render(<Index/>, document.getElementById('root'));
 
 registerServiceWorker();

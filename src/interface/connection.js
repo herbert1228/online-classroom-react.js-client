@@ -51,6 +51,7 @@ var DEBUG = false
 })()
 
 function sendMessage(ws, message) {
+    if (ws.readyState === ws.OPEN)
     ws.send(JSON.stringify(message))
 }
 
@@ -138,7 +139,7 @@ const signalingChannel = {
     // },
     requestOffer(to) {
         console.log(`Sending request offer to ${to}: `)        
-        connection.cast("request_offer", to)
+        connection.signalCast("request_offer", to)
     },
     sendOffer(stream_owner, offer, to) {
         console.log(`Sending offer to ${to}: `, offer.type)
@@ -149,7 +150,7 @@ const signalingChannel = {
         connection.signalCast("answer", {stream_owner, answer, to})
     },
     sendCandidate(stream_owner, candidate, to) {
-        console.log(`Sending candidate to ${to}: `, candidate.type)
+        console.log(`Sending candidate to ${to}: `)
         connection.signalCast("candidate", {stream_owner, candidate, to})
     },
     // listenRequestOffer(callback) {
@@ -166,7 +167,39 @@ const signalingChannel = {
     }
 }
 
+function checkTURNServer(turnConfig, timeout){ 
+
+    return new Promise(function(resolve, reject){
+  
+      setTimeout(function(){
+          if(promiseResolved) return;
+          resolve(false);
+          promiseResolved = true;
+      }, timeout || 5000);
+  
+      var promiseResolved = false
+        , myPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection   //compatibility for firefox and chrome
+        , pc = new myPeerConnection({iceServers:[turnConfig]})
+        , noop = function(){};
+      pc.createDataChannel("");    //create a bogus data channel
+      pc.createOffer(function(sdp){
+        if(sdp.sdp.indexOf('typ relay') > -1){ // sometimes sdp contains the ice candidates...
+          promiseResolved = true;
+          resolve(true);
+        }
+        pc.setLocalDescription(sdp, noop, noop);
+      }, noop);    // create offer and set local description
+      pc.onicecandidate = function(ice){  //listen for candidate events
+        if(promiseResolved || !ice || !ice.candidate || !ice.candidate.candidate || !(ice.candidate.candidate.indexOf('typ relay')>-1))  return;
+        promiseResolved = true;
+        resolve(true);
+      };
+    });   
+  }
+
 export {
     connection,
-    signalingChannel
+    signalingChannel,
+    checkTURNServer
+    // listener // for debug use
 }

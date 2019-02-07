@@ -1,7 +1,7 @@
 import React from 'react'
 import {withStyles} from '@material-ui/core/styles'
 import {Button} from '@material-ui/core'
-import {signalingChannel as channel, connection as conn} from '../../interface/connection'
+import {signalingChannel as channel, connection as conn, checkTURNServer} from '../../interface/connection'
 
 const styles = theme => ({})
 
@@ -32,7 +32,9 @@ class LocalStream extends React.Component {
     state = this.defaultState
 
     async componentDidMount() {
-        console.info(`!!!!!!!! ${this.state.started}`)
+        checkTURNServer(this.state.pcConfig['iceServers'][1], 5000)
+            .then((bool) => console.log('is TURN server active? ', bool? 'yes':'no'))
+            .catch(console.error.bind(console))
 
         try {
             const stream = await navigator.mediaDevices
@@ -50,19 +52,23 @@ class LocalStream extends React.Component {
         } catch (e) {
             console.log("getUserMedia() error: ", e)
         }
-        // channel.listenRequestOffer(() => {
-        //     if (event.stream_owner === this.props.user || event.to === this.props.user) {
-        //         console.log('Stream', this.props.user, 'received message:', event.type)
-        //         console.info(`### ${this.state.started}`)
-        //         this.inRequestForPeerConn(event.from)
-        //     }
-        // })
-        // channel.listenCandidate("message", this.wsEventListener)
-        // conn.addListener("request_offer", (e) => console.log(e))
-        // conn.addListener("answer", (e) => console.log(e))
-        // conn.addListener("candidate", (e) => console.log(e))
-        // conn.addListener("answer", (e) => console.log(e))
-        console.info(`!!!!!!!!2 ${this.state.started}`)
+        conn.addListener("request_offer", (from) => this.inRequestForPeerConn(from))
+        conn.addListener("answer", (e) => {
+            if (this.state.called) {
+                this.pc[e.from].setRemoteDescription(e.answer)
+            }
+        })
+        conn.addListener("candidate", (e) => {
+            if (e.from !== this.props.self) return
+            if (this.state.called && e.candidate === null) return
+            try {
+                this.pc[e.from].addIceCandidate(e.candidate)
+                console.log("Local adding ice from", e.from)
+            } catch (_ignore) {
+                console.log("Catch ERROR")
+                console.log(e)
+            }
+        })
     }
 
     // componentWillUnmount() {
@@ -84,38 +90,6 @@ class LocalStream extends React.Component {
     //     }
     //     console.info(`closing Local stream...`)
     // }
-
-    preparePeerConnection(target, callback) {
-        this.pc[target].onicecandidate = (event) => this.iceCallbackLocal(event, target)
-        console.log(`Local: created remote peer connection object`)
-
-        callback()
-    }
-
-    wsEventListener = (event) => {
-        if (event.stream_owner === this.props.user || event.to === this.props.user) {
-            console.log('Stream', this.props.user, 'received message:', event.type)
-            switch (event.type) {
-                case "answer":
-                    if (this.state.called) {
-                        this.pc[event.from].setRemoteDescription(event.desc)
-                    }
-                    break
-                case "candidate":
-                    if (this.state.called && event.candidate !== null) {
-                        try {
-                            this.pc[event.from].addIceCandidate(event.candidate)
-                        } catch (_ignore) {
-                            console.log("Catch ERROR")
-                            console.log(event)
-                        }
-                    }
-                    break
-                default:
-                    break
-            }
-        }
-    }
 
     call = () => {
         this.setState({
@@ -144,22 +118,22 @@ class LocalStream extends React.Component {
         console.log(this.pc[target])
         if (this.state.started) {
             this.pc[target] = new RTCPeerConnection(this.state.pcConfig)
-            this.preparePeerConnection(target, () => {
-                this.localStream.getTracks().forEach(track => {
-                    console.log(`Adding track: ${JSON.stringify(track)}`)
-                    this.pc[target].addTrack(track, this.localStream)
-                })
-                console.log("added local stream to local peer connection")
-                this.pc[target].createOffer(offerOptions)
-                    .then((desc) => this.sendOfferDescription(desc, target), this.onCreateSessionDescriptionError)
+            this.pc[target].onicecandidate = (event) => this.iceCallbackLocal(event, target)
+            console.log(`Local: created remote peer connection object`)
+            this.localStream.getTracks().forEach(track => {
+                console.log(`Adding track: ${track.kind}`)
+                this.pc[target].addTrack(track, this.localStream)
             })
+            console.log("added local stream to local peer connection")
+            this.pc[target].createOffer(offerOptions)
+                .then((desc) => this.sendOfferDescription(desc, target), this.onCreateSessionDescriptionError)
         }
     }
 
     gotStream = (stream) => { //called after start and before call
         console.log("Receive local stream")
         this.localVideo.srcObject = stream
-        this.localStream = stream //hide call btn after this
+        this.localStream = stream //hide call btn after this //label, enabled, muted
     }
 
     sendOfferDescription = (offerDesc, target) => {

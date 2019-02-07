@@ -48,7 +48,6 @@ class Login extends React.Component {
     }
 
     componentDidMount() {
-        conn.connect()
         setInterval(() => this.setState({fade: true}), 500)
         conn.addListener("socketopen", this.handleSocketOpen)
     }

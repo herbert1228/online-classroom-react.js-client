@@ -30,10 +30,22 @@ class RemoteStream extends React.Component {
         this.peerConn.onicecandidate = this.iceCallbackRemote
         console.log(`${this.props.user}: created remote peer connection object`)
 
-        conn.addListener("got user media", (e) => console.log(e))
-        conn.addListener("offer", (e) => console.log(e))
-        conn.addListener("candidate", (e) => console.log(e))
-        // this.props.ws.addEventListener("message", this.wsEventListener)
+        conn.addListener("got_media", (e) => {
+            if (!this.state.requesting) {
+                this.requestOffer()
+            } else {
+                console.log(this.state.requesting);
+                console.log(this.state)
+            }
+        })
+        conn.addListener("offer", (e) => this.setRemoteDescriptionForPeerConn(e.offer))
+        conn.addListener("candidate", (e) => {
+            if (e.from !== this.props.self) return
+            if (!this.state.requesting) return
+            if (e.candidate == null) return
+            console.log("Remote adding ice from", e.from)
+            this.peerConn.addIceCandidate(e.candidate)
+        })
 
         // case "get_exist_peer_conn":
         // this.setState({ peerConn: event.exist_peer_conn })
@@ -50,41 +62,6 @@ class RemoteStream extends React.Component {
     //     }
     //     console.info(`closing remote stream: ${this.props.user}...`)
     // }
-
-    wsEventListener = (e) => {
-        const event = JSON.parse(e.data)
-        // if (event.type === "join") {
-        //     console.log('Received a request to join room from:') // + event.joiner_pid)
-        // }
-        if (event.stream_owner === this.props.user) {
-            console.log('Stream', this.props.user, 'received message:', event.type)
-            switch (event.type) {
-                case "got user media":
-                    if (!this.state.requesting) {
-                        this.requestOffer()
-                    } else {
-                        console.log(this.state.requesting);
-                        console.log(this.state)
-                    }
-                    break
-                case "offer":
-                    this.setRemoteDescriptionForPeerConn(event)
-                    break
-                case "candidate":
-                    if (this.state.requesting) {
-                        if (event.candidate !== null) {
-                            this.peerConn.addIceCandidate(event.candidate)
-                        }
-                    }
-                    break
-                default:
-                    console.log(`Not Controlledd:`)
-                    console.log({ ...event
-                    })
-                    break
-            }
-        }
-    }
 
     requestOffer = () => {
         this.setState({
@@ -134,7 +111,7 @@ class RemoteStream extends React.Component {
     }
 
     onAddIceCandidateError = (e) => {
-        console.log(`Failed to add ICE candidate: ${e.toString()}`)
+        console.log(`AddIceCandidateFailed: ${e.toString()}`)
     }
 
     render() {

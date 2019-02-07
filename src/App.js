@@ -58,35 +58,6 @@ class App extends React.Component {
             //     break
     }
 
-    componentDidMount() {
-        conn.addListener("socketclose", this.handleSocketClose)
-        conn.addListener("get_started_class", (e) => this.handleGetStartedClass(e))
-        conn.addListener("broadcast_message", (e) => console.log(e))
-        conn.addListener("get_session_user", (e) => console.log(e))
-        conn.addListener("get_exist_peer_conn", (e) => console.log(e))
-    }
-    
-    componentWillUnmount() {
-        conn.removeListener("socketclose", this.handleSocketClose)
-    }
-
-    handleSocketClose = () => {
-        //TODO relogin here
-        console.log("attempting to reconnect...")
-        setTimeout(() => {
-            store.dispatch({type: "logout"}) //TODO error: cannot set self to null
-            conn.connect()
-        }, 2000)
-        this.setState({joined: null})
-    }
-
-    handleGetStartedClass = (e) => {
-        store.dispatch({
-            type: "get_started_class",
-            result: e.result
-        })
-    }
-
     changeScene(target) {
         if (this.state.joined && target !== 1) {
             // should stop pc instead of leaving the classroom
@@ -176,7 +147,8 @@ function mapStateToProps(state) {
         session_user: state.session_user,
         location: state.location,
         self: state.self,
-        joined: state.joined
+        joined: state.joined,
+        peerConn: state.peerConn
     }
 }
 
