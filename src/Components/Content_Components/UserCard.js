@@ -11,8 +11,8 @@ import UserCardMenu from '../Classroom_Components/UserCardMenu'
 
 const styles = theme => ({
     card: {
-        width: 460,
-        height: 633
+        width: '100%',
+        height: '100%'
     },
     avatar: {
         backgroundColor: "#769da8"
@@ -144,21 +144,6 @@ class UserCard extends React.Component {
     disableWebcam() {
         this.setState({camOpen: false})
     }
-
-    // render2() {
-    //     return(
-    //         <PaintEditor
-    //             // image={optionalImage}
-    //             // imageId={"optionalId"}
-    //             // imageFormat='svg'
-    //             // rotationCenterX={optionalCenterPointX}
-    //             // rotationCenterY={optionalCenterPointY}
-    //             // rtl={true|false}
-    //             // onUpdateImage={handleUpdateImageFunction}
-    //             // zoomLevelId={optionalZoomLevelId}
-    //         />
-    //     )
-    // }
 
     render() {
         const {user} = this.props;

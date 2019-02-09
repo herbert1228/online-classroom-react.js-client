@@ -5,13 +5,7 @@ import {withStyles} from '@material-ui/core/styles'
 import { connection as conn } from '../../interface/connection';
 import { store } from '../..';
 
-const styles = theme => ({
-    menu: {
-        position: "fixed",
-        top: 90,
-        right: 10
-    }
-})
+const styles = theme => ({})
 
 class ClassMenu extends React.Component {
     state = {
@@ -42,7 +36,7 @@ class ClassMenu extends React.Component {
         const { classes } = this.props;
 
         return (
-            <div className={classes.menu}>
+            <div>
                 <Button
                     aria-owns={anchorEl ? 'simple-menu' : undefined}
                     aria-haspopup="true"

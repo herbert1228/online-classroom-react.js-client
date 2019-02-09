@@ -14,7 +14,6 @@ import {drawerWidth} from './Components/index'
 
 const styles = theme => ({
     root: {
-        flexGrow: 1,
         height: "100vh", //100% after adding more components
         zIndex: 1,
         overflow: 'hidden',
@@ -22,17 +21,11 @@ const styles = theme => ({
         display: 'flex',
     },
     content: {
-        // flexGrow: 1,
-        // display: 'flex',
-        // justifyContent: 'flex-start',
-        float: 'left',
         backgroundColor: theme.palette.background.default,
-        padding: theme.spacing.unit * 5,
-        paddingLeft: 20,
         marginLeft: drawerWidth,
         width: `calc(100% - ${drawerWidth}px)`,
         minWidth: 0, // So the Typography noWrap works
-    },
+    }
 })
 
 class App extends React.Component {

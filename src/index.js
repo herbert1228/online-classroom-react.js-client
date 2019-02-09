@@ -47,7 +47,7 @@ function reducer(state = initialState, action) {
         case "changeLocation":
             return {...state, location: action.target}
         case "logout":
-            return {...state, self: null}
+            return {...state, self: null, joined: null}
         case "login":
             return {...state, self: action.loginName}
         case "joinClass":

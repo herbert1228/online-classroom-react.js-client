@@ -83,8 +83,16 @@ const connection = {
         websocket = new WebSocket(url)
         websocket.onmessage = handleMessage
         websocket.onerror = (e) => console.log(e)
-        websocket.onopen = () => listener.emit("socketopen", null)
+        websocket.onopen = () => {
+            listener.emit("socketopen", null)
+            setTimeout(
+                () => setInterval(() => sendMessage(websocket, "keep_alive"), 3000), 
+            1000)
+        }
         websocket.onclose = () => listener.emit("socketclose", null)
+    },
+    connected() {
+        return websocket? (websocket.readyState === websocket.OPEN) : false
     },
     cast(type, params) {
         sendMessage(websocket, ["cast", type, params])
@@ -200,6 +208,6 @@ function checkTURNServer(turnConfig, timeout){
 export {
     connection,
     signalingChannel,
-    checkTURNServer
+    checkTURNServer,
     // listener // for debug use
 }

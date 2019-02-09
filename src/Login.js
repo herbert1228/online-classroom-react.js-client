@@ -125,9 +125,9 @@ class Login extends React.Component {
         const {classes} = this.props
         return (
             <Fragment>
-            {this.state.connected &&
+            {conn.connected() &&
                 <div className={classes.loginBg}></div>}
-            {this.state.connected &&
+            {conn.connected() &&
             <Fade in={this.state.fade} timeout={{enter: 4500}}>
                 <Grid container 
                     direction="column"
@@ -194,7 +194,7 @@ class Login extends React.Component {
                 </Grid>
                 </Fade>
             }
-            {!this.state.connected &&
+            {!conn.connected() &&
                 <Loading/>
             }
             </Fragment>

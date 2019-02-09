@@ -4,13 +4,12 @@ import {withStyles} from '@material-ui/core/styles'
 import Typography from '@material-ui/core/Typography'
 
 const styles = theme => ({
-    toolbar: {
+    root: {
+        height: '100%',
+        width: '100%',
         display: 'flex',
+        justifyContent: 'center',
         alignItems: 'center',
-        justifyContent: 'flex-end',
-        padding: '0 8px',
-        ...theme.mixins.toolbar,
-        minWidth: 0, // So the Typography noWrap works
     },
     grid_item: {
         marginBottom: 50,
@@ -22,10 +21,10 @@ const styles = theme => ({
 
 class Content extends React.Component {
     render() {
-        const { classes } = this.props;
+        const { classes } = this.props
         return (
-            <main>
-                <div className={classes.toolbar}/>
+            <div className={classes.root}>
+                <div>
                 <Typography variant="display3"  noWrap>
                     Welcome to the classroom !
                 </Typography>
@@ -41,7 +40,8 @@ class Content extends React.Component {
                 <Typography variant="caption" gutterBottom noWrap>
                     Copyright © 2019 Overcoded All rights reserved
                 </Typography>
-            </main>
+                </div>
+            </div>
         )
     }
 }
