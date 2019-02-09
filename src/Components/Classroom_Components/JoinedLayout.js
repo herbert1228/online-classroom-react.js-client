@@ -4,6 +4,7 @@ import {Rnd} from 'react-rnd'
 import UserCard from '../Content_Components/UserCard'
 import UserCardSmall from '../Content_Components/UserCardSmall'
 import ClassMenu from '../Classroom_Components/ClassMenu'
+import Drawer from '../Classroom_Components/Drawer'
 import { withStyles } from '@material-ui/core/styles'
 
 const styles = theme => ({
@@ -100,6 +101,14 @@ class JoinedLayout extends Component {
                             position
                         }})}>
                     <UserCard {...other} user={this.props.self} />
+                </Rnd>
+               
+                <Rnd
+                    default={{
+                        x: 0,
+                        y: 0
+                    }}> 
+                    <Drawer {...other} />
                 </Rnd>
             </div>
         )
