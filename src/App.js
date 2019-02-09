@@ -9,7 +9,7 @@ import './css/App.css'
 import Login from './Login'
 import { connect } from 'react-redux'
 import {store} from './index'
-import { connection as conn } from './interface/connection'
+// import { connection as conn } from './interface/connection'
 import {drawerWidth} from './Components/index'
 
 const styles = theme => ({

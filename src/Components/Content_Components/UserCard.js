@@ -35,6 +35,9 @@ class UserCard extends React.Component {
         const {classes, ...other} = this.props;
         return (
             <Rnd 
+                style={{zIndex: this.props.zIndex}} 
+                onClick={() => this.props.bringTop()}
+                onDragStart={() => this.props.bringTop()}
                 lockAspectRatio={true}
                 dragHandleClassName={
                     document.getElementById(`draggable${this.props.user}`)?

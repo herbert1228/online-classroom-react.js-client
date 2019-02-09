@@ -1,62 +1,50 @@
 import React, { Component } from 'react'
-import { Grid, AppBar, Toolbar, Typography } from '@material-ui/core'
-import {Rnd} from 'react-rnd'
+import { AppBar, Toolbar, Button } from '@material-ui/core'
 import UserCard from '../Content_Components/UserCard'
-import UserCardSmall from '../Content_Components/UserCardSmall'
 import ClassMenu from '../Classroom_Components/ClassMenu'
 import { withStyles } from '@material-ui/core/styles'
+import ParticipantList from './ParticipantList';
 
-const styles = theme => ({
-    grid_item: {
-        marginBottom: 50,
-    },
-    participantList : {
-        padding: 20,
-        backgroundColor: "rgba(15,25,30,0.15)",
-        borderRadius: 25
-    }
-})
+const styles = theme => ({})
 
 class JoinedLayout extends Component {
+    state = {
+        zSelf: 0, zTeacher: 0, zPList: 0
+    }
+    bringTop(target) {
+        const tmpStateObj = {}
+        tmpStateObj[target] = Math.max(...Object.values(this.state)) + 1
+        this.setState(tmpStateObj)
+    }
     render() {
+        console.log(Object.keys(this.state))
         const { classes, ...other } = this.props
         return (
             <div>
                 <AppBar position="static" color="default">
                     <Toolbar variant="dense">
-                        <Typography variant="h6">{this.props.joined.class_name}</Typography>
                         <ClassMenu {...other} />
+                        {Object.keys(this.state).map((key) => (
+                            <Button onClick={()=>this.bringTop(key)}>
+                                {key.substr(1)}
+                            </Button>
+                        ))}
                     </Toolbar>
                 </AppBar>
-                <Rnd default={{y: 50, x: 0}} enableResizing={false}>
-                    <Grid
-                        container
-                        direction="column"
-                        justify="flex-start"
-                        alignItems="flex-start"
-                        className={classes.participantList}
-                    >
-                        <Grid key={"Member List"} item className={classes.grid_item}>
-                            Participants: 
-                        </Grid>
-                        {(this.props.session_user != null) &&
-                            this.props.session_user.map(user => (
-                                (user !== this.props.self) &&
-                                <Grid key={user} item className={classes.grid_item}>
-                                    <UserCardSmall {...other} user={user} />
-                                </Grid>
-                            ))}
-                    </Grid>
-                </Rnd>
-                <UserCard 
+                <ParticipantList bringTop={() => this.bringTop('zPList')} zIndex={this.state.zPList}/>
+                <UserCard
+                    bringTop={() => this.bringTop('zTeacher')}
                     key={"Teacher"} 
                     {...other} 
                     user={"Teacher"}
-                    position={{x: 200, y: 100}} />                    
+                    position={{x: 200, y: 100}} 
+                    zIndex={this.state.zTeacher}/>                    
                 <UserCard 
+                    bringTop={() => this.bringTop('zSelf')}
                     position={{x: 800, y: 100}}
                     key={this.props.self} {...other} 
-                    user={this.props.self} />
+                    user={this.props.self} 
+                    zIndex={this.state.zSelf}/>
             </div>
         )
     }

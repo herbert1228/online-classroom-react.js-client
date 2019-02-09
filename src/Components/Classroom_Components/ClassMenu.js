@@ -33,7 +33,7 @@ class ClassMenu extends React.Component {
 
     render() {
         const { anchorEl } = this.state;
-        const { classes } = this.props;
+        // const { classes } = this.props;
 
         return (
             <div>
