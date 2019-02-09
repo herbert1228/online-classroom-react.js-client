@@ -1,11 +1,11 @@
 import React from 'react';
-import {Dialog, DialogContent, DialogContentText, DialogTitle, withStyles} from "@material-ui/core";
+import {Dialog, DialogContent, DialogContentText, DialogTitle, withStyles, Button, DialogActions} from "@material-ui/core";
 
 const styles = theme => ({
     dialog: {
-        width: '50%',
-        height: '80%',
-        maxWidth: '80%',
+        width: '70%',
+        height: '90%',
+        maxWidth: '90%',
         // maxHeight: 435
     }
 });
@@ -17,19 +17,21 @@ class Popover extends React.Component {
         return (
             <Dialog
                 open={open}
-                onClose={() => this.props.onClose()}
+                onClose={() => this.props.onClose? this.props.onClose() : null}
                 aria-labelledby="form-dialog-title"
                 classes={{paper: classes.dialog}}
             >
                 <DialogTitle id="form-dialog-title">{title}</DialogTitle>
-                <DialogContent>
+                {/*<DialogContent>
                     <DialogContentText>
                         {children}
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button color="primary">Create</Button>
-                </DialogActions>
+                <Button color="primary">Save</Button>
+                <Button color="primary">Cancel</Button>
+                </DialogActions> */}
+                {children}
             </Dialog>
         )
     }

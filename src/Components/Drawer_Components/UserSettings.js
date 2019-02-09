@@ -4,6 +4,7 @@ import {store} from '../../index'
 import {withCookies} from 'react-cookie'
 import {compose} from 'redux'
 import {Avatar, withStyles, List, ListItem, ListItemText, Menu, MenuItem} from '@material-ui/core'
+import ChangeUserInfo from '../Locations/PopupFunction/ChangeUserInfo'
 
 const styles = theme => ({
     avatar: {
@@ -61,6 +62,7 @@ class UserSettings extends Component {
                 onClose={this.handleClose}
                 style={{marginLeft: 150}}
                 >
+                    <ChangeUserInfo {...this.props}/>
                     <MenuItem onClick={this.handleLogout}>
                         Logout
                     </MenuItem>

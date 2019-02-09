@@ -2,14 +2,15 @@ import React, { Component } from 'react'
 import { AppBar, Toolbar, Button } from '@material-ui/core'
 import UserCard from '../Content_Components/UserCard'
 import ClassMenu from '../Classroom_Components/ClassMenu'
+import Drawer from '../Classroom_Components/Drawer'
 import { withStyles } from '@material-ui/core/styles'
-import ParticipantList from './ParticipantList';
+import ParticipantList from './ParticipantList'
 
 const styles = theme => ({})
 
 class JoinedLayout extends Component {
     state = {
-        zSelf: 0, zTeacher: 0, zPList: 0
+        zSelf: 2, zTeacher: 2, zPList: 1, zDrawer: 0
     }
     bringTop(target) {
         const tmpStateObj = {}
@@ -34,17 +35,23 @@ class JoinedLayout extends Component {
                 <ParticipantList bringTop={() => this.bringTop('zPList')} zIndex={this.state.zPList}/>
                 <UserCard
                     bringTop={() => this.bringTop('zTeacher')}
+                    position={{x: 200, y: 100}} 
+                    zIndex={this.state.zTeacher}
                     key={"Teacher"} 
                     {...other} 
-                    user={"Teacher"}
-                    position={{x: 200, y: 100}} 
-                    zIndex={this.state.zTeacher}/>                    
+                    user={"Teacher"}/>                    
                 <UserCard 
                     bringTop={() => this.bringTop('zSelf')}
                     position={{x: 800, y: 100}}
-                    key={this.props.self} {...other} 
-                    user={this.props.self} 
-                    zIndex={this.state.zSelf}/>
+                    zIndex={this.state.zSelf}      
+                    key={this.props.self} 
+                    {...other} 
+                    user={this.props.self} />  
+                <Drawer 
+                    bringTop={() => this.bringTop('zDrawer')}
+                    position={{x: 500, y: 350}}
+                    zIndex={this.state.zDrawer}
+                    {...other} />
             </div>
         )
     }
