@@ -169,19 +169,16 @@ class LocalStream extends React.Component {
 
     render() {
         return ( <div>
-            <video width = "460"
-            height = "300"
+            <video width = '100%'
+            height = '100%'
             autoPlay muted playsInline ref = {
                 video => {
                     this.localVideo = video
                 }
             } > </video> { /* <Button onClick={this.start} disabled={this.state.started}>Start</Button> */ } 
-            <Button onClick = {
-                this.call
-            }
-            disabled = {
-                this.state.called
-            } > Call </Button> 
+            <Button 
+            onClick = {this.call}
+            disabled = {!this.state.started || this.state.called} > Call </Button> 
             </div>
         )
     }

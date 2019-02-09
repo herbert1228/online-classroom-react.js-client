@@ -7,9 +7,6 @@ import ClassMenu from '../Classroom_Components/ClassMenu'
 import { withStyles } from '@material-ui/core/styles'
 
 const styles = theme => ({
-    root: {
-        position: "relative",
-    },
     grid_item: {
         marginBottom: 50,
     },
@@ -21,86 +18,45 @@ const styles = theme => ({
 })
 
 class JoinedLayout extends Component {
-    state = {
-        rndSelf: {
-            size: {width: 460, height: 633},
-            position: {x: 800, y: 100}
-        },
-        rndTeacher: {
-            size: {width: 460, height: 633},
-            position: {x: 200, y: 100}
-        }
-    }
     render() {
         const { classes, ...other } = this.props
         return (
-            <div className={classes.root}>
+            <div>
                 <AppBar position="static" color="default">
                     <Toolbar variant="dense">
                         <Typography variant="h6">{this.props.joined.class_name}</Typography>
                         <ClassMenu {...other} />
                     </Toolbar>
                 </AppBar>
-                <Grid
-                    container
-                    direction="row"
-                    justify="flex-start"
-                    alignItems="flex-start"
-                    spacing={40}
-                >
-                    <Grid item>
-                        <Grid
-                            container
-                            direction="column"
-                            justify="center"
-                            alignItems="flex-start"
-                            className={classes.participantList}
-                        >
-                            <Grid key={"Member List"} item className={classes.grid_item}>
-                                Participants: 
-                            </Grid>
-                            {(this.props.session_user != null) &&
-                                this.props.session_user.map(user => (
-                                    (user !== this.props.self) &&
-                                    <Grid key={user} item className={classes.grid_item}>
-                                        <UserCardSmall {...other} user={user} />
-                                    </Grid>
-                                ))}
+                <Rnd default={{y: 50, x: 0}} enableResizing={false}>
+                    <Grid
+                        container
+                        direction="column"
+                        justify="flex-start"
+                        alignItems="flex-start"
+                        className={classes.participantList}
+                    >
+                        <Grid key={"Member List"} item className={classes.grid_item}>
+                            Participants: 
                         </Grid>
+                        {(this.props.session_user != null) &&
+                            this.props.session_user.map(user => (
+                                (user !== this.props.self) &&
+                                <Grid key={user} item className={classes.grid_item}>
+                                    <UserCardSmall {...other} user={user} />
+                                </Grid>
+                            ))}
                     </Grid>
-                </Grid>
-                <Rnd key={"Teacher"}
-                    size={this.state.rndTeacher.size}
-                    position={this.state.rndTeacher.position}
-                    onDragStop={(e, d) => this.setState({
-                        rndTeacher: {
-                            ...this.state.rndTeacher, 
-                            position: {x: d.x, y: d.y}
-                        }})}
-                    onResize={(e, direction, ref, delta, position) => this.setState({
-                        rndTeacher: {
-                            ...this.state.rndTeacher, 
-                            size: {width: ref.style.width, height: ref.style.height},
-                            position
-                        }})}>
-                    <UserCard {...other} user={"Teacher"} />                    
                 </Rnd>
-                <Rnd key={this.props.self} 
-                    size={this.state.rndSelf.size}
-                    position={this.state.rndSelf.position}
-                    onDragStop={(e, d)=>this.setState({
-                        rndSelf: {
-                            ...this.state.rndSelf, 
-                            position: {x: d.x, y: d.y}
-                        }})}
-                    onResize={(e, direction, ref, delta, position) => this.setState({
-                        rndSelf: {
-                            ...this.state.rndSelf, 
-                            size: {width: ref.style.width, height: ref.style.height},
-                            position
-                        }})}>
-                    <UserCard {...other} user={this.props.self} />
-                </Rnd>
+                <UserCard 
+                    key={"Teacher"} 
+                    {...other} 
+                    user={"Teacher"}
+                    position={{x: 200, y: 100}} />                    
+                <UserCard 
+                    position={{x: 800, y: 100}}
+                    key={this.props.self} {...other} 
+                    user={this.props.self} />
             </div>
         )
     }

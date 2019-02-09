@@ -126,10 +126,10 @@ class RemoteStream extends React.Component {
         } = this.props
         return ( <div>
             <video width = {
-                small ? "92" : "460"
+                small ? "100%" : "460"
             }
             height = {
-                small ? "60" : "300"
+                small ? "100%" : "300"
             }
             autoPlay playsInline ref = {
                 video => {
