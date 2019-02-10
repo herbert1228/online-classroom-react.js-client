@@ -1,6 +1,6 @@
 import React, {Fragment} from 'react'
 import {compose} from 'redux'
-import {Content, Classroom, ClassList, Notebooks, Mailbox, NotificationBar} from './Components'
+import {Content, Classroom, Notebooks, Mailbox, NotificationBar} from './Components'
 import PropTypes, {instanceOf} from 'prop-types'
 import {Cookies, withCookies} from 'react-cookie'
 import {withStyles} from '@material-ui/core'
@@ -11,6 +11,8 @@ import { connect } from 'react-redux'
 import {store} from './index'
 // import { connection as conn } from './interface/connection'
 import {drawerWidth} from './Components/index'
+import ClassListStudent from './Components/Locations/ClassListStudent';
+import ClassListTeacher from './Components/Locations/ClassListTeacher';
 
 const styles = theme => ({
     root: {
@@ -92,7 +94,9 @@ class App extends React.Component {
                         <div className={classes.content}>
                             {this.props.location === 0 &&<Content {...this.state} {...others} handleNotification={this.handleNotification}/>}
                             {this.props.location === 1 &&<Classroom {...this.state} {...others} handleNotification={this.handleNotification} changeScene={this.changeScene}/>}
-                            {this.props.location === 2 &&<ClassList {...this.state} {...others} handleNotification={this.handleNotification} changeScene={this.changeScene}/>}
+                            {/* {this.props.location === 2 &&<ClassList {...this.state} {...others} handleNotification={this.handleNotification} changeScene={this.changeScene}/>} */}
+                            {this.props.location === 2.1 &&<ClassListTeacher {...this.state} {...others} handleNotification={this.handleNotification} changeScene={this.changeScene}/>}
+                            {this.props.location === 2.2 &&<ClassListStudent {...this.state} {...others} handleNotification={this.handleNotification} changeScene={this.changeScene}/>}
                             {this.props.location === 3 &&<Notebooks {...this.state} {...others} handleNotification={this.handleNotification}/>}
                             {this.props.location === 4 &&<Mailbox {...this.state} {...others} handleNotification={this.handleNotification}/>}
                         </div>
@@ -121,7 +125,7 @@ function mapStateToProps(state) {
         location: state.location,
         self: state.self,
         joined: state.joined,
-        peerConn: state.peerConn
+        peerConn: state.peerConn,
     }
 }
 

@@ -22,10 +22,10 @@ const theme = createMuiTheme({
 
 const initialState = {
     createdClass: [],
-    enrolledClass: [],
+    enrolledClass: [], // class_name, owner, online and offline students number of every class
     startedClass: [],
-    session_user: [],
-    peerConn: [],
+    session_user: [], // user currently in the same class
+    peerConn: [],   // session_user who is ready for peer connection (as webcam turned on)
     location: 0,
     self: null,
     joined: null,

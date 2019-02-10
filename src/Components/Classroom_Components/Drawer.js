@@ -54,13 +54,12 @@ class Drawer extends React.Component {
 // }
 
     render() {
-        const {self} = this.props;
-        const {classes, ...other} = this.props;
-        const { dense, secondary } = this.state;
+        const {classes} = this.props;
+        const { dense } = this.state;
         return (
             <Rnd 
                 style={{zIndex: this.props.zIndex}} 
-                onClick={() => this.props.bringTop()}
+                onMouseDown={() => this.props.bringTop()}
                 onDragStart={() => this.props.bringTop()}
                 default={{
                     x: this.props.position.x, 
@@ -75,7 +74,7 @@ class Drawer extends React.Component {
                         container 
                         direction="column"
                         justify="center"
-                        alignItems="start"
+                        alignItems="flex-start"
                     >
                         
                         {/* {this.state.files.map(file => 
@@ -104,7 +103,7 @@ class Drawer extends React.Component {
                             <div className={classes.demo}>
                             <List dense={dense} className={classes.infolist}>
                                 {this.state.files.map(file => 
-                                <ListItem>
+                                <ListItem key={file.name}>
                                     <ListItemAvatar>
                                     <Avatar>
                                         <FolderIcon />

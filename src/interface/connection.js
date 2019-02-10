@@ -2,8 +2,8 @@ let websocket
 const TIMEOUT = 5000
 const callsInProgress = {}
 
-// const url = `ws://${window.location.hostname}:8500/`
-const url = "ws://overcoded.tk:8500"
+const url = `ws://${window.location.hostname}:8500/`
+// const url = "ws://overcoded.tk:8500"
 
 function genid() {
     // https://stackoverflow.com/a/2117523

@@ -18,7 +18,6 @@ class JoinedLayout extends Component {
         this.setState(tmpStateObj)
     }
     render() {
-        console.log(Object.keys(this.state))
         const { classes, ...other } = this.props
         return (
             <div>
@@ -26,13 +25,16 @@ class JoinedLayout extends Component {
                     <Toolbar variant="dense">
                         <ClassMenu {...other} />
                         {Object.keys(this.state).map((key) => (
-                            <Button onClick={()=>this.bringTop(key)}>
+                            <Button onClick={()=>this.bringTop(key)} key={key}>
                                 {key.substr(1)}
                             </Button>
                         ))}
                     </Toolbar>
                 </AppBar>
-                <ParticipantList bringTop={() => this.bringTop('zPList')} zIndex={this.state.zPList}/>
+                <ParticipantList 
+                    {...other}
+                    bringTop={() => this.bringTop('zPList')} 
+                    zIndex={this.state.zPList}/>
                 <UserCard
                     bringTop={() => this.bringTop('zTeacher')}
                     position={{x: 200, y: 100}} 

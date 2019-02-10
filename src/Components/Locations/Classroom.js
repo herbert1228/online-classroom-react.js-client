@@ -29,7 +29,7 @@ class Classroom extends React.Component {
                         </Typography>
                         <Button 
                             className={classes.btn_notJoinged}
-                            onClick={() => this.props.changeScene(2)}
+                            onClick={() => this.props.changeScene(2.2)}
                             size="small">
                         Select a classroom here!</Button>
                     </div>

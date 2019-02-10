@@ -56,7 +56,7 @@ class DrawerLeft extends React.Component {
     }
     
     render() {
-        const {classes, open} = this.props //, ...others
+        const {classes, open, ...other} = this.props //, ...others
 
         return (
             <Drawer
@@ -66,7 +66,7 @@ class DrawerLeft extends React.Component {
                 }}
                 open={open}
             >
-                <UserSettings {...this.props}/>
+                <UserSettings {...other}/>
                 <Divider/>
                 <ListItems1 changeScene={this.props.changeScene} location={this.props.location}/>
                 <Divider/>

@@ -21,7 +21,7 @@ class ParticipantList extends Component {
         return (
             <Rnd 
                 style={{zIndex: this.props.zIndex}} 
-                onClick={() => this.props.bringTop()}
+                onMouseDown={() => this.props.bringTop()}
                 onDragStart={() => this.props.bringTop()}
                 default={{y: 50, x: 0}} enableResizing={false}>
                 <Grid
@@ -34,7 +34,7 @@ class ParticipantList extends Component {
                     <Grid key={"Member List"} item className={classes.grid_item}>
                         Participants: 
                     </Grid>
-                    {(this.props.session_user != null) &&
+                    {this.props.session_user &&
                         this.props.session_user.map(user => (
                             (user !== this.props.self) &&
                             <Grid key={user} item className={classes.grid_item}>

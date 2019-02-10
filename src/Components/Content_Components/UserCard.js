@@ -36,7 +36,7 @@ class UserCard extends React.Component {
         return (
             <Rnd 
                 style={{zIndex: this.props.zIndex}} 
-                onClick={() => this.props.bringTop()}
+                onMouseDown={() => this.props.bringTop()}
                 onDragStart={() => this.props.bringTop()}
                 lockAspectRatio={true}
                 dragHandleClassName={

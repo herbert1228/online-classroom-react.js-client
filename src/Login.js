@@ -60,7 +60,8 @@ class Login extends React.Component {
             this.setState({loginName: cookies.get("name"), loginPassword: cookies.get("password")})
             this.handleLogin()
             if (cookies.get("location")) {
-                store.dispatch({type: "changeLocation", target: parseInt(cookies.get("location"), 10)})
+                // TODO parseInt in production
+                store.dispatch({type: "changeLocation", target: parseFloat(cookies.get("location"), 10)})
             }
         } else {
             this.setState({connected: true})

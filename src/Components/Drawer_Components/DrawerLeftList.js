@@ -26,11 +26,23 @@ export class ListItems1 extends React.Component {
                     </ListItemIcon>
                     <ListItemText primary="Classroom"/>
                 </ListItem>
-                <ListItem button onClick={() => this.props.changeScene(2)} disabled={this.props.location === 2}>
+                {/* <ListItem button onClick={() => this.props.changeScene(2)} disabled={this.props.location === 2}>
                     <ListItemIcon>
                         <ListIcon/>
                     </ListItemIcon>
                     <ListItemText primary="Class List"/>
+                </ListItem> */}
+                <ListItem button onClick={() => this.props.changeScene(2.1)} disabled={this.props.location === 2.1}>
+                    <ListItemIcon>
+                        <ListIcon/>
+                    </ListItemIcon>
+                    <ListItemText primary="Class List (T)"/>
+                </ListItem>
+                <ListItem button onClick={() => this.props.changeScene(2.2)} disabled={this.props.location === 2.2}>
+                    <ListItemIcon>
+                        <ListIcon/>
+                    </ListItemIcon>
+                    <ListItemText primary="Class List (S)"/>
                 </ListItem>
                 <ListItem button onClick={() => this.props.changeScene(3)} disabled={this.props.location === 3}>
                     <ListItemIcon>
