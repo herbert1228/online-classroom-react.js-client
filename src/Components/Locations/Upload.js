@@ -10,6 +10,7 @@ import { withCookies } from 'react-cookie'
 import '../../css/App.css'
 import Dropzone from 'react-dropzone'
 import classNames from 'classnames'
+import Link from 'react-router-dom/Link'
 // import axios from 'axios'
 
 const styles = theme => ({
@@ -114,6 +115,7 @@ class Upload extends React.Component {
         const { classes } = this.props
         return (
             <div>
+                <Link to="/">Back to Classroom</Link>
                 <Grid container 
                     direction="column"
                     justify="center"

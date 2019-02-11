@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types'
-import {Divider, Drawer, withStyles, List} from '@material-ui/core'
-import {ListItems1, listItems2} from './Drawer_Components/DrawerLeftList';
+import {Divider, Drawer, withStyles} from '@material-ui/core'
+import {ListItems} from './Drawer_Components/DrawerLeftList';
 import classNames from 'classnames'
 import {drawerWidth} from "./index";
 import { connection as conn } from '../interface/connection'
@@ -68,9 +68,9 @@ class DrawerLeft extends React.Component {
             >
                 <UserSettings {...other}/>
                 <Divider/>
-                <ListItems1 changeScene={this.props.changeScene} location={this.props.location}/>
-                <Divider/>
-                <List>{listItems2}</List>
+                <ListItems 
+                    changeScene={this.props.changeScene} 
+                    location={this.props.location}/>
             </Drawer>
         )
     }
