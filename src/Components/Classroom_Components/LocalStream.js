@@ -2,6 +2,7 @@ import React from 'react'
 import {withStyles} from '@material-ui/core/styles'
 import {Button} from '@material-ui/core'
 import {signalingChannel as channel, connection as conn, checkTURNServer} from '../../interface/connection'
+import poster from '../../css/ask_camera_permission.jpg'
 
 const styles = theme => ({})
 
@@ -169,16 +170,17 @@ class LocalStream extends React.Component {
 
     render() {
         return ( <div>
-            <video width = '100%'
-            height = '100%'
-            autoPlay muted playsInline ref = {
-                video => {
-                    this.localVideo = video
-                }
-            } > </video> { /* <Button onClick={this.start} disabled={this.state.started}>Start</Button> */ } 
+            <video poster={poster}
+                width = '100%'
+                height = '100%'
+                autoPlay muted playsInline ref = {
+                    video => {this.localVideo = video
+                }}> </video> { /* <Button onClick={this.start} disabled={this.state.started}>Start</Button> */ } 
             <Button 
-            onClick = {this.call}
-            disabled = {!this.state.started || this.state.called} > Call </Button> 
+                onClick = {this.call}
+                disabled = {!this.state.started || this.state.called} > 
+                Call
+            </Button> 
             </div>
         )
     }

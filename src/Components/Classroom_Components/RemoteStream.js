@@ -128,6 +128,7 @@ class RemoteStream extends React.Component {
             <video width = {
                 small ? "100%" : "460"
             }
+            poster="https://d2v9y0dukr6mq2.cloudfront.net/video/thumbnail/P3IPDsA/loading-bar-scribble-animation-doodle-cartoon-4k_sdfqzybaux_thumbnail-full05.png"
             height = {
                 small ? "100%" : "300"
             }

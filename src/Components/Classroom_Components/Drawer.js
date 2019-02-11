@@ -61,6 +61,8 @@ class Drawer extends React.Component {
                 style={{zIndex: this.props.zIndex}} 
                 onMouseDown={() => this.props.bringTop()}
                 onDragStart={() => this.props.bringTop()}
+                bounds="window"
+                enableResizing={false}
                 default={{
                     x: this.props.position.x, 
                     y: this.props.position.y, 

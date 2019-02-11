@@ -17,7 +17,7 @@ const styles = theme => ({
     }
 })
 
-class UserCard extends React.Component {
+class Whiteboard extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -26,12 +26,7 @@ class UserCard extends React.Component {
         }
     }
 
-    disableWebcam() {
-        this.setState({camOpen: false})
-    }
-
     render() {
-        const {user} = this.props;
         const {classes, ...other} = this.props;
         return (
             <Rnd 
@@ -43,8 +38,8 @@ class UserCard extends React.Component {
                 bounds="window"
                 minWidth={200}
                 dragHandleClassName={
-                    document.getElementById(`draggable${this.props.user}`)?
-                    document.getElementById(`draggable${this.props.user}`).className : null
+                    document.getElementById(`draggableWhiteboard${this.props.user}`)?
+                    document.getElementById(`draggableWhiteboard${this.props.user}`).className : null
                 }
                 default={{
                     x: this.props.position.x, 
@@ -53,42 +48,18 @@ class UserCard extends React.Component {
                 }}>
                 <Card className={classes.card}>
                     <CardHeader //this height is 74px
-                        id={`draggable${this.props.user}`}
+                        title="Whiteboard"
+                        subheader="Teacher"
+                        id={`draggableWhiteboard${this.props.user}`}
                         style={{height: 50}}
-                        avatar={
-                            <Avatar aria-label="user whiteboard" className={classes.avatar}>
-                                {user.substring(0, 3)}
-                            </Avatar>
-                        }
-                        action={
-                            <UserCardMenu disableWebcam={this.disableWebcam.bind(this)}/>
-                        }
-                        title={user}
                         // subheader={this.state.drawRight}
                     />
                     <Divider/>
-                    <Webcam {...other} camOpen={this.state.camOpen} />
+                    <canvas></canvas>
                 </Card>
             </Rnd>
         )
     }
 }
 
-function Webcam(props) {
-    const {self, user} = props
-    if (user === self) {
-        return (
-            <LocalStream
-                {...props}
-            />
-        )
-    } else {
-        return (
-            <RemoteStream
-                {...props}
-            />
-        )
-    }
-}
-
-export default withStyles(styles)(UserCard);
+export default withStyles(styles)(Whiteboard);
