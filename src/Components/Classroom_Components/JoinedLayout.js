@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import { AppBar, Toolbar, Button } from '@material-ui/core'
 import UserCard from '../Content_Components/UserCard'
 import ClassMenu from '../Classroom_Components/ClassMenu'
@@ -9,6 +9,7 @@ import Whiteboard from './Whiteboard';
 
 const styles = theme => ({
     container: {
+        display: 'relative',
         height: '900',
         weight: '900',
     }
@@ -26,20 +27,18 @@ class JoinedLayout extends Component {
     render() {
         const { classes, ...other } = this.props
         return (
-            <div>
-                <div>
-                    <AppBar position="static" color="default">
-                        <Toolbar variant="dense">
-                            <ClassMenu {...other} />
-                            {Object.keys(this.state).map((key) => (
-                                <Button onClick={()=>this.bringTop(key)} key={key}>
-                                    {key.substr(1)}
-                                </Button>
-                            ))}
-                        </Toolbar>
-                    </AppBar>
-                </div>
-                <div>
+            <Fragment>
+                <AppBar position="static" color="default">
+                    <Toolbar variant="dense">
+                        <ClassMenu {...other} />
+                        {Object.keys(this.state).map((key) => (
+                            <Button onClick={()=>this.bringTop(key)} key={key}>
+                                {key.substr(1)}
+                            </Button>
+                        ))}
+                    </Toolbar>
+                </AppBar>
+                <div className={classes.container}>
                     <ParticipantList 
                         {...other}
                         bringTop={() => this.bringTop('zPList')} 
@@ -70,7 +69,7 @@ class JoinedLayout extends Component {
                         zIndex={this.state.zDrawer}
                         {...other} />
                 </div>
-            </div>
+            </Fragment>
         )
     }
 }

@@ -27,6 +27,7 @@ const styles = theme => ({
         marginLeft: drawerWidth,
         width: `calc(100% - ${drawerWidth}px)`,
         minWidth: 0, // So the Typography noWrap works
+        display: 'relative'
     }
 })
 
@@ -78,10 +79,10 @@ class App extends React.Component {
         return (
             <Fragment>
                 <NotificationBar
-                            message={this.state.notificationMessage}
-                            open={this.state.showNotification}
-                            handleClose={this.handleDismissNotification.bind(this)}
-                            handleExited={this.processQueue}/>
+                    message={this.state.notificationMessage}
+                    open={this.state.showNotification}
+                    handleClose={this.handleDismissNotification.bind(this)}
+                    handleExited={this.processQueue}/>
                 {(this.props.self) &&
                     <div className={classes.root}>
                         <DrawerLeft

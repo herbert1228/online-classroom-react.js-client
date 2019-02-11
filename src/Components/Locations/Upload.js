@@ -1,9 +1,12 @@
 import React from 'react'
 import { compose } from 'redux'
 import { NotificationBar } from '../../Components'
-// import { instanceOf } from 'prop-types'
+import { TextField, Grid, withStyles } from "@material-ui/core"
+import IconButton from '@material-ui/core/IconButton';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import Visibility from '@material-ui/icons/Visibility';
+import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { withCookies } from 'react-cookie'
-import { withStyles } from '@material-ui/core'
 import '../../css/App.css'
 import Dropzone from 'react-dropzone'
 import classNames from 'classnames'
@@ -11,34 +14,40 @@ import classNames from 'classnames'
 
 const styles = theme => ({
     dropzone: {
-        // height: '30vh',
-        // width: '50vw',
         position: 'absolute',
-        top: '50%',
+        top: '65%',
+        left: '50%',
+        transform: 'translateX(-50%) translateY(-50%)'
+    },
+    form: {
+        position: 'absolute',
+        top: '40%',
         left: '50%',
         transform: 'translateX(-50%) translateY(-50%)'
     }
 })
 
-const url = `http://${window.location.hostname}:8600/image`
+const url = `http://${window.location.hostname}:8600/upload`
 // const url = "ws://overcoded.tk:8600"
 
 class Upload extends React.Component {
-    constructor(prop) {
-        super(prop);
-        this.state = {
-            showNotification: false,
-            notificationMessage: "",
-            connected: false
-            // files: []
-        }
+    state = {
+        showNotification: false,
+        notificationMessage: "",
+        connected: false,
+        showPassword: false,
+        username: "",
+        password: ""
+    }
+
+    componentDidMount() {
+        const {cookies} = this.props
+        if (cookies.get("name")) {
+            this.setState({username: cookies.get("name"), password: cookies.get("password")})
+        } 
     }
 
     notificationQueue = []
-
-    handleDrawer = () => {
-        this.setState({ open: !this.state.open });
-    }
 
     handleNotification = (message) => {
         this.notificationQueue.push(message)
@@ -65,35 +74,89 @@ class Upload extends React.Component {
         this.setState({ showNotification: false });
     }
 
+    handleName = e => {
+        this.setState({ username: e.target.value });
+    }
+
+    handlePassword = (e) => {
+        this.setState({password: e.target.value});
+    }
+
+    keyPress = (e) => {
+        if (e.keyCode === 13) {
+            e.preventDefault()
+        }
+    }
+
+    handleClickShowPassword = () => {
+        this.setState(state => ({ showPassword: !state.showPassword }));
+    }
+
     handleDrop = (acceptedFiles, rejectedFiles) => {
         console.log({ acceptedFiles, rejectedFiles })
         if (acceptedFiles.length > 0){
             let formdata = new FormData()
-            formdata.append("data", acceptedFiles[0], "upload_file")
+            formdata.append("data", acceptedFiles[0], acceptedFiles[0].name) //3rd arg refer to filename
             formdata.append("timestamp", (new Date()).toISOString())
-            formdata.append("type", "image")
-            // fetch(url, {
-            //     method: "POST",
-            //     mode: "cors",
-            //     body: formdata
-            // })
-            // .then(res => console.log(res))
-            // .catch(err => console.error("Error:", err))
+            formdata.append("username", this.state.username)
+            formdata.append("password", this.state.password)
             fetch(url, {
-                headers : {
-                  "Content-Type": "application/json",
-                  "Accept": "application/json"
-                }
+                method: "POST",
+                body: formdata
             })
-            .then((response) => response.json())
-            .then((messages) => {console.log("messages");});
+            .then(response => response.text())
+            .then(data => this.handleNotification(data))
+            .catch(e => {this.handleNotification(`${e}`)})
         }
     }
 
     render() {
         const { classes } = this.props
         return (
-            <div className={classes.root}>
+            <div>
+                <Grid container 
+                    direction="column"
+                    justify="center"
+                    alignItems="center"
+                    className={classes.form}
+                    spacing={16} // can be 8, 16, 24, 32 or 40dp wide
+                    >
+                    <Grid item> 
+                        <TextField
+                            label="Username"
+                            value={this.state.username}
+                            onChange={this.handleName}
+                            onKeyDown={this.keyPress}
+                            autoFocus={true}
+                            variant="filled"
+                            style={{width: 160}}
+                        />
+                    </Grid>
+
+                    <Grid item>
+                        <TextField
+                            variant="filled"
+                            type={this.state.showPassword ? 'text' : 'password'}
+                            label="Password"
+                            value={this.state.password}
+                            onChange={this.handlePassword.bind(this)}
+                            onKeyDown={this.keyPress}
+                            style={{width: 160}}
+                            InputProps={{
+                                endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                    aria-label="Toggle password visibility"
+                                    onClick={this.handleClickShowPassword}
+                                    >
+                                    {this.state.showPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                                ),
+                            }}
+                        />
+                    </Grid>
+                </Grid>
                 <div className={classes.dropzone}>
                     <Dropzone onDrop={this.handleDrop}>
                         {({ getRootProps, getInputProps, isDragActive }) => {
@@ -105,8 +168,8 @@ class Upload extends React.Component {
                                     <input {...getInputProps()} />
                                     {
                                         isDragActive ?
-                                            <p>Drop files here...</p> :
-                                            <p>Drop files here, or click to select files to upload</p>
+                                            <p>Drop files here... (50MB max)</p> :
+                                            <p>Drop files here, or click to select files to upload (50MB max)</p>
                                     }
                                 </div>
                             )
