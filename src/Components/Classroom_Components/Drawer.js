@@ -12,6 +12,7 @@ import IconButton from '@material-ui/core/IconButton';
 import FolderIcon from '@material-ui/icons/Folder';
 import DeleteIcon from '@material-ui/icons/Delete';
 import {Rnd} from 'react-rnd'
+import {connection as conn} from '../../interface/connection'
 
 const styles = theme => ({
     card: {
@@ -46,12 +47,20 @@ const styles = theme => ({
 
 class Drawer extends React.Component {
     state = {
-        files: [{name: "file1.pdf", time: "4/2/2019 15:01"}, {name: "file2.jpg", time: "4/2/2019 15:30"}],
+        // files: [{name: "file1.pdf", time: "4/2/2019 15:01"}, {name: "file2.jpg", time: "4/2/2019 15:30"}],
+        files: [],
         dense: false,
     }
     
-// componentDidMount() {
-// }
+    async componentDidMount() {
+        const response = await conn.call("get_filenames_in_drawer")
+        if (response.result) this.setState({files: response.result})
+        conn.addListener('drawer_item_change', this.handleDrawerChange)
+    }
+
+    handleDrawerChange = e => {
+        this.setState({files: e.result})
+    }
 
     render() {
         const {classes} = this.props;
@@ -104,18 +113,18 @@ class Drawer extends React.Component {
                         <Grid item xs={12} md={6}>
                             <div className={classes.demo}>
                             <List dense={dense} className={classes.infolist}>
-                                {this.state.files.map(file => 
-                                <ListItem key={file.name}>
+                                {this.state.files.map(filename => 
+                                <ListItem key={filename.name}>
                                     <ListItemAvatar>
                                     <Avatar>
                                         <FolderIcon />
                                     </Avatar>
                                     </ListItemAvatar>
                                     <ListItemText 
-                                        primary={file.name}
+                                        primary={filename}
                                     />
                                     <ListItemText
-                                        primary={file.time}
+                                        primary={"some more info here"}
                                     />
                                     <ListItemSecondaryAction>
                                     <IconButton aria-label="Delete">
