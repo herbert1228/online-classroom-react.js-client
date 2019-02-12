@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { withStyles } from '@material-ui/core'
-import {Rnd} from 'react-rnd'
 import UserCardSmall from '../Content_Components/UserCardSmall'
 import { Grid } from '@material-ui/core'
+import RndContainer from './RndContainer';
 
 const styles = theme => ({
     grid_item: {
@@ -19,11 +19,7 @@ class ParticipantList extends Component {
     render() {
         const { classes, ...other } = this.props
         return (
-            <Rnd 
-                style={{zIndex: this.props.zIndex}} 
-                onMouseDown={() => this.props.bringTop()}
-                onDragStart={() => this.props.bringTop()}
-                default={this.props.position} enableResizing={false}>
+            <RndContainer {...other}>
                 <Grid
                     container
                     direction="column"
@@ -42,7 +38,7 @@ class ParticipantList extends Component {
                             </Grid>
                         ))}
                 </Grid>
-            </Rnd>
+            </RndContainer>
         )
     }
 }

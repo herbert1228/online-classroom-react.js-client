@@ -29,7 +29,7 @@ const styles = theme => ({
 })
 
 const url = `http://${window.location.hostname}:8600/upload`
-// const url = "ws://overcoded.tk:8600"
+// const url = "http://overcoded.tk:8600/upload"
 
 class Upload extends React.Component {
     state = {

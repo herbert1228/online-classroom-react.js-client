@@ -6,7 +6,6 @@ import LocalStream from '../Classroom_Components/LocalStream'
 import RemoteStream from '../Classroom_Components/RemoteStream'
 import UserCardMenu from '../Classroom_Components/UserCardMenu'
 import RndContainer from '../Classroom_Components/RndContainer'
-import {Rnd} from 'react-rnd'
 
 const styles = theme => ({
     card: {
@@ -33,22 +32,15 @@ class UserCard extends React.Component {
 
     render() {
         const {user} = this.props;
-        const {classes, id, ...other} = this.props;
+        const {classes, ...other} = this.props;
         return (
             <RndContainer
-                id={id}
-                size={{width: 460, height: 470}}
-                position={this.props.position}
-                zIndex= {this.props.zIndex}
-                bringTop={this.props.bringTop}
-                lockAspectRatio={4/3}
-                lockAspectRatioExtraHeight={72}
                 inputRef={this.props.inputRef}
+                {...other}
             >
                 <Card className={classes.card}>
                     <CardHeader //this height is 74px
-                        id={`draggable${id}`}
-                        style={{height: 50}}
+                        id={`draggable${this.props.id}`}
                         avatar={
                             <Avatar aria-label="user whiteboard" className={classes.avatar}>
                                 {user.substring(0, 3)}

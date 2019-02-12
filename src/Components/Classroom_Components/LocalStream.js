@@ -4,7 +4,18 @@ import {Button} from '@material-ui/core'
 import {signalingChannel as channel, connection as conn, checkTURNServer} from '../../interface/connection'
 import poster from '../../css/ask_camera_permission.jpg'
 
-const styles = theme => ({})
+const styles = theme => ({
+    button: {
+        position: 'absolute', 
+        left: '50%', 
+        top: '50%', 
+        height: 160,
+        width: 220,
+        backgroundColor: '#eee',
+        opacity: '80%',
+        transform: 'translateX(-50%) translateY(-50%)'
+    },
+})
 
 const offerOptions = {
     offerToReceiveAudio: 1,
@@ -169,18 +180,21 @@ class LocalStream extends React.Component {
     }
 
     render() {
-        return ( <div>
-            <video poster={poster}
-                width = '100%'
-                height = '100%'
-                autoPlay muted playsInline ref = {
-                    video => {this.localVideo = video
-                }}> </video> { /* <Button onClick={this.start} disabled={this.state.started}>Start</Button> */ } 
-            <Button 
-                onClick = {this.call}
-                disabled = {!this.state.started || this.state.called} > 
-                Call
-            </Button> 
+        return (
+            <div style={{position: 'relative'}}>
+                <video poster={poster}
+                    width = '100%'
+                    height = '100%'
+                    autoPlay muted playsInline ref = {
+                        video => {this.localVideo = video
+                    }}> </video> { /* <Button onClick={this.start} disabled={this.state.started}>Start</Button> */ } 
+                <Button 
+                    style={{visibility: (!this.state.started || this.state.called)? 'hidden' : 'visible'}}
+                    className={this.props.classes.button}
+                    onClick = {this.call}
+                    disabled = {!this.state.started || this.state.called} > 
+                    Call
+                </Button> 
             </div>
         )
     }

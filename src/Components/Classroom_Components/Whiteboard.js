@@ -1,7 +1,7 @@
 import React from 'react';
 import {withStyles} from '@material-ui/core/styles'
 import {Card, CardHeader, Divider, Button} from '@material-ui/core'
-import {Rnd} from 'react-rnd'
+import RndContainer from '../Classroom_Components/RndContainer'
 import {Stage, Layer, Text} from 'react-konva'
 import Rectangle from './Whiteboard_Components/Rectangle'
 import TransformerComponent from './Whiteboard_Components/TransformerComponent'
@@ -53,31 +53,17 @@ class Whiteboard extends React.Component {
     }
 
     render() {
-        const {classes} = this.props;
+        const {classes, id, ...other} = this.props;
         return (
-            <Rnd 
-                style={{zIndex: this.props.zIndex}} 
-                onMouseDown={() => this.props.bringTop()}
-                onDragStart={() => this.props.bringTop()}
-                lockAspectRatio={4/3}
-                lockAspectRatioExtraHeight={72}
-                bounds="window"
-                enableResizing={false}
-                minWidth={200}
-                dragHandleClassName={
-                    document.getElementById(`draggableWhiteboard${this.props.user}`)?
-                    document.getElementById(`draggableWhiteboard${this.props.user}`).className : null
-                }
-                default={{
-                    x: this.props.position.x, 
-                    y: this.props.position.y, 
-                    width: 800, height: 774
-                }}>
+            <RndContainer
+                id={id}
+                {...other}
+            >
                 <Card className={classes.card}>
                     <CardHeader //this height is 74px
                         title="Whiteboard"
                         subheader="Teacher"
-                        id={`draggableWhiteboard${this.props.user}`}
+                        id={`draggable${id}`}
                         style={{height: 50}}
                     />
                     <Divider/>
@@ -118,7 +104,7 @@ class Whiteboard extends React.Component {
                         </Layer>
                     </Stage>
                 </Card>
-            </Rnd>
+            </RndContainer>
         )
     }
 }

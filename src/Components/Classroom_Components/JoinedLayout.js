@@ -7,7 +7,7 @@ import { withStyles } from '@material-ui/core/styles'
 import ParticipantList from './ParticipantList'
 import Whiteboard from './Whiteboard';
 
-const styles = theme => ({
+const styles = theme => ({ 
     container: {
         display: 'relative',
         height: '900',
@@ -19,50 +19,39 @@ class JoinedLayout extends Component {
     ref={}
     state = {
         webcam: {
-            selfWebcam: { zIndex: 3, position: {x: 950, y: 50} }, 
-            teacherWebcam: { zIndex: 3, position: {x: 200, y: 50} }, 
+            selfWebcam: { zIndex: 3, position: {x: 1130, y: 5}, size: {width: 460, height: 345+72} }, 
+            teacherWebcam: { zIndex: 3, position: {x: 0, y: 5}, size: {width: 460, height: 345+72} }, 
         },
         whiteboard: {
-            teacherWhiteboard: { zIndex: 2, position: {x: 100, y: 400} }, 
-            selfWhiteboard: { zIndex: 2, position: {x: 300, y: 400} },
+            selfWhiteboard: { zIndex: 2, position: {x: 800, y: 150}, size: {width: 800, height: 774} },
+            teacherWhiteboard: { zIndex: 2, position: {x: 0, y: 150}, size: {width: 800, height: 774} }, 
         },
         drawer: {
-            selfDrawer: { zIndex: 0, position: {x: 850, y: 320} }, 
-            classDrawer: { zIndex: 0, position: {x: 850, y: 50} },// to distribute/receive files class esources
+            selfDrawer: { zIndex: 0, position: {x: 660, y: 5}, size: {width: 450, height: 550} }, 
+            classDrawer: { zIndex: 0, position: {x: 0, y: 5} },// to distribute/receive files class esources
         },
         other: {
-            PList: { zIndex: 1, position: {x: 0, y: 50} }, 
+            PList: { zIndex: 1, position: {x: 465, y: 5}, size: {width: 0, height: 0} }, 
         }
     }
-    bringTop(target) {
+    bringTop = (target) => { // target: selfWebcam/etc
         let maxZ = -1
-        for (var outter of this.state) {
-            for (var inner of outter) {
+        Object.values(this.state).forEach(outer => {
+            Object.values(outer).forEach(inner => {
                 if (inner.zIndex > maxZ) maxZ = inner.zIndex
-            }
-        }
-        outter = this.findKeyInNestedObject(target)
-        this.setState({
-            [outter]: {
-                ...this.state[outter], 
-                [target]: {...this.state[outter][target], zIndex: maxZ + 1}
-            }
+            })
         })
-    }
-    updatePosition = (id, position) => {
-        for (let s of this.state) {
-            console.log(s)
-        }
-        // this.setState({position: {...this.state.position, [id]: position}})
-    }
-    findKeyInNestedObject = (key) => {
-        Object.keys(this.state).forEach(k => {
-            this.state[k].includes(key)
-            return k
+        var outer = findKeyInNestedObject(target, this.state)
+        this.setState({
+            [outer]: {
+                ...this.state[outer], 
+                [target]: {...this.state[outer][target], zIndex: maxZ + 1}
+            }
         })
     }
     testfunc = () => {
-        this.ref.selfWebcam.updatePosition({x: 500, y: 500})
+        this.ref["selfDrawer"].updatePosition({x: 825, y: 230})
+        this.bringTop("selfDrawer")
     }
     render() {
         const { classes, ...other } = this.props
@@ -71,61 +60,94 @@ class JoinedLayout extends Component {
                 <AppBar position="static" color="default">
                     <Toolbar variant="dense">
                         <ClassMenu {...other} />
-                        {Object.keys(this.state.zIndex).map((key) => (
-                            <Button onClick={()=>this.bringTop(key)} key={key}>
-                                {key}
+                        {Object.keys(this.state).map(
+                            (outer) => Object.keys(this.state[outer]).map((inner) => (
+                            <Button onClick={()=>this.bringTop(inner)} key={inner}>
+                                {inner}
                             </Button>
-                        ))}
+                        )))}
                         <Button onClick={()=>this.testfunc()}>update position</Button>
                     </Toolbar>
                 </AppBar>
                 <div className={classes.container}>
                     <ParticipantList 
-                        {...other}
+                        id={"PList"}
                         bringTop={() => this.bringTop('PList')}
-                        position={this.state.other.PList.position}
-                        zIndex={this.state.zIndex.PList}/>
+                        size={this.state.other["PList"].size}
+                        position={this.state.other["PList"].position}
+                        zIndex={this.state.other["PList"].zIndex}
+                        inputRef={(id, el) => this.ref[id] = el}
+                        enableResizing={false}
+                        minWidth={0}
+                        {...other}/>
                     {/* this.state.webcam.map() */}
-                    <UserCard // add key if use map func
+                    <UserCard
                         id={"teacherWebcam"}
                         bringTop={() => this.bringTop('teacherWebcam')}
-                        position={this.state.position["teacherWebcam"]} 
-                        zIndex={this.state.zIndex.teacherWebcam}
+                        size={this.state.webcam["teacherWebcam"].size}
+                        position={this.state.webcam["teacherWebcam"].position} 
+                        zIndex={this.state.webcam["teacherWebcam"].zIndex}
                         inputRef={(id, el) => this.ref[id] = el}
+                        lockAspectRatio={4/3}
+                        lockAspectRatioExtraHeight={72}
                         {...other} 
                         user={"Teacher"}/>                    
                     <UserCard 
                         id={"selfWebcam"}
                         bringTop={() => this.bringTop('selfWebcam')}
-                        position={this.state.position["selfWebcam"]}
-                        zIndex={this.state.zIndex["selfWebcam"]} 
+                        size={this.state.webcam["selfWebcam"].size}
+                        position={this.state.webcam["selfWebcam"].position}
+                        zIndex={this.state.webcam["selfWebcam"].zIndex} 
                         inputRef={(id, el) => this.ref[id] = el}
                         {...other} 
                         user={this.props.self} />
                     <Whiteboard
                         id={"teacherWhiteboard"}
-                        key={"teacherWhiteboard"}
                         bringTop={() => this.bringTop('teacherWhiteboard')}
-                        position={this.state.position["teacherWhiteboard"]}
-                        zIndex={this.state.zIndex.teacherWhiteboard}      
+                        size={this.state.whiteboard["teacherWhiteboard"].size}
+                        position={this.state.whiteboard["teacherWhiteboard"].position}
+                        zIndex={this.state.whiteboard["teacherWhiteboard"].zIndex}      
+                        inputRef={(id, el) => this.ref[id] = el}
+                        lockAspectRatio={4/3}
+                        lockAspectRatioExtraHeight={72}
+                        enableResizing={false}
                         {...other}
                         user={"Teacher"} />
                     <Whiteboard
                         id={"selfWhiteboard"}
                         bringTop={() => this.bringTop('selfWhiteboard')}
-                        position={this.state.position["selfWhiteboard"]}
-                        zIndex={this.state.zIndex.selfWhiteboard}      
+                        size={this.state.whiteboard["selfWhiteboard"].size}
+                        position={this.state.whiteboard["selfWhiteboard"].position}
+                        zIndex={this.state.whiteboard["selfWhiteboard"].zIndex}           
+                        inputRef={(id, el) => this.ref[id] = el}
+                        lockAspectRatio={4/3}
+                        lockAspectRatioExtraHeight={72}
+                        enableResizing={false}
                         {...other}
                         user={this.props.self} />
                     <Drawer 
-                        bringTop={() => this.bringTop('Drawer')}
-                        position={this.state.drawer["selfDrawer"]}
-                        zIndex={this.state.zIndex.Drawer}
+                        id={"selfDrawer"}
+                        bringTop={() => this.bringTop('selfDrawer')}
+                        size={this.state.drawer["selfDrawer"].size}
+                        position={this.state.drawer["selfDrawer"].position}
+                        zIndex={this.state.drawer["selfDrawer"].zIndex}
+                        inputRef={(id, el) => this.ref[id] = el}
+                        enableResizing={false}
                         {...other} />
                 </div>
             </Fragment>
         )
     }
+}
+
+function findKeyInNestedObject(key, nestedObj) {
+    let result
+    Object.keys(nestedObj).forEach(k => {
+        if (Object.keys(nestedObj[k]).includes(key)) {
+            result = k
+        }
+    })
+    return result
 }
 
 export default withStyles(styles)(JoinedLayout)

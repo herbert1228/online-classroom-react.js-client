@@ -7,7 +7,7 @@ const styles = theme => ({})
 class RndContainer extends React.Component {
     render() {
         const { children, zIndex, id,
-                position, size,
+                position, size, enableResizing, minWidth,
                 lockAspectRatio, lockAspectRatioExtraHeight 
         } = this.props
         return (
@@ -17,9 +17,10 @@ class RndContainer extends React.Component {
                 onMouseDown={() => this.props.bringTop()}
                 onDragStart={() => this.props.bringTop()}
                 lockAspectRatio={lockAspectRatio || false}
+                enableResizing={enableResizing || true}
                 lockAspectRatioExtraHeight={lockAspectRatioExtraHeight || 0}
                 bounds="window"
-                minWidth={200}
+                minWidth={minWidth || 200}
                 dragHandleClassName={
                     document.getElementById(`draggable${id}`)?
                     document.getElementById(`draggable${id}`).className : null

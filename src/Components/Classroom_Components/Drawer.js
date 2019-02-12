@@ -11,8 +11,12 @@ import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 import FolderIcon from '@material-ui/icons/Folder';
 import DeleteIcon from '@material-ui/icons/Delete';
-import {Rnd} from 'react-rnd'
+import Dropzone from 'react-dropzone'
+import classNames from 'classnames'
 import {connection as conn} from '../../interface/connection'
+import {withCookies} from 'react-cookie'
+import {compose} from 'redux'
+import RndContainer from './RndContainer';
 
 const styles = theme => ({
     card: {
@@ -23,27 +27,24 @@ const styles = theme => ({
         display: 'flex',
         justifyContent: 'space-between'
     },
-    newitems: {
-        display: 'flex',
-    },
-    infodiv: {
-        padding: '10px'
-    },
     root: {
         flexGrow: 1,
         maxWidth: 752,
-      },
-      demo: {
+    },
+    demo: {
         backgroundColor: theme.palette.background.paper,
-      },
-      title: {
+    },
+    title: {
         margin: `${theme.spacing.unit * 4}px 0 ${theme.spacing.unit * 2}px`,
-      },
-      infolist: {
-          width: 450,
-          height: 150
-      }
-});
+    },
+    infolist: {
+        width: 450,
+        height: 150
+    },
+    dropzone: {
+
+    },
+})
 
 class Drawer extends React.Component {
     state = {
@@ -62,23 +63,35 @@ class Drawer extends React.Component {
         this.setState({files: e.result})
     }
 
+    handleDrop = (acceptedFiles, rejectedFiles) => {
+        console.log({ acceptedFiles, rejectedFiles })
+        if (acceptedFiles.length > 0){
+            let formdata = new FormData()
+            formdata.append("data", acceptedFiles[0], acceptedFiles[0].name) //3rd arg refer to filename
+            formdata.append("timestamp", (new Date()).toISOString())
+            formdata.append("username", this.props.cookies.get("name"))
+            formdata.append("password", this.props.cookies.get("password"))
+            fetch("http://overcoded.tk:8600/upload", {
+                method: "POST",
+                body: formdata
+            })
+            .then(response => response.text())
+            .then(data => this.props.handleNotification(data))
+            .catch(e => {this.props.handleNotification(`${e}`)})
+        }
+    }
+
     render() {
-        const {classes} = this.props;
+        const {classes, ...other} = this.props;
         const { dense } = this.state;
         return (
-            <Rnd 
-                style={{zIndex: this.props.zIndex}} 
-                onMouseDown={() => this.props.bringTop()}
-                onDragStart={() => this.props.bringTop()}
-                bounds="window"
-                enableResizing={false}
-                default={{
-                    x: this.props.position.x, 
-                    y: this.props.position.y, 
-            }}>
+            <RndContainer 
+                {...other}
+            >
                 <Card className={classes.card}>
                 <CardHeader //this height is 74px
                     title= "Personal Drawer"
+                    id={`draggable${this.props.id}`}
                 />
                     <Divider/>
                     <Grid 
@@ -87,60 +100,62 @@ class Drawer extends React.Component {
                         justify="center"
                         alignItems="flex-start"
                     >
-                        
-                        {/* {this.state.files.map(file => 
-                            <Grid item className={classes.griditems}>
-                            <div className={classes.infodiv}>
-                                <text>{file.name}</text>
-                            </div>
-                            <div className={classes.infodiv}>
-                                <text>{file.time}</text>
-                            </div>
-                                <div className={classes.infodiv}>
-                                    <button>View</button>
-                                    <button>Delete</button>
-                                    <button>Share</button>
-                                </div>
-                            </Grid>
-                        )}
-                        <Grid item className={classes.newitem}>
-                            <div className={classes.infodiv}>
-                                <button> + </button>
-                                <text>Upload/Drag</text>
-                            </div>
-                        </Grid> */}
-
                         <Grid item xs={12} md={6}>
                             <div className={classes.demo}>
-                            <List dense={dense} className={classes.infolist}>
-                                {this.state.files.map(filename => 
-                                <ListItem key={filename}>
-                                    <ListItemAvatar>
-                                    <Avatar>
-                                        <FolderIcon />
-                                    </Avatar>
-                                    </ListItemAvatar>
-                                    <ListItemText 
-                                        primary={filename}
-                                    />
-                                    <ListItemText
-                                        primary={"some more info here"}
-                                    />
-                                    <ListItemSecondaryAction>
-                                    <IconButton aria-label="Delete">
-                                        <DeleteIcon />
-                                    </IconButton>
-                                    </ListItemSecondaryAction>
-                                </ListItem>
-                                )}
-                            </List>
+                                <List dense={dense} className={classes.infolist}>
+                                    {this.state.files.map(filename => 
+                                    <ListItem key={filename}>
+                                        <ListItemAvatar>
+                                        <Avatar>
+                                            <FolderIcon />
+                                        </Avatar>
+                                        </ListItemAvatar>
+                                        <ListItemText 
+                                            primary={filename}
+                                        />
+                                        <ListItemText
+                                            primary={"some more info here"}
+                                        />
+                                        <ListItemSecondaryAction>
+                                        {/* <button>View</button>
+                                        <button>Download</button>
+                                        <button>Share</button> */}
+                                        <IconButton aria-label="Delete">
+                                            <DeleteIcon />
+                                        </IconButton>
+                                        </ListItemSecondaryAction>
+                                    </ListItem>
+                                    )}
+                                    <ListItem className={classes.dropzone}>
+                                        <Dropzone onDrop={this.handleDrop}>
+                                            {({ getRootProps, getInputProps, isDragActive }) => {
+                                                return (
+                                                    <div
+                                                        {...getRootProps()}
+                                                        className={classNames("dropzone", { "dropzone--isActive": isDragActive })}
+                                                    >
+                                                        <input {...getInputProps()} />
+                                                        {
+                                                            isDragActive ?
+                                                                <p>Drop files here... (50MB max)</p> :
+                                                                <p>Drop files here, or click to select files to upload (50MB max)</p>
+                                                        }
+                                                    </div>
+                                                )
+                                            }}
+                                        </Dropzone>
+                                    </ListItem>
+                                </List>
                             </div>
                         </Grid>
                     </Grid>
                 </Card>
-            </Rnd>
+            </RndContainer>
         )
     }
 }
 
-export default withStyles(styles)(Drawer)
+export default compose(
+    withCookies,
+    withStyles(styles, {withTheme: true}),
+)(Drawer)
