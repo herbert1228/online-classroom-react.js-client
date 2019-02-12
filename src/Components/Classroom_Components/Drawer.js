@@ -114,7 +114,7 @@ class Drawer extends React.Component {
                             <div className={classes.demo}>
                             <List dense={dense} className={classes.infolist}>
                                 {this.state.files.map(filename => 
-                                <ListItem key={filename.name}>
+                                <ListItem key={filename}>
                                     <ListItemAvatar>
                                     <Avatar>
                                         <FolderIcon />

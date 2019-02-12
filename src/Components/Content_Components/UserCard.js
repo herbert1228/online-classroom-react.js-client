@@ -5,6 +5,7 @@ import {Card, CardHeader, Avatar, Divider} from '@material-ui/core'
 import LocalStream from '../Classroom_Components/LocalStream'
 import RemoteStream from '../Classroom_Components/RemoteStream'
 import UserCardMenu from '../Classroom_Components/UserCardMenu'
+import RndContainer from '../Classroom_Components/RndContainer'
 import {Rnd} from 'react-rnd'
 
 const styles = theme => ({
@@ -32,28 +33,21 @@ class UserCard extends React.Component {
 
     render() {
         const {user} = this.props;
-        const {classes, ...other} = this.props;
+        const {classes, id, ...other} = this.props;
         return (
-            <Rnd 
-                style={{zIndex: this.props.zIndex}} 
-                onMouseDown={() => this.props.bringTop()}
-                onDragStart={() => this.props.bringTop()}
+            <RndContainer
+                id={id}
+                size={{width: 460, height: 470}}
+                position={this.props.position}
+                zIndex= {this.props.zIndex}
+                bringTop={this.props.bringTop}
                 lockAspectRatio={4/3}
                 lockAspectRatioExtraHeight={72}
-                bounds="window"
-                minWidth={200}
-                dragHandleClassName={
-                    document.getElementById(`draggable${this.props.user}`)?
-                    document.getElementById(`draggable${this.props.user}`).className : null
-                }
-                default={{
-                    x: this.props.position.x, 
-                    y: this.props.position.y, 
-                    width: 460, height: 470
-                }}>
+                inputRef={this.props.inputRef}
+            >
                 <Card className={classes.card}>
                     <CardHeader //this height is 74px
-                        id={`draggable${this.props.user}`}
+                        id={`draggable${id}`}
                         style={{height: 50}}
                         avatar={
                             <Avatar aria-label="user whiteboard" className={classes.avatar}>
@@ -69,7 +63,7 @@ class UserCard extends React.Component {
                     <Divider/>
                     <Webcam {...other} camOpen={this.state.camOpen} />
                 </Card>
-            </Rnd>
+            </RndContainer>
         )
     }
 }

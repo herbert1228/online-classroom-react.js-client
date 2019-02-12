@@ -1,6 +1,6 @@
 import React from 'react';
 import {withStyles} from '@material-ui/core/styles'
-import {Card, CardHeader, Divider} from '@material-ui/core'
+import {Card, CardHeader, Divider, Button} from '@material-ui/core'
 import {Rnd} from 'react-rnd'
 import {Stage, Layer, Text} from 'react-konva'
 import Rectangle from './Whiteboard_Components/Rectangle'
@@ -15,7 +15,11 @@ const styles = theme => ({
     avatar: {
         backgroundColor: "#769da8"
     },
-    stage: {height: '460', width: '470'}
+    stage: {height: '800', width: '674'},
+    panel: {
+        height: 100,
+        width: '100%'
+    }
 })
 
 class Whiteboard extends React.Component {
@@ -67,7 +71,7 @@ class Whiteboard extends React.Component {
                 default={{
                     x: this.props.position.x, 
                     y: this.props.position.y, 
-                    width: 460, height: 470
+                    width: 800, height: 774
                 }}>
                 <Card className={classes.card}>
                     <CardHeader //this height is 74px
@@ -77,7 +81,14 @@ class Whiteboard extends React.Component {
                         style={{height: 50}}
                     />
                     <Divider/>
-                    <Stage width={460} height={398} 
+                    <div className={classes.panel}>
+                        <Button onClick={()=> {
+                            let defaultRect = {x: 40, y: 40, width: 100, height: 100, fill: 'grey', name: 'rect1'}
+                            this.setState({rectangles: [...this.state.rectangles, defaultRect]
+                        })}}>Add Rect</Button>
+                    </div>
+                    <Divider/>
+                    <Stage width={800} height={600} 
                         onDragOver={() => console.log("onDragOver")} //!!! e.preventDefault()
                         onDrop={() => console.log("onDrop")} // e.preventDefault() then add image at pointer position
                         onMouseDown={this.handleStageMouseDown}>

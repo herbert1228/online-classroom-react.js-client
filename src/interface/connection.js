@@ -2,8 +2,8 @@ let websocket
 const TIMEOUT = 5000
 const callsInProgress = {}
 
-const url = `ws://${window.location.hostname}:8500/`
-// const url = "ws://overcoded.tk:8500"
+// const url = `ws://${window.location.hostname}:8500/`
+const url = "ws://overcoded.tk:8500"
 
 function genid() {
     // https://stackoverflow.com/a/2117523
@@ -175,6 +175,29 @@ const signalingChannel = {
     }
 }
 
+// WhiteboardChannel.sendLoadImage(image)
+// conn.addListener("loadImage", (e)=> loadImag(e))
+const whiteboardChannel = {
+    notiflyLoadImage(image) { // {image(based64)}
+        sendMessage(websocket, ["whiteboard_cast", "loadImage", image])
+    },
+    notiflyClear() {
+        sendMessage(websocket, ["whiteboard_cast", "clear", null])
+    },
+    notiflyDraw(params) { // params = {lineWidth, lineColor, point}
+        sendMessage(websocket, ["whiteboard_cast", "draw", params])
+    },
+    notiflyErase(params) {// params = {lineWidth, point}
+        sendMessage(websocket, ["whiteboard_cast", "erase", params])        
+    },
+    notiflyRedo() {
+        sendMessage(websocket, ["whiteboard_cast", "redo", null])
+    },
+    notiflyUndo() {
+        sendMessage(websocket, ["whiteboard_cast", "undo", null])
+    }
+}
+
 function checkTURNServer(turnConfig, timeout){ 
 
     return new Promise(function(resolve, reject){
@@ -209,5 +232,6 @@ export {
     connection,
     signalingChannel,
     checkTURNServer,
+    whiteboardChannel,
     // listener // for debug use
 }

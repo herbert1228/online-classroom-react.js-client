@@ -23,7 +23,7 @@ class ParticipantList extends Component {
                 style={{zIndex: this.props.zIndex}} 
                 onMouseDown={() => this.props.bringTop()}
                 onDragStart={() => this.props.bringTop()}
-                default={{y: 50, x: 0}} enableResizing={false}>
+                default={this.props.position} enableResizing={false}>
                 <Grid
                     container
                     direction="column"
