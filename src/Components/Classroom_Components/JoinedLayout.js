@@ -108,7 +108,7 @@ class JoinedLayout extends Component {
                             lockAspectRatioExtraHeight={72}
                             enableResizing={false}
                             {...other}
-                            user={(whiteboard.id === "teacherWebcam") ? "Teacher": this.props.self}                            
+                            user={(whiteboard.id === "teacherWebcam") ? this.props.self: "Teacher" }   
                         />
                     ))}
                     <Drawer 

@@ -46,7 +46,7 @@ class UserCard extends React.Component {
                         action={
                             <UserCardMenu disableWebcam={this.disableWebcam.bind(this)}/>
                         }
-                        title={user}
+                        title={`${user}'s Webcam`}
                         // subheader={this.state.drawRight}
                     />
                     <Divider/>

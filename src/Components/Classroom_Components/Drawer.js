@@ -13,10 +13,12 @@ import FolderIcon from '@material-ui/icons/Folder';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Dropzone from 'react-dropzone'
 import classNames from 'classnames'
-import {connection as conn} from '../../interface/connection'
+import {connection as conn, uploadURL} from '../../interface/connection'
 import {withCookies} from 'react-cookie'
 import {compose} from 'redux'
 import RndContainer from './RndContainer';
+import { FileDownload } from '@material-ui/icons';
+import ShareBrn from './ShareBtn'
 
 const styles = theme => ({
     card: {
@@ -60,18 +62,44 @@ class Drawer extends React.Component {
     }
 
     handleDrawerChange = e => {
-        this.setState({files: e.result})
+        this.setState({files: e.result}, () => {
+            this.props.handleNotification(`Received file from ${e.from}`)
+        })
+    }
+
+    // handleDrag = (filename) => {
+    //     const username = this.props.cookies.get("name")
+    //     const password = this.props.cookies.get("password")
+        // fetch(uploadURL+`/download/${username}/${password}/${filename}`)
+        // .then(response => response.text())
+        // .then(data => console.log(data))
+        // .catch(e => {this.props.handleNotification(`${e}`)})
+    // }
+    
+    handleDownload = filename => {
+        const username = this.props.cookies.get("name")
+        const password = this.props.cookies.get("password")
+        window.open(uploadURL+`/download/${username}/${password}/${filename}`)
+    }
+
+    handleDelete = async filename => {
+        const response = await conn.call("file_delete", {filename})
+        if (response) {
+            if (response.result === "ok") {
+                this.setState({files: response.files})
+                this.props.handleNotification(`Delete file ${filename} success`)
+            } else {this.props.handleNotification(`Delete file error: Invalid response`)}
+        } else {this.props.handleNotification(`Internal server error: Delete file failed`)}
     }
 
     handleDrop = (acceptedFiles, rejectedFiles) => {
-        console.log({ acceptedFiles, rejectedFiles })
         if (acceptedFiles.length > 0){
             let formdata = new FormData()
             formdata.append("data", acceptedFiles[0], acceptedFiles[0].name) //3rd arg refer to filename
             formdata.append("timestamp", (new Date()).toISOString())
             formdata.append("username", this.props.cookies.get("name"))
             formdata.append("password", this.props.cookies.get("password"))
-            fetch("http://overcoded.tk:8600/upload", {
+            fetch(uploadURL+'/upload', {
                 method: "POST",
                 body: formdata
             })
@@ -87,7 +115,7 @@ class Drawer extends React.Component {
         return (
             <RndContainer 
                 {...other}
-            >
+            >   
                 <Card className={classes.card}>
                 <CardHeader //this height is 74px
                     title= "Personal Drawer"
@@ -103,7 +131,8 @@ class Drawer extends React.Component {
                         <Grid item xs={12} md={6}>
                             <div className={classes.demo}>
                                 <List dense={dense} className={classes.infolist}>
-                                    {this.state.files.map(filename => 
+                                    {this.state.files &&
+                                    this.state.files.map(filename => 
                                     <ListItem key={filename}>
                                         <ListItemAvatar>
                                         <Avatar>
@@ -113,14 +142,14 @@ class Drawer extends React.Component {
                                         <ListItemText 
                                             primary={filename}
                                         />
-                                        <ListItemText
-                                            primary={"some more info here"}
-                                        />
                                         <ListItemSecondaryAction>
-                                        {/* <button>View</button>
-                                        <button>Download</button>
-                                        <button>Share</button> */}
-                                        <IconButton aria-label="Delete">
+                                        {/* <button>View</button> */}
+                                        {/* <button>Download</button> */}
+                                        <ShareBrn {...other} filename={filename}/>
+                                        <IconButton aria-label="Download" onClick={() => this.handleDownload(filename)}>
+                                            <FileDownload />
+                                        </IconButton>
+                                        <IconButton aria-label="Delete" onClick={() => this.handleDelete(filename)}>
                                             <DeleteIcon />
                                         </IconButton>
                                         </ListItemSecondaryAction>

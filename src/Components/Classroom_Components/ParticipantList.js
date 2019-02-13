@@ -28,11 +28,12 @@ class ParticipantList extends Component {
                     className={classes.participantList}
                 >
                     <Grid key={"Member List"} item className={classes.grid_item}>
-                        Participants: 
+                        Students: 
                     </Grid>
                     {this.props.session_user &&
                         this.props.session_user.map(user => (
                             (user !== this.props.self) &&
+                            (user !== this.props.joined.owner) &&
                             <Grid key={user} item className={classes.grid_item}>
                                 <UserCardSmall {...other} user={user} />
                             </Grid>
