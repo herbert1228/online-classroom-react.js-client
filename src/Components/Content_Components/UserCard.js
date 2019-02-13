@@ -34,10 +34,7 @@ class UserCard extends React.Component {
         const {user} = this.props;
         const {classes, ...other} = this.props;
         return (
-            <RndContainer
-                inputRef={this.props.inputRef}
-                {...other}
-            >
+            <RndContainer {...other}>
                 <Card className={classes.card}>
                     <CardHeader //this height is 74px
                         id={`draggable${this.props.id}`}

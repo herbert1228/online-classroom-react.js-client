@@ -19,19 +19,19 @@ class JoinedLayout extends Component {
     ref={}
     state = {
         webcam: {
-            selfWebcam: { zIndex: 3, position: {x: 1130, y: 5}, size: {width: 460, height: 345+72} }, 
-            teacherWebcam: { zIndex: 3, position: {x: 0, y: 5}, size: {width: 460, height: 345+72} }, 
+            selfWebcam: { id: "selfWebcam", zIndex: 3, position: {x: 1130, y: 5}, size: {width: 460, height: 345+72} }, 
+            teacherWebcam: { id: "teacherWebcam", zIndex: 3, position: {x: 0, y: 5}, size: {width: 460, height: 345+72} }, 
         },
         whiteboard: {
-            selfWhiteboard: { zIndex: 2, position: {x: 800, y: 150}, size: {width: 800, height: 774} },
-            teacherWhiteboard: { zIndex: 2, position: {x: 0, y: 150}, size: {width: 800, height: 774} }, 
+            selfWhiteboard: { id: "selfWhiteboard", zIndex: 2, position: {x: 800, y: 150}, size: {width: 800, height: 774} },
+            teacherWhiteboard: { id: "teacherWhiteboard", zIndex: 2, position: {x: 0, y: 150}, size: {width: 800, height: 774} }, 
         },
         drawer: {
-            selfDrawer: { zIndex: 0, position: {x: 660, y: 5}, size: {width: 450, height: 550} }, 
-            classDrawer: { zIndex: 0, position: {x: 0, y: 5} },// to distribute/receive files class esources
+            selfDrawer: { id: "selfDrawer", zIndex: 0, position: {x: 660, y: 5}, size: {width: 450, height: 550} }, 
+            classDrawer: { id: "classDrawer", zIndex: 0, position: {x: 0, y: 5} },// to distribute/receive files class esources
         },
         other: {
-            PList: { zIndex: 1, position: {x: 465, y: 5}, size: {width: 0, height: 0} }, 
+            PList: { id: "PList", zIndex: 1, position: {x: 465, y: 5}, size: {width: 0, height: 0} }, 
         }
     }
     bringTop = (target) => { // target: selfWebcam/etc
@@ -62,9 +62,9 @@ class JoinedLayout extends Component {
                         <ClassMenu {...other} />
                         {Object.keys(this.state).map(
                             (outer) => Object.keys(this.state[outer]).map((inner) => (
-                            <Button onClick={()=>this.bringTop(inner)} key={inner}>
-                                {inner}
-                            </Button>
+                                <Button onClick={()=>this.bringTop(inner)} key={inner}>
+                                    {inner}
+                                </Button>
                         )))}
                         <Button onClick={()=>this.testfunc()}>update position</Button>
                     </Toolbar>
@@ -80,51 +80,37 @@ class JoinedLayout extends Component {
                         enableResizing={false}
                         minWidth={0}
                         {...other}/>
-                    {/* this.state.webcam.map() */}
-                    <UserCard
-                        id={"teacherWebcam"}
-                        bringTop={() => this.bringTop('teacherWebcam')}
-                        size={this.state.webcam["teacherWebcam"].size}
-                        position={this.state.webcam["teacherWebcam"].position} 
-                        zIndex={this.state.webcam["teacherWebcam"].zIndex}
-                        inputRef={(id, el) => this.ref[id] = el}
-                        lockAspectRatio={4/3}
-                        lockAspectRatioExtraHeight={72}
-                        {...other} 
-                        user={"Teacher"}/>                    
-                    <UserCard 
-                        id={"selfWebcam"}
-                        bringTop={() => this.bringTop('selfWebcam')}
-                        size={this.state.webcam["selfWebcam"].size}
-                        position={this.state.webcam["selfWebcam"].position}
-                        zIndex={this.state.webcam["selfWebcam"].zIndex} 
-                        inputRef={(id, el) => this.ref[id] = el}
-                        {...other} 
-                        user={this.props.self} />
-                    <Whiteboard
-                        id={"teacherWhiteboard"}
-                        bringTop={() => this.bringTop('teacherWhiteboard')}
-                        size={this.state.whiteboard["teacherWhiteboard"].size}
-                        position={this.state.whiteboard["teacherWhiteboard"].position}
-                        zIndex={this.state.whiteboard["teacherWhiteboard"].zIndex}      
-                        inputRef={(id, el) => this.ref[id] = el}
-                        lockAspectRatio={4/3}
-                        lockAspectRatioExtraHeight={72}
-                        enableResizing={false}
-                        {...other}
-                        user={"Teacher"} />
-                    <Whiteboard
-                        id={"selfWhiteboard"}
-                        bringTop={() => this.bringTop('selfWhiteboard')}
-                        size={this.state.whiteboard["selfWhiteboard"].size}
-                        position={this.state.whiteboard["selfWhiteboard"].position}
-                        zIndex={this.state.whiteboard["selfWhiteboard"].zIndex}           
-                        inputRef={(id, el) => this.ref[id] = el}
-                        lockAspectRatio={4/3}
-                        lockAspectRatioExtraHeight={72}
-                        enableResizing={false}
-                        {...other}
-                        user={this.props.self} />
+                    {Object.values(this.state.webcam).map((webcam) => (
+                        <UserCard
+                            key={webcam.id}
+                            id={webcam.id}
+                            bringTop={() => this.bringTop(webcam.id)}
+                            size={webcam.size}
+                            position={webcam.position} 
+                            zIndex={webcam.zIndex}
+                            inputRef={(id, el) => this.ref[id] = el} // delete id field (modifly RndContainer as well)
+                            lockAspectRatio={4/3}
+                            lockAspectRatioExtraHeight={72}
+                            {...other}
+                            user={(webcam.id === "teacherWebcam") ? "Teacher": this.props.self}
+                        />
+                    ))}
+                    {Object.values(this.state.whiteboard).map((whiteboard) => (
+                        <Whiteboard
+                            key={whiteboard.id}
+                            id={whiteboard.id}
+                            bringTop={() => this.bringTop(whiteboard.id)}
+                            size={whiteboard.size}
+                            position={whiteboard.position}
+                            zIndex={whiteboard.zIndex}      
+                            inputRef={(id, el) => this.ref[id] = el}
+                            lockAspectRatio={4/3}
+                            lockAspectRatioExtraHeight={72}
+                            enableResizing={false}
+                            {...other}
+                            user={(whiteboard.id === "teacherWebcam") ? "Teacher": this.props.self}                            
+                        />
+                    ))}
                     <Drawer 
                         id={"selfDrawer"}
                         bringTop={() => this.bringTop('selfDrawer')}

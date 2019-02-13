@@ -17,7 +17,11 @@ class RndContainer extends React.Component {
                 onMouseDown={() => this.props.bringTop()}
                 onDragStart={() => this.props.bringTop()}
                 lockAspectRatio={lockAspectRatio || false}
-                enableResizing={enableResizing || true}
+                enableResizing={(enableResizing === false)?  {} : {
+                    bottom: true, bottomLeft: true, bottomRight: true,
+                    left: true, right: true,
+                    top: true, topLeft: true, topRight: true
+                }}
                 lockAspectRatioExtraHeight={lockAspectRatioExtraHeight || 0}
                 bounds="window"
                 minWidth={minWidth || 200}
