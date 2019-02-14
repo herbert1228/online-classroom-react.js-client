@@ -19,6 +19,7 @@ import {compose} from 'redux'
 import RndContainer from './RndContainer';
 import { FileDownload } from '@material-ui/icons';
 import ShareBrn from './ShareBtn'
+import ViewButton from './ViewButton'
 
 const styles = theme => ({
     card: {
@@ -155,7 +156,12 @@ class Drawer extends React.Component {
                                         <ListItemSecondaryAction>
                                         {/* <button>View</button> */}
                                         {/* <button>Download</button> */}
-                                        {/* <ShareBrn {...other} filename={filename}/> */}
+                                        <ViewButton 
+                                            {...other} 
+                                            filename={filename}
+                                            username={this.props.cookies.get("name")}
+                                            password={this.props.cookies.get("password")}
+                                            />
                                         <ShareBrn {...other} filename={filename}/>
                                         <IconButton aria-label="Download" onClick={() => this.handleDownload(filename)}>
                                             <FileDownload />
