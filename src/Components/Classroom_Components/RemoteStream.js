@@ -124,26 +124,16 @@ class RemoteStream extends React.Component {
         const {
             small
         } = this.props
-        return ( <div>
-            <video width = {
-                small ? "100%" : "460"
-            }
-            poster="https://d2v9y0dukr6mq2.cloudfront.net/video/thumbnail/P3IPDsA/loading-bar-scribble-animation-doodle-cartoon-4k_sdfqzybaux_thumbnail-full05.png"
-            height = {
-                small ? "100%" : "300"
-            }
-            autoPlay playsInline ref = {
-                video => {
-                    this.remoteVideo = video
-                }
-            } > </video> {
-                /* <audio
-                                    autoPlay controls ref={
-                                        audio => {
-                                            this.remoteAudio = audio
-                                        }
-                                    }></audio> */
-            } 
+        return ( <div style={{position: 'relative'}}>
+            <video 
+                // poster="https://d2v9y0dukr6mq2.cloudfront.net/video/thumbnail/P3IPDsA/loading-bar-scribble-animation-doodle-cartoon-4k_sdfqzybaux_thumbnail-full05.png"
+                width = { small ? "100%" : "460" }
+                height = { small ? "100%" : "300" }
+                autoPlay playsInline ref = {
+                    video => {
+                        this.remoteVideo = video
+                    }
+            } > </video>
             </div>
         )
     }
