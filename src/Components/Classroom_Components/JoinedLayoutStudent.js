@@ -15,7 +15,7 @@ const styles = theme => ({
     }
 })
 
-class JoinedLayout extends Component {
+class JoinedLayoutStudent extends Component {
     ref={}
     state = {
         webcam: {
@@ -92,7 +92,8 @@ class JoinedLayout extends Component {
                             lockAspectRatio={4/3}
                             lockAspectRatioExtraHeight={72}
                             {...other}
-                            user={(webcam.id === "teacherWebcam") ? "Teacher": this.props.self}
+                            user={(webcam.id === "teacherWebcam") ? 
+                                this.props.joined.owner : this.props.self}
                         />
                     ))}
                     {Object.values(this.state.whiteboard).map((whiteboard) => (
@@ -136,4 +137,4 @@ function findKeyInNestedObject(key, nestedObj) {
     return result
 }
 
-export default withStyles(styles)(JoinedLayout)
+export default withStyles(styles)(JoinedLayoutStudent)

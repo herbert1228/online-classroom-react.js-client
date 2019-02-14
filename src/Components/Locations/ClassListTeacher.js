@@ -144,7 +144,8 @@ class ClassListTeacher extends React.Component {
                 </Grid>
                 <Divider className={classes.divider}/>
                 <div className={classes.ex_root}>
-                {(this.props.createdClass.length > 0) ?
+                {(this.props.createdClass) && //TODO createdClass sometimes undefined
+                    (this.props.createdClass.length > 0) ?
                     this.props.createdClass.map((c, index) => (
                         <ExpansionPanel
                             key={index} expanded={expanded === index}

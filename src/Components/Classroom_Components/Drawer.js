@@ -142,9 +142,20 @@ class Drawer extends React.Component {
                                         <ListItemText 
                                             primary={filename}
                                         />
+                                        {/* <div onDragOver={e=>e.preventDefault()}>
+                                            <p 
+                                                draggable={true}
+                                                id={`dragtarget${filename}`}
+                                                ondragstart={e=>{
+                                                    e.dataTransfer.setData("Text", e.target.id)
+                                            }}>
+                                                {filename}
+                                            </p>
+                                        </div> */}
                                         <ListItemSecondaryAction>
                                         {/* <button>View</button> */}
                                         {/* <button>Download</button> */}
+                                        {/* <ShareBrn {...other} filename={filename}/> */}
                                         <ShareBrn {...other} filename={filename}/>
                                         <IconButton aria-label="Download" onClick={() => this.handleDownload(filename)}>
                                             <FileDownload />

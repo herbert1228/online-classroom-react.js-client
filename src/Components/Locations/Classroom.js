@@ -3,7 +3,8 @@ import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core/styles'
 import Typography from '@material-ui/core/Typography'
 import { Button } from '@material-ui/core'
-import Joined from '../Classroom_Components/JoinedLayout'
+import JoinedLayoutStudent from '../Classroom_Components/JoinedLayoutStudent'
+import JoinedLayoutTeacher from '../Classroom_Components/JoinedLayoutTeacher'
 
 const styles = theme => ({
     notJoined: {
@@ -34,8 +35,11 @@ class Classroom extends React.Component {
                         Select a classroom here!</Button>
                     </div>
                 }
-                {(this.props.joined) &&
-                   <Joined {...other}/>
+                {(this.props.joined) && (this.props.joined.owner !== this.props.self) &&
+                   <JoinedLayoutStudent {...other}/>
+                }
+                {(this.props.joined) && (this.props.joined.owner === this.props.self) &&
+                   <JoinedLayoutTeacher {...other}/>
                 }
             </Fragment>
         )

@@ -11,6 +11,8 @@ import '../../css/App.css'
 import Dropzone from 'react-dropzone'
 import classNames from 'classnames'
 import Link from 'react-router-dom/Link'
+import {uploadURL} from '../../interface/connection'
+
 // import axios from 'axios'
 
 const styles = theme => ({
@@ -27,9 +29,6 @@ const styles = theme => ({
         transform: 'translateX(-50%) translateY(-50%)'
     }
 })
-
-const url = `http://${window.location.hostname}:8600/upload`
-// const url = "http://overcoded.tk:8600/upload"
 
 class Upload extends React.Component {
     state = {
@@ -101,7 +100,7 @@ class Upload extends React.Component {
             formdata.append("timestamp", (new Date()).toISOString())
             formdata.append("username", this.state.username)
             formdata.append("password", this.state.password)
-            fetch(url, {
+            fetch(uploadURL+'/upload', {
                 method: "POST",
                 body: formdata
             })

@@ -35,18 +35,19 @@ class UserCard extends React.Component {
         const {classes, ...other} = this.props;
         return (
             <RndContainer {...other}>
-                <Card className={classes.card}>
+                <Card className={classes.card} style={{overflow: "hidden"}}>
                     <CardHeader //this height is 74px
+                        style={{overflow: "hidden"}}
                         id={`draggable${this.props.id}`}
-                        avatar={
-                            <Avatar aria-label="user whiteboard" className={classes.avatar}>
-                                {user.substring(0, 3)}
-                            </Avatar>
-                        }
+                        // avatar={
+                        //     <Avatar aria-label="user whiteboard" className={classes.avatar}>
+                        //         {user.substring(0, 3)}
+                        //     </Avatar>
+                        // }
                         action={
                             <UserCardMenu disableWebcam={this.disableWebcam.bind(this)}/>
                         }
-                        title={`${user}'s Webcam`}
+                        subheader={`${user}'s Webcam`}
                         // subheader={this.state.drawRight}
                     />
                     <Divider/>
