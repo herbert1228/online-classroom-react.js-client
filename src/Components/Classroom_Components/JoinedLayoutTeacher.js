@@ -5,7 +5,7 @@ import ClassMenu from '../Classroom_Components/ClassMenu'
 import Drawer from '../Classroom_Components/Drawer'
 import { withStyles } from '@material-ui/core/styles'
 import ParticipantList from './ParticipantList'
-import Whiteboard from './Whiteboard';
+import Whiteboard from './Whiteboard'
 
 const styles = theme => ({ 
     container: {
@@ -19,7 +19,7 @@ class JoinedLayoutTeacher extends Component {
     ref={}
     state = {
         webcam: {
-            selfWebcam: { id: "selfWebcam", zIndex: 3, position: {x: 1130, y: 5}, size: {width: 460, height: 345+72} }, 
+            // selfWebcam: { owner: "", id: "selfWebcam", zIndex: 3, position: {x: 1130, y: 5}, size: {width: 460, height: 345+72} }, 
             teacherWebcam: { id: "teacherWebcam", zIndex: 3, position: {x: 0, y: 5}, size: {width: 460, height: 345+72} }, 
         },
         whiteboard: {
@@ -34,9 +34,19 @@ class JoinedLayoutTeacher extends Component {
             PList: { id: "PList", zIndex: 1, position: {x: 465, y: 5}, size: {width: 0, height: 0} }, 
         }
     }
-    componentDidMount() {
-        console.log(this.props)
-    }
+    // componentDidUpdate(prevProps, prevState) {
+    //     // if (prevProps.session_user && this.props.session_user){
+    //         if (prevProps.session_user !== this.props.session_user) {
+    //             const diff = _.xor(prevProps.session_user, this.props.session_user)
+    //             console.log(diff)
+    //             if (prevProps.session_user.length > this.props.session_user.length) {
+    //                 console.log("less")
+    //             } else {
+    //                 console.log("more")
+    //             }
+    //         }
+    //     // }
+    //   }
     bringTop = (target) => { // target: selfWebcam/etc
         let maxZ = -1
         Object.values(this.state).forEach(outer => {
@@ -85,6 +95,7 @@ class JoinedLayoutTeacher extends Component {
                         {...other}/>
                     {Object.values(this.state.webcam).map((webcam) => (
                         <UserCard
+                            style={{backgroundColor: 'yellow'}}
                             key={webcam.id}
                             id={webcam.id}
                             bringTop={() => this.bringTop(webcam.id)}
@@ -95,7 +106,8 @@ class JoinedLayoutTeacher extends Component {
                             lockAspectRatio={4/3}
                             lockAspectRatioExtraHeight={72}
                             {...other}
-                            user={(webcam.id === "teacherWebcam") ? "Teacher": this.props.self}
+                            user={(webcam.id === "teacherWebcam") ? 
+                                this.props.joined.owner : this.props.self}
                         />
                     ))}
                     {Object.values(this.state.whiteboard).map((whiteboard) => (
@@ -111,7 +123,7 @@ class JoinedLayoutTeacher extends Component {
                             lockAspectRatioExtraHeight={72}
                             enableResizing={false}
                             {...other}
-                            user={(whiteboard.id === "teacherWebcam") ? this.props.self: "Teacher" }   
+                            user={(whiteboard.id === "teacherWebcam") ? whiteboard.owner: this.props.self }   
                         />
                     ))}
                     <Drawer 
