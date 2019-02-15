@@ -26,22 +26,23 @@ class ViewButton extends React.Component {
 
     handleView = (filename) => {
         const {username,  password} = this.props
-        console.log(this.props.username)
-        console.log(this.props.password)
-        console.log(uploadURL+`/download/${username}/${password}/${filename}`)
         fetch(uploadURL+`/download/${username}/${password}/${filename}`)
         .then(response => response.text())
-        // console.log(response)
-        .then(data => {
-            console.log(data)
-            this.setState({data})
-        })
+        // .then(response => response.blob())
+        // .then(blob => {
+        //     const reader  = new FileReader()
+        //     reader.addEventListener("load", () => {
+        //         this.setState({data: reader.result})
+        //       }, false)
+            
+        //     reader.readAsDataURL(blob);
+        // })
         .then(() => this.handleOpenOrClose())
         .catch(e => {this.props.handleNotification(`${e}`)})
     }
 
     render() { 
-        const { classes } = this.props
+        const { username, password, filename} = this.props
         return (
             <Fragment>
                 <IconButton aria-label="View" onClick={() => this.handleView(this.props.filename)}>
@@ -49,21 +50,8 @@ class ViewButton extends React.Component {
                 </IconButton>
                 <Popover title="Viewing File" open={this.state.open}>
                 <DialogContent>
-                    <DialogContentText>
-                        {/* <Grid
-                            container
-                            direction="column"
-                            justify="center"
-                            alignItems="center"
-                        >
-                            <Grid item> */}
-                                {/* <Typography > */}
-                                {this.state.data}
-                                {/* </Typography>
-                               
-                            </Grid>
-                        </Grid> */}
-                    </DialogContentText>
+                    <img src={uploadURL+`/download/${username}/${password}/${filename}`} 
+                        width="100%" height="100%"/>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={this.handleCancel} color="primary">Cancel</Button>

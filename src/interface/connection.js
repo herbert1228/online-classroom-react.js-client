@@ -2,10 +2,10 @@ let websocket
 const TIMEOUT = 5000
 const callsInProgress = {}
 
-// const url = `ws://${window.location.hostname}:8500/`
+const url = `ws://${window.location.hostname}:8500/`
 const url = "ws://overcoded.tk:8500"
 
-// const uploadURL = `http://${window.location.hostname}:8600`
+const uploadURL = `http://${window.location.hostname}:8600`
 const uploadURL = 'http://overcoded.tk:8600'
 
 function genid() {
