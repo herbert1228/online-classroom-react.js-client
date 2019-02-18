@@ -3,10 +3,10 @@ const TIMEOUT = 5000
 const callsInProgress = {}
 
 const url = `ws://${window.location.hostname}:8500/`
-const url = "ws://overcoded.tk:8500"
+// const url = "ws://overcoded.tk:8500"
 
 const uploadURL = `http://${window.location.hostname}:8600`
-const uploadURL = 'http://overcoded.tk:8600'
+// const uploadURL = 'http://overcoded.tk:8600'
 
 function genid() {
     // https://stackoverflow.com/a/2117523
@@ -48,7 +48,7 @@ var DEBUG = false
 ;(function () {
     var send = WebSocket.prototype.send
     WebSocket.prototype.send = function (msg) {
-        if (DEBUG) console.log("websocket sending:\n", JSON.parse(msg))
+        if (DEBUG) if (JSON.parse(msg) !== "keep_alive") console.log("websocket sending:\n", JSON.parse(msg))
         return send.call(this, msg)
     }
 })()
@@ -236,6 +236,7 @@ export {
     signalingChannel,
     checkTURNServer,
     whiteboardChannel,
-    uploadURL
+    uploadURL,
+    genid
     // listener // for debug use
 }

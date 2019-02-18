@@ -1,8 +1,8 @@
 import Popover from '../Popover'
 import React, { Fragment } from 'react';
 import {withStyles} from '@material-ui/core/styles'
-import {Button, DialogActions, DialogContent, Grid, Typography, DialogContentText, IconButton } from "@material-ui/core";
-import {connection as conn, uploadURL} from '../../interface/connection'
+import {Button, DialogActions, DialogContent, IconButton } from "@material-ui/core";
+import {uploadURL} from '../../interface/connection'
 import View from '@material-ui/icons/Pageview';
 
 
@@ -50,7 +50,9 @@ class ViewButton extends React.Component {
                 </IconButton>
                 <Popover title="Viewing File" open={this.state.open}>
                 <DialogContent>
-                    <img src={uploadURL+`/download/${username}/${password}/${filename}`} 
+                    <img 
+                        alt="View Selected File"
+                        src={uploadURL+`/download/${username}/${password}/${filename}`} 
                         width="100%" height="100%"/>
                 </DialogContent>
                 <DialogActions>
@@ -60,10 +62,6 @@ class ViewButton extends React.Component {
             </Fragment>
         );
     }
-}
-
-function hexToBase64(str) {
-    return btoa(String.fromCharCode.apply(null, str.replace(/\r|\n/g, "").replace(/([\da-fA-F]{2}) ?/g, "0x$1 ").replace(/ +$/, "").split(" ")));
 }
 
 export default withStyles(styles, {withTheme: true})(ViewButton)

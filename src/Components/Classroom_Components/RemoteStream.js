@@ -32,15 +32,17 @@ class RemoteStream extends React.Component {
 
         conn.addListener("got_media", (e) => {
             if (!this.state.requesting) {
-                this.requestOffer()
+                if (e === this.props.user) this.requestOffer()
             } else {
                 console.log(this.state.requesting);
                 console.log(this.state)
             }
         })
         conn.addListener("offer", (e) => {
-            console.log("received offer from", e.from)
-            this.setRemoteDescriptionForPeerConn(e.offer)
+            if( e.from === this.props.user) {
+                console.log("received offer from", e.from)
+                this.setRemoteDescriptionForPeerConn(e.offer)
+            }
         })
         conn.addListener("candidate", (e) => {
             if (e.stream_owner !== this.props.user) return
