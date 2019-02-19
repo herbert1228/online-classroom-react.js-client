@@ -7,6 +7,7 @@ import Rectangle from './Whiteboard_Components/Rectangle'
 import TransformerComponent from './Whiteboard_Components/TransformerComponent'
 import CanvasInsideWhiteboard from './Whiteboard_Components/CanvasInsideWhiteboard'
 import Portal from './Whiteboard_Components/Portal'
+import { SketchPicker } from 'react-color'
 
 const styles = theme => ({
     card: {
@@ -40,7 +41,7 @@ class Whiteboard extends React.Component {
     }
 
     handleStageMouseDown = e => {
-        // clicked on stage - clear selection 
+        // clicked on stage - clear selection
         if (e.target === e.target.getStage()) {
             this.setState({selectedShapeName: ''})
             return
@@ -77,9 +78,10 @@ class Whiteboard extends React.Component {
                             let defaultRect = {x: 40, y: 40, width: 100, height: 100, fill: 'grey', name: 'rect1'}
                             this.setState({rectangles: [...this.state.rectangles, defaultRect]
                         })}}>Add Rect</Button>
+                        <SketchPicker/>
                     </div>
                     <Divider/>
-                    <Stage width={800} height={600} 
+                    <Stage width={800} height={600}
                         ref={ref=>this.stage=ref}
                         onMouseDown={this.handleStageMouseDown}>
                         <Layer>
