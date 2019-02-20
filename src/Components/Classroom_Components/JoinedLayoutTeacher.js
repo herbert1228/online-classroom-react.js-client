@@ -6,6 +6,8 @@ import Drawer from '../Classroom_Components/Drawer'
 import { withStyles } from '@material-ui/core/styles'
 import ParticipantList from './ParticipantList'
 import Whiteboard from './Whiteboard'
+import {withCookies} from 'react-cookie'
+import {compose} from 'redux'
 
 const styles = theme => ({ 
     container: {
@@ -34,6 +36,7 @@ class JoinedLayoutTeacher extends Component {
             PList: { id: "PList", zIndex: 1, position: {x: 465, y: 5}, size: {width: 0, height: 0} }, 
         }
     }
+
     // componentDidUpdate(prevProps, prevState) {
     //     // if (prevProps.session_user && this.props.session_user){
     //         if (prevProps.session_user !== this.props.session_user) {
@@ -66,6 +69,17 @@ class JoinedLayoutTeacher extends Component {
         this.ref["selfDrawer"].updatePosition({x: 825, y: 230})
         this.bringTop("selfDrawer")
     }
+    saveLayout = () => {
+        const {cookies} = this.props
+        Object.values(this.state).forEach(outer => {
+            Object.values(outer).forEach(inner => {
+                cookies.set("layout", {
+                    ...this.state,
+                    [outer]: {...this.state[outer], inner}
+                })
+            })
+        })
+    }
     render() {
         const { classes, ...other } = this.props
         return (
@@ -80,6 +94,7 @@ class JoinedLayoutTeacher extends Component {
                                 </Button>
                         )))}
                         <Button onClick={()=>this.testfunc()}>update position</Button>
+                        <Button onClick={()=>this.saveLayout()}>saveLayout</Button>
                     </Toolbar>
                 </AppBar>
                 <div className={classes.container}>
@@ -151,4 +166,7 @@ function findKeyInNestedObject(key, nestedObj) {
     return result
 }
 
-export default withStyles(styles)(JoinedLayoutTeacher)
+export default compose(
+    withCookies,
+    withStyles(styles, {withTheme: true}),
+)(JoinedLayoutTeacher)

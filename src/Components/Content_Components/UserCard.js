@@ -1,7 +1,7 @@
 import React from 'react';
 // import PropTypes from 'prop-types'
 import {withStyles} from '@material-ui/core/styles'
-import {Card, CardHeader, Avatar, Divider} from '@material-ui/core'
+import {Card, CardHeader, Divider} from '@material-ui/core'
 import LocalStream from '../Classroom_Components/LocalStream'
 import RemoteStream from '../Classroom_Components/RemoteStream'
 import UserCardMenu from '../Classroom_Components/UserCardMenu'

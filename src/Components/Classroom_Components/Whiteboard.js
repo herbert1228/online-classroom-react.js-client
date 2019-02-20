@@ -6,8 +6,9 @@ import {Stage, Layer, Text, Image} from 'react-konva'
 import Rectangle from './Whiteboard_Components/Rectangle'
 import TransformerComponent from './Whiteboard_Components/TransformerComponent'
 import CanvasInsideWhiteboard from './Whiteboard_Components/CanvasInsideWhiteboard'
-import Portal from './Whiteboard_Components/Portal'
 import { SketchPicker } from 'react-color'
+// import Portal from './Whiteboard_Components/Portal'
+import {genid} from '../../interface/connection'
 
 const styles = theme => ({
     card: {
@@ -19,7 +20,6 @@ const styles = theme => ({
     },
     stage: {height: '800', width: '674'},
     panel: {
-        height: 100,
         width: '100%'
     }
 })
@@ -28,16 +28,17 @@ class Whiteboard extends React.Component {
     state = {
         drawRight: 'Read Only',
         camOpen: true,
-        isDraggingText: false,
-        rectangles: [
-            {x: 40, y: 40, width: 100, height: 100, fill: 'grey', name: 'rect1'},
-            {x: 150, y: 150, width: 100, height: 100, fill: 'green', name: 'rect2'}
+        objects: [
+            {type: "rectangle", x: 40, y: 40, width: 100, height: 100, fill: 'grey', name: 'rect1'},
+            {type: "rectangle", x: 150, y: 150, width: 100, height: 100, fill: 'green', name: 'rect2'},
+            {type: "text", x: 40, y: 40, text:"Text\nLine Break", fontSize: 18, fontFamily: "Calibri", fill: 'black', name: 'text1'},
         ],
         selectedShapeName: '',
-    }
-
-    componentDidMount() {
-        console.log(this.stage.getContainer())
+        cursor: {
+            x: null,
+            y: null
+        },
+        image: null,
     }
 
     handleStageMouseDown = e => {
@@ -47,15 +48,31 @@ class Whiteboard extends React.Component {
             return
         }
 
-        // clicked on transformer - do nothing
-        if (e.target.getParent().className === 'Transformer') return
-
         //find clicked rect by its name
         const name = e.target.name()
-        const rect = this.state.rectangles.find(r => r.name === name)
-        if (rect) {this.setState({selectedShapeName: name})}
-        else {this.setState({selectedShapeName: ''})}
+        const obj = this.state.objects.find(r => r.name === name)
+
+        // clicked on transformer - do nothing
+        if (e.target.getParent().className === 'Transformer') return
+        if (obj) {this.setState({selectedShapeName: name})}
+            else {this.setState({selectedShapeName: ''})}
         console.log("selectedShapeName:", this.state.selectedShapeName)
+    }
+
+    handleBringTop = () => {
+        console.log("lalala")
+        const objName = this.state.selectedShapeName
+        const obj = this.state.objects.find(r => r.name === objName)
+        console.log(objName)
+        console.log(obj)
+        this.state.objects.splice(this.state.objects.indexOf(obj), 1)
+        this.setState({objects: [...this.state.objects, obj]})
+    }
+    
+    handleMouseMove = e => {
+        var stage = e.currentTarget // same as: stage = this.stageRef.getStage(), or: stage = e.target.getStage()
+        this.setState({ cursor: stage.getPointerPosition() })
+        // console.log(this.state.cursor)
     }
 
     render() {
@@ -75,28 +92,36 @@ class Whiteboard extends React.Component {
                     <Divider/>
                     <div className={classes.panel}>
                         <Button onClick={()=> {
-                            let defaultRect = {x: 40, y: 40, width: 100, height: 100, fill: 'grey', name: 'rect1'}
-                            this.setState({rectangles: [...this.state.rectangles, defaultRect]
-                        })}}>Add Rect</Button>
+                            let newText = {
+                                type: "text", x: 40, y: 40, text:"New Text", fontSize: 18, 
+                                fontFamily: "Calibri", fill: 'blue', name: genid()}
+                            this.setState({objects: [...this.state.objects, newText]})}}>
+                            Add Text
+                        </Button>
                         <SketchPicker/>
+                        <Button onClick={this.handleBringTop}>
+                            Bring Top
+                        </Button>
                     </div>
                     <Divider/>
                     <Stage width={800} height={600}
                         ref={ref=>this.stage=ref}
+                        onClick={()=>console.log(this.stageRef.getPointerPosition())}
+                        // onDragMove = { () => {console.log("aaa")}}
+                        onMouseMove={this.handleMouseMove}
                         onMouseDown={this.handleStageMouseDown}>
                         <Layer>
-                            {this.state.rectangles.map((rect, i) => (
-                                <Rectangle key={i} {...rect}/>
-                            ))}
+                            {this.state.objects.map((obj, i) => {
+                                if (obj.type === "rectangle") return <Rectangle key={obj.name} {...obj}/>
+                                else if (obj.type === "text") return <Text key={obj.name} {...obj} draggable/>
+                            })}
                             <TransformerComponent selectedShapeName={this.state.selectedShapeName}/>
-                            <Text
-                                text="Draggable Text" name="draggableText"
-                                x={10} y={10} draggable
-                                fill={this.state.isDraggingText ? 'green' : 'black'}
-                                onDragStart={() => this.setState({isDraggingText: true})}
-                                onDragEnd={() => this.setState({isDraggingText: false})}
-                            />
+                            
                             <CanvasInsideWhiteboard/>
+                            {/* <Image
+                                image = {this.state.image}
+                            /> */}
+                            
                             {/* <Portal>
                                 <input
                                     style={{
