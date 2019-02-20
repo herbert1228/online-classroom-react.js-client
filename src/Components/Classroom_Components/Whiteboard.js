@@ -98,14 +98,14 @@ class Whiteboard extends React.Component {
                             this.setState({objects: [...this.state.objects, newText]})}}>
                             Add Text
                         </Button>
-                        <SketchPicker/>
+                        {/* <SketchPicker/> */}
                         <Button onClick={this.handleBringTop}>
                             Bring Top
                         </Button>
                     </div>
                     <Divider/>
                     <Stage width={800} height={600}
-                        ref={ref=>this.stage=ref}
+                        ref={ref=>this.stageRef=ref}
                         onClick={()=>console.log(this.stageRef.getPointerPosition())}
                         // onDragMove = { () => {console.log("aaa")}}
                         onMouseMove={this.handleMouseMove}

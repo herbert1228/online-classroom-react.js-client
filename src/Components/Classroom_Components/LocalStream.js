@@ -189,7 +189,7 @@ class LocalStream extends React.Component {
                     height = '100%'
                     autoPlay muted playsInline ref = {
                         video => {this.localVideo = video
-                    }}> </video> { /* <Button onClick={this.start} disabled={this.state.started}>Start</Button> */ } 
+                    }}> </video>
                 <Button 
                     style={{visibility: (!this.state.started || this.state.called)? 'hidden' : 'visible'}}
                     className={this.props.classes.button}

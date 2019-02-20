@@ -97,12 +97,12 @@ const connection = {
     connected() {
         return websocket? (websocket.readyState === websocket.OPEN) : false
     },
-    cast(type, params) {
-        sendMessage(websocket, ["cast", type, params])
+    cast(type, params, serverType = "cast") {
+        sendMessage(websocket, [serverType, type, params])
     },
-    call(type, params) {
+    call(type, params, serverType = "call") {
         let id = genid()
-        sendMessage(websocket, ["call", id, type, params])
+        sendMessage(websocket, [serverType, id, type, params])
 
         return new Promise((resolve, reject) => {
             callsInProgress[id] = resolve
@@ -117,87 +117,44 @@ const connection = {
     },
     removeListener(type, callback) {
         listener.removeListener(type, callback)
-    },
-    signalCast(type, params) {
-        sendMessage(websocket, ["signal_cast", type, params])
-    },
-    signalCall(type, params) {
-        let id = genid()
-        sendMessage(websocket, ["signal_call", id, type, params])
-
-        return new Promise((resolve, reject) => {
-            callsInProgress[id] = resolve
-            setTimeout(
-                () => reject(new Error(`call timeout, type: ${type}, params: ${params}`)),
-                TIMEOUT
-            )
-        })
     }
 }
 
 const signalingChannel = {
-    // createOffer() {
-
-    // },
+    cast(type, params) {
+        connection.cast(type, params, "signal_cast")
+    },
+    call(type, params) {
+        connection.call(type, params, "signal_call")
+    },
     // broadcast(message) {
     //     console.log('Local sending message: ', message.type)
     //     connection.cast("class_broadcast_message", message)
     // },
-    // sendTo(message, to) {
-    //     console.log(`Local sending message to ${to}: `, message.type)
-    //     message.to = to
-    //     connection.signalCast("class_direct_message", message)
-    // },
     requestOffer(to) {
         console.log(`Sending request offer to ${to}: `)        
-        connection.signalCast("request_offer", to)
+        this.cast("request_offer", to)
     },
     sendOffer(stream_owner, offer, to) {
         console.log(`Sending offer to ${to}: `, offer.type)
-        connection.signalCast("offer", {stream_owner, offer, to})
+        this.cast("offer", {stream_owner, offer, to})
     },
     sendAnswer(stream_owner, answer, to) {
         console.log(`Sending answer to ${to}: `, answer.type)
-        connection.signalCast("answer", {stream_owner, answer, to})
+        this.cast("answer", {stream_owner, answer, to})
     },
     sendCandidate(stream_owner, candidate, to) {
         console.log(`Sending candidate to ${to}: `)
-        connection.signalCast("candidate", {stream_owner, candidate, to})
-    },
-    // listenRequestOffer(callback) {
-    //     listener.addListener("request_offer", callback)
-    // },
-    setListenerForLocal() {
-
-    },
-    setListenerForRemote() {
-        
+        this.cast("candidate", {stream_owner, candidate, to})
     },
     gotUserMedia() {
-        connection.signalCast("got_media", null)
+        this.cast("got_media", null)
     }
 }
 
-// WhiteboardChannel.sendLoadImage(image)
-// conn.addListener("loadImage", (e)=> loadImag(e))
-const whiteboardChannel = {
-    notiflyLoadImage(image) { // {image(based64)}
-        sendMessage(websocket, ["whiteboard_cast", "loadImage", image])
-    },
-    notiflyClear() {
-        sendMessage(websocket, ["whiteboard_cast", "clear", null])
-    },
-    notiflyDraw(params) { // params = {lineWidth, lineColor, point}
-        sendMessage(websocket, ["whiteboard_cast", "draw", params])
-    },
-    notiflyErase(params) {// params = {lineWidth, point}
-        sendMessage(websocket, ["whiteboard_cast", "erase", params])        
-    },
-    notiflyRedo() {
-        sendMessage(websocket, ["whiteboard_cast", "redo", null])
-    },
-    notiflyUndo() {
-        sendMessage(websocket, ["whiteboard_cast", "undo", null])
+const WhiteboardChannel = {
+    cast(type, params) {
+        connection.cast(websocket, ["whiteboard_cast", type, params])
     }
 }
 
@@ -235,7 +192,7 @@ export {
     connection,
     signalingChannel,
     checkTURNServer,
-    whiteboardChannel,
+    WhiteboardChannel,
     uploadURL,
     genid
     // listener // for debug use
