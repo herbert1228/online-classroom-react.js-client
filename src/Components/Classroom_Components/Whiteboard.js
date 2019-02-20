@@ -6,7 +6,7 @@ import {Stage, Layer, Text, Image} from 'react-konva'
 import Rectangle from './Whiteboard_Components/Rectangle'
 import TransformerComponent from './Whiteboard_Components/TransformerComponent'
 import CanvasInsideWhiteboard from './Whiteboard_Components/CanvasInsideWhiteboard'
-import { SketchPicker } from 'react-color'
+// import { SketchPicker } from 'react-color'
 // import Portal from './Whiteboard_Components/Portal'
 import {genid} from '../../interface/connection'
 
@@ -24,49 +24,53 @@ const styles = theme => ({
     }
 })
 
+function defaultText() {
+    return {type: "text", x: 40, y: 40, text:"New Text\nwith Line Break", fontSize: 18, fontFamily: "Calibri", fill: 'blue', name: genid()}
+}
+
+function defaultRect() {
+    return {type: "rectangle", x: 150, y: 150, width: 100, height: 100, fill: 'grey', name: genid()}
+}
+
 class Whiteboard extends React.Component {
     state = {
-        drawRight: 'Read Only',
-        camOpen: true,
-        objects: [
-            {type: "rectangle", x: 40, y: 40, width: 100, height: 100, fill: 'grey', name: 'rect1'},
-            {type: "rectangle", x: 150, y: 150, width: 100, height: 100, fill: 'green', name: 'rect2'},
-            {type: "text", x: 40, y: 40, text:"Text\nLine Break", fontSize: 18, fontFamily: "Calibri", fill: 'black', name: 'text1'},
-        ],
+        permission: 'Read Only',
+        objects: [{type: "whiteboard", name: "whiteboard"}],
         selectedShapeName: '',
-        cursor: {
-            x: null,
-            y: null
-        },
+        cursor: {x: null, y: null},
         image: null,
     }
 
     handleStageMouseDown = e => {
+        console.log(this.state.test)
         // clicked on stage - clear selection
-        if (e.target === e.target.getStage()) {
+        if (e.target === e.target.getStage() || e.target.name === "whiteboard") {
             this.setState({selectedShapeName: ''})
             return
         }
 
-        //find clicked rect by its name
         const name = e.target.name()
         const obj = this.state.objects.find(r => r.name === name)
 
         // clicked on transformer - do nothing
         if (e.target.getParent().className === 'Transformer') return
         if (obj) {this.setState({selectedShapeName: name})}
-            else {this.setState({selectedShapeName: ''})}
-        console.log("selectedShapeName:", this.state.selectedShapeName)
+        else {this.setState({selectedShapeName: ''})}
     }
 
-    handleBringTop = () => {
-        console.log("lalala")
+    handleZIndex = type => { // type = "top" || "bottom"
         const objName = this.state.selectedShapeName
         const obj = this.state.objects.find(r => r.name === objName)
-        console.log(objName)
-        console.log(obj)
+        if (!obj) {
+            this.props.handleNotification("No object selected!")
+            return
+        }
         this.state.objects.splice(this.state.objects.indexOf(obj), 1)
-        this.setState({objects: [...this.state.objects, obj]})
+        if (type === "top") {
+            this.setState({objects: [...this.state.objects, obj]})
+        } else if (type === "bottom") {
+            this.setState({objects: [obj, ...this.state.objects]})
+        } else throw new Error("Invalid type for handleZIndex")
     }
     
     handleMouseMove = e => {
@@ -92,15 +96,19 @@ class Whiteboard extends React.Component {
                     <Divider/>
                     <div className={classes.panel}>
                         <Button onClick={()=> {
-                            let newText = {
-                                type: "text", x: 40, y: 40, text:"New Text", fontSize: 18, 
-                                fontFamily: "Calibri", fill: 'blue', name: genid()}
-                            this.setState({objects: [...this.state.objects, newText]})}}>
+                            this.setState({objects: [...this.state.objects, defaultText()]})}}>
                             Add Text
                         </Button>
+                        <Button onClick={()=> {
+                            this.setState({objects: [...this.state.objects, defaultRect()]})}}>
+                            Add Rect
+                        </Button>
                         {/* <SketchPicker/> */}
-                        <Button onClick={this.handleBringTop}>
+                        <Button onClick={() => this.handleZIndex("top")}>
                             Bring Top
+                        </Button>
+                        <Button onClick={() => this.handleZIndex("bottom")}>
+                            Bring Bottom
                         </Button>
                     </div>
                     <Divider/>
@@ -112,12 +120,19 @@ class Whiteboard extends React.Component {
                         onMouseDown={this.handleStageMouseDown}>
                         <Layer>
                             {this.state.objects.map((obj, i) => {
-                                if (obj.type === "rectangle") return <Rectangle key={obj.name} {...obj}/>
-                                else if (obj.type === "text") return <Text key={obj.name} {...obj} draggable/>
+                                if (obj === undefined) console.log(obj)
+                                else if (obj.type === "whiteboard")
+                                    return <CanvasInsideWhiteboard key="whiteboard"/>
+                                else if (obj.type === "rectangle") 
+                                    return <Rectangle key={obj.name} {...obj}/>
+                                else if (obj.type === "text") 
+                                    return <Text key={obj.name} {...obj} draggable/>
+                                else if (obj.type === "image") 
+                                    return <Image />
+                                return <Image />
                             })}
                             <TransformerComponent selectedShapeName={this.state.selectedShapeName}/>
                             
-                            <CanvasInsideWhiteboard/>
                             {/* <Image
                                 image = {this.state.image}
                             /> */}

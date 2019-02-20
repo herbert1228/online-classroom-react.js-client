@@ -1,10 +1,9 @@
 import Popover from '../Popover'
 import React, { Fragment } from 'react';
 import {withStyles} from '@material-ui/core/styles'
-import {Button, DialogActions, DialogContent, IconButton } from "@material-ui/core";
+import { DialogContent, IconButton } from "@material-ui/core";
 import {uploadURL} from '../../interface/connection'
 import View from '@material-ui/icons/Pageview';
-
 
 const styles = theme => ({
 
@@ -14,14 +13,14 @@ class ViewButton extends React.Component {
     state = { 
         open: false,
         data: null,
-     }
+    }
 
-    handleCancel = () => {
+    handleClose = () => {
         this.setState({open: false})
     }
 
-    handleOpenOrClose() {
-        this.setState({open: !this.state.open})
+    handleOpen() {
+        this.setState({open: true})
     }
 
     handleView = (filename) => {
@@ -37,27 +36,40 @@ class ViewButton extends React.Component {
             
         //     reader.readAsDataURL(blob);
         // })
-        .then(() => this.handleOpenOrClose())
+        .then(() => this.handleOpen())
         .catch(e => {this.props.handleNotification(`${e}`)})
+    }
+
+    isCannotView(filename) {
+        if (filename.substr(-4) === ".jpg"
+            || filename.substr(-4) === ".png"
+            || filename.substr(-4) === ".gif"
+            || filename.substr(-4) === ".svg"
+            || filename.substr(-4) === ".bmp"
+            || filename.substr(-5) === ".jpeg"
+            || filename.substr(-5) === ".apng"){
+            return false
+        }
+        return true
     }
 
     render() { 
         const { username, password, filename} = this.props
         return (
             <Fragment>
-                <IconButton aria-label="View" onClick={() => this.handleView(this.props.filename)}>
+                <IconButton 
+                    aria-label="View" 
+                    disabled={this.isCannotView(filename)}
+                    onClick={() => this.handleView(filename)}>
                     <View />
                 </IconButton>
-                <Popover title="Viewing File" open={this.state.open}>
+                <Popover title="Viewing File" open={this.state.open} onClose={this.handleClose}>
                 <DialogContent>
                     <img 
                         alt="View Selected File"
                         src={uploadURL+`/download/${username}/${password}/${filename}`} 
                         width="100%" height="100%"/>
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={this.handleCancel} color="primary">Cancel</Button>
-                </DialogActions>
                 </Popover>
             </Fragment>
         );

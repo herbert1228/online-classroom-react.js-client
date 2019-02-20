@@ -1,7 +1,6 @@
-import React, { Component }  from 'react';
+import React from 'react';
 import {withStyles} from '@material-ui/core/styles'
-import {Stage, Layer, Image} from 'react-konva'
-import { shape } from 'prop-types';
+import {Image} from 'react-konva'
 
 const styles = theme => ({
 })
@@ -21,7 +20,7 @@ class CanvasInsideWhiteboard extends React.Component {
 
     componentDidMount() {
         const canvas = document.createElement('canvas')
-        canvas.width = 400
+        canvas.width = 800
         canvas.height = 600
         this.ctx = canvas.getContext('2d')       
         this.setState({canvas})
@@ -112,11 +111,10 @@ class CanvasInsideWhiteboard extends React.Component {
     render() {
         return (
             <Image
-                x={400}
+                x={0}
                 y={0}
                 image={this.state.canvas}
                 ref={node => (this.image = node)}
-                stroke={"green"}
                 shadowBlur={5}
                 onMouseDown={this.handleMouseDown}
                 onMouseUp={this.handleMouseUp}

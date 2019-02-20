@@ -1,7 +1,7 @@
 import React from 'react';
 // import PropTypes from 'prop-types'
 import {withStyles} from '@material-ui/core/styles'
-import {Card, CardHeader, Divider, Grid} from '@material-ui/core'
+import {Card, CardHeader, Divider, Grid, Typography} from '@material-ui/core'
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
@@ -43,6 +43,12 @@ const styles = theme => ({
     infolist: {
         width: 450,
         height: 150
+    },
+    listItem: {
+        width: 285, // 270
+        overflow: "hidden",
+        // whiteSpace: "nowrap",
+        // textOverflow: "ellipsis"
     },
     dropzone: {
 
@@ -110,6 +116,14 @@ class Drawer extends React.Component {
         }
     }
 
+    breakFilenameToLines(filename) {
+        const len = 21
+        if (filename.length > len) {
+            return filename.substr(0, len) + ' ' + filename.substr(len)
+        }
+        return filename
+    }
+
     render() {
         const {classes, ...other} = this.props;
         const { dense } = this.state;
@@ -134,28 +148,14 @@ class Drawer extends React.Component {
                                 <List dense={dense} className={classes.infolist}>
                                     {this.state.files &&
                                     this.state.files.map(filename => 
-                                    <ListItem key={filename}>
+                                    <ListItem key={filename} className={classes.listItem}>
                                         <ListItemAvatar>
-                                        <Avatar>
-                                            <FolderIcon />
-                                        </Avatar>
+                                            <Avatar>
+                                                <FolderIcon />
+                                            </Avatar>
                                         </ListItemAvatar>
-                                        <ListItemText 
-                                            primary={filename}
-                                        />
-                                        {/* <div onDragOver={e=>e.preventDefault()}>
-                                            <p 
-                                                draggable={true}
-                                                id={`dragtarget${filename}`}
-                                                ondragstart={e=>{
-                                                    e.dataTransfer.setData("Text", e.target.id)
-                                            }}>
-                                                {filename}
-                                            </p>
-                                        </div> */}
+                                        <ListItemText primary={this.breakFilenameToLines(filename)}/>
                                         <ListItemSecondaryAction>
-                                        {/* <button>View</button> */}
-                                        {/* <button>Download</button> */}
                                         <ViewButton 
                                             {...other} 
                                             filename={filename}
