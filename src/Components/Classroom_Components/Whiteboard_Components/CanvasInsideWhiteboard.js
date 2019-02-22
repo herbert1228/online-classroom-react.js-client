@@ -115,7 +115,7 @@ class CanvasInsideWhiteboard extends React.Component {
                 y={0}
                 image={this.state.canvas}
                 ref={node => (this.image = node)}
-                shadowBlur={5}
+                shadowBlur={1}
                 onMouseDown={this.handleMouseDown}
                 onMouseUp={this.handleMouseUp}
                 onMouseMove={this.handleMouseMove}

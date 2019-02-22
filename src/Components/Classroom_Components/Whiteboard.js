@@ -15,13 +15,11 @@ const styles = theme => ({
         width: '100%',
         height: '100%'
     },
-    avatar: {
-        backgroundColor: "#769da8"
-    },
+    // avatar: {
+    //     backgroundColor: "#769da8"
+    // },
     stage: {height: '800', width: '674'},
-    panel: {
-        width: '100%'
-    }
+    panel: { width: '100%'}
 })
 
 function defaultText() {
@@ -34,7 +32,7 @@ function defaultRect() {
 
 class Whiteboard extends React.Component {
     state = {
-        permission: 'Read Only',
+        permission: this.props.user === this.props.self,
         objects: [{type: "whiteboard", name: "whiteboard"}],
         selectedShapeName: '',
         cursor: {x: null, y: null},
@@ -42,8 +40,7 @@ class Whiteboard extends React.Component {
     }
 
     handleStageMouseDown = e => {
-        console.log(this.state.test)
-        // clicked on stage - clear selection
+        // clicked on stage/whiteboard - clear selection
         if (e.target === e.target.getStage() || e.target.name === "whiteboard") {
             this.setState({selectedShapeName: ''})
             return
@@ -59,8 +56,7 @@ class Whiteboard extends React.Component {
     }
 
     handleZIndex = type => { // type = "top" || "bottom"
-        const objName = this.state.selectedShapeName
-        const obj = this.state.objects.find(r => r.name === objName)
+        const obj = this.state.objects.find(r => r.name === this.state.selectedShapeName)
         if (!obj) {
             this.props.handleNotification("No object selected!")
             return
@@ -72,11 +68,24 @@ class Whiteboard extends React.Component {
             this.setState({objects: [obj, ...this.state.objects]})
         } else throw new Error("Invalid type for handleZIndex")
     }
+
+    handleRemove = () => {
+        const obj = this.state.objects.find(r => r.name === this.state.selectedShapeName)
+        if (!obj) {
+            this.props.handleNotification("No object selected!")
+            return
+        }
+        this.state.objects.splice(this.state.objects.indexOf(obj), 1)
+    }
     
     handleMouseMove = e => {
         var stage = e.currentTarget // same as: stage = this.stageRef.getStage(), or: stage = e.target.getStage()
         this.setState({ cursor: stage.getPointerPosition() })
         // console.log(this.state.cursor)
+    }
+
+    handleEditText = name => {
+        
     }
 
     render() {
@@ -89,7 +98,11 @@ class Whiteboard extends React.Component {
                 >
                     <CardHeader //this height is 74px
                         title="Whiteboard"
-                        subheader="Teacher"
+                        subheader={
+                            (this.props.joined.owner === this.props.user? 'Teacher: ' : '') 
+                            + this.props.user
+                            + (this.state.permission? '' : ' (Read Only)')
+                        }
                         id={`draggable${id}`}
                         style={{height: 50}}
                     />
@@ -110,6 +123,9 @@ class Whiteboard extends React.Component {
                         <Button onClick={() => this.handleZIndex("bottom")}>
                             Bring Bottom
                         </Button>
+                        <Button onClick={this.handleRemove}>
+                            Remove
+                        </Button>
                     </div>
                     <Divider/>
                     <Stage width={800} height={600}
@@ -126,7 +142,7 @@ class Whiteboard extends React.Component {
                                 else if (obj.type === "rectangle") 
                                     return <Rectangle key={obj.name} {...obj}/>
                                 else if (obj.type === "text") 
-                                    return <Text key={obj.name} {...obj} draggable/>
+                                    return <Text key={obj.name} {...obj} draggable onDblClick={() => this.handleEditText(obj.name)}/>
                                 else if (obj.type === "image") 
                                     return <Image />
                                 return <Image />
