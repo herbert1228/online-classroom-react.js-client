@@ -74,6 +74,8 @@ class LocalStream extends React.Component {
         })
         conn.addListener("candidate", (e) => {
             if (e.stream_owner !== this.props.self) return
+            console.log(e.stream_owner, this.props.self)
+            console.log(e)
             if (this.state.called && e.candidate === null) return
             try {
                 setTimeout(() => this.pc[e.from].addIceCandidate(e.candidate), 1000)
@@ -187,7 +189,7 @@ class LocalStream extends React.Component {
                     height = '100%'
                     autoPlay muted playsInline ref = {
                         video => {this.localVideo = video
-                    }}> </video> { /* <Button onClick={this.start} disabled={this.state.started}>Start</Button> */ } 
+                    }}> </video>
                 <Button 
                     style={{visibility: (!this.state.started || this.state.called)? 'hidden' : 'visible'}}
                     className={this.props.classes.button}

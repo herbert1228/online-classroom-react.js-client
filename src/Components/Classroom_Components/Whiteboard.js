@@ -7,65 +7,94 @@ import {Stage, Layer, Text, Image} from 'react-konva'
 import Rectangle from './Whiteboard_Components/Rectangle'
 import TransformerComponent from './Whiteboard_Components/TransformerComponent'
 import CanvasInsideWhiteboard from './Whiteboard_Components/CanvasInsideWhiteboard'
-import Portal from './Whiteboard_Components/Portal'
 import { CompactPicker } from 'react-color'
 import penButton from "./thumbnail/pen.png"
 import eraserButton from "./thumbnail/eraser.png"
 import downloadButton from "./thumbnail/download.png"
+// import { SketchPicker } from 'react-color'
+// import Portal from './Whiteboard_Components/Portal'
+import {genid} from '../../interface/connection'
 
 const styles = theme => ({
     card: {
         width: '100%',
         height: '100%'
     },
-    avatar: {
-        backgroundColor: "#769da8"
-    },
+    // avatar: {
+    //     backgroundColor: "#769da8"
+    // },
     stage: {height: '800', width: '674'},
-    panel: {
-        height: 100,
-        width: '100%'
-    },
-
+    panel: { width: '100%'}
 })
+
+function defaultText() {
+    return {type: "text", x: 40, y: 40, text:"New Text\nwith Line Break", fontSize: 18, fontFamily: "Calibri", fill: 'blue', name: genid()}
+}
+
+function defaultRect() {
+    return {type: "rectangle", x: 150, y: 150, width: 100, height: 100, fill: 'grey', name: genid()}
+}
 
 class Whiteboard extends React.Component {
     state = {
-        drawRight: 'Read Only',
-        camOpen: true,
-        isDraggingText: false,
-        rectangles: [
-            {x: 40, y: 40, width: 100, height: 100, fill: 'grey', name: 'rect1'},
-            {x: 150, y: 150, width: 100, height: 100, fill: 'green', name: 'rect2'}
-        ],
+        permission: this.props.user === this.props.self,
+        objects: [{type: "whiteboard", name: "whiteboard"}],
         selectedShapeName: '',
         lineColor: "#000000",
         lineWidth: 5,
         mode: "draw",
-        startDownload: false
-        }
-
-
-    componentDidMount() {
-        console.log(this.stage.getContainer())
+        startDownload: false,
+        cursor: {x: null, y: null},
+        image: null,
     }
 
     handleStageMouseDown = e => {
-        // clicked on stage - clear selection
-        if (e.target === e.target.getStage()) {
+        // clicked on stage/whiteboard - clear selection
+        if (e.target === e.target.getStage() || e.target.name === "whiteboard") {
             this.setState({selectedShapeName: ''})
             return
         }
 
+        const name = e.target.name()
+        const obj = this.state.objects.find(r => r.name === name)
+
         // clicked on transformer - do nothing
         if (e.target.getParent().className === 'Transformer') return
-
-        //find clicked rect by its name
-        const name = e.target.name()
-        const rect = this.state.rectangles.find(r => r.name === name)
-        if (rect) {this.setState({selectedShapeName: name})}
+        if (obj) {this.setState({selectedShapeName: name})}
         else {this.setState({selectedShapeName: ''})}
-        console.log("selectedShapeName:", this.state.selectedShapeName)
+    }
+
+    handleZIndex = type => { // type = "top" || "bottom"
+        const obj = this.state.objects.find(r => r.name === this.state.selectedShapeName)
+        if (!obj) {
+            this.props.handleNotification("No object selected!")
+            return
+        }
+        this.state.objects.splice(this.state.objects.indexOf(obj), 1)
+        if (type === "top") {
+            this.setState({objects: [...this.state.objects, obj]})
+        } else if (type === "bottom") {
+            this.setState({objects: [obj, ...this.state.objects]})
+        } else throw new Error("Invalid type for handleZIndex")
+    }
+
+    handleRemove = () => {
+        const obj = this.state.objects.find(r => r.name === this.state.selectedShapeName)
+        if (!obj) {
+            this.props.handleNotification("No object selected!")
+            return
+        }
+        this.state.objects.splice(this.state.objects.indexOf(obj), 1)
+    }
+    
+    handleMouseMove = e => {
+        var stage = e.currentTarget // same as: stage = this.stageRef.getStage(), or: stage = e.target.getStage()
+        this.setState({ cursor: stage.getPointerPosition() })
+        // console.log(this.state.cursor)
+    }
+
+    handleEditText = name => {
+        
     }
 
     handleColorChange = (color, event) => {
@@ -100,17 +129,34 @@ class Whiteboard extends React.Component {
                 >
                     <CardHeader //this height is 74px
                         title="Whiteboard"
-                        subheader="Teacher"
+                        subheader={
+                            (this.props.joined.owner === this.props.user? 'Teacher: ' : '') 
+                            + this.props.user
+                            + (this.state.permission? '' : ' (Read Only)')
+                        }
                         id={`draggable${id}`}
                         style={{height: 50}}
                     />
                     <Divider/>
                     <div className={classes.panel}>
                         <Button onClick={()=> {
-                            let defaultRect = {x: 40, y: 40, width: 100, height: 100, fill: 'grey', name: 'rect1'}
-                            this.setState({rectangles: [...this.state.rectangles, defaultRect]
-                        })}}>Add Rect</Button>
-
+                            this.setState({objects: [...this.state.objects, defaultText()]})}}>
+                            Add Text
+                        </Button>
+                        <Button onClick={()=> {
+                            this.setState({objects: [...this.state.objects, defaultRect()]})}}>
+                            Add Rect
+                        </Button>
+                        {/* <SketchPicker/> */}
+                        <Button onClick={() => this.handleZIndex("top")}>
+                            Bring Top
+                        </Button>
+                        <Button onClick={() => this.handleZIndex("bottom")}>
+                            Bring Bottom
+                        </Button>
+                        <Button onClick={this.handleRemove}>
+                            Remove
+                        </Button>
                         <span id="color" ref="color">
                           <CompactPicker color={ this.state.lineColor}
                                          onChangeComplete={ this.handleColorChange}/>
@@ -138,31 +184,37 @@ class Whiteboard extends React.Component {
                             alt="btn-download" id="btn-download" src={downloadButton}
                             width="40px" height="40px" />
                         </span>
-
-
                     </div>
                     <Divider/>
                     <Stage width={800} height={600}
-                        ref={ref=>this.stage=ref}
+                        ref={ref=>this.stageRef=ref}
+                        onClick={()=>console.log(this.stageRef.getPointerPosition())}
+                        // onDragMove = { () => {console.log("aaa")}}
+                        onMouseMove={this.handleMouseMove}
                         onMouseDown={this.handleStageMouseDown}>
                         <Layer>
-                            {this.state.rectangles.map((rect, i) => (
-                                <Rectangle key={i} {...rect}/>
-                            ))}
+                            {this.state.objects.map((obj, i) => {
+                                if (obj === undefined) console.log(obj)
+                                else if (obj.type === "whiteboard")
+                                    return <CanvasInsideWhiteboard 
+                                                key="whiteboard"
+                                                lineColor={ this.state.lineColor }
+                                                lineWidth={ this.state.lineWidth }
+                                                mode={ this.state.mode }
+                                                startDownload={ this.state.startDownload } 
+                                            />
+                                else if (obj.type === "rectangle") 
+                                    return <Rectangle key={obj.name} {...obj}/>
+                                else if (obj.type === "text") 
+                                    return <Text key={obj.name} {...obj} draggable onDblClick={() => this.handleEditText(obj.name)}/>
+                                else if (obj.type === "image") 
+                                    return <Image />
+                                return <Image />
+                            })}
                             <TransformerComponent selectedShapeName={this.state.selectedShapeName}/>
-                            <Text
-                                text="Draggable Text" name="draggableText"
-                                x={10} y={10} draggable
-                                fill={this.state.isDraggingText ? 'green' : 'black'}
-                                onDragStart={() => this.setState({isDraggingText: true})}
-                                onDragEnd={() => this.setState({isDraggingText: false})}
-                            />
-                            <CanvasInsideWhiteboard lineColor={ this.state.lineColor }
-                                                    lineWidth={ this.state.lineWidth }
-                                                    mode={ this.state.mode }
-                                                    startDownload={ this.state.startDownload }
-                                                    ref={this.child}
-                            />
+                            {/* <Image
+                                image = {this.state.image}
+                            /> */}
                             {/* <Portal>
                                 <input
                                     style={{

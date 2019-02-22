@@ -53,7 +53,7 @@ function reducer(state = initialState, action) {
         case "joinClass":
             return {...state, joined: {owner: action.owner, class_name: action.class_name}}
         case "leaveClass":
-            return {...state, joined: null}
+            return {...state, joined: null, session_user: []}
         default: 
             return state
     }

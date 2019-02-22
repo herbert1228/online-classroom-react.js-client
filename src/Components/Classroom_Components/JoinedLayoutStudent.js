@@ -23,8 +23,8 @@ class JoinedLayoutStudent extends Component {
             teacherWebcam: { id: "teacherWebcam", zIndex: 3, position: {x: 0, y: 5}, size: {width: 460, height: 345+72} }, 
         },
         whiteboard: {
-            selfWhiteboard: { id: "selfWhiteboard", zIndex: 2, position: {x: 800, y: 150}, size: {width: 800, height: 774} },
-            teacherWhiteboard: { id: "teacherWhiteboard", zIndex: 2, position: {x: 0, y: 150}, size: {width: 800, height: 774} }, 
+            selfWhiteboard: { id: "selfWhiteboard", user: this.props.self, zIndex: 2, position: {x: 800, y: 150}, size: {width: 800, height: 774} },
+            teacherWhiteboard: { id: "teacherWhiteboard", user: this.props.joined.owner, zIndex: 2, position: {x: 0, y: 150}, size: {width: 800, height: 774} }, 
         },
         drawer: {
             selfDrawer: { id: "selfDrawer", zIndex: 0, position: {x: 660, y: 5}, size: {width: 450, height: 550} }, 
@@ -99,17 +99,13 @@ class JoinedLayoutStudent extends Component {
                     {Object.values(this.state.whiteboard).map((whiteboard) => (
                         <Whiteboard
                             key={whiteboard.id}
-                            id={whiteboard.id}
+                            {...whiteboard}
                             bringTop={() => this.bringTop(whiteboard.id)}
-                            size={whiteboard.size}
-                            position={whiteboard.position}
-                            zIndex={whiteboard.zIndex}      
                             inputRef={(id, el) => this.ref[id] = el}
                             lockAspectRatio={4/3}
                             lockAspectRatioExtraHeight={72}
                             enableResizing={false}
                             {...other}
-                            user={(whiteboard.id === "teacherWebcam") ? this.props.self: "Teacher" }   
                         />
                     ))}
                     <Drawer 

@@ -25,10 +25,6 @@ class ChangeUserInfo extends React.Component {
         this.setState({open: true})
     }
 
-    handleCancel = () => {
-        this.setState({open: false})
-    }
-
     handleSave = () => {
         this.setState({open: false})
     }

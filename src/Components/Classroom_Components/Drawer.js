@@ -19,6 +19,7 @@ import {compose} from 'redux'
 import RndContainer from './RndContainer';
 import { FileDownload } from '@material-ui/icons';
 import ShareBrn from './ShareBtn'
+import ViewButton from './ViewButton'
 
 const styles = theme => ({
     card: {
@@ -42,6 +43,12 @@ const styles = theme => ({
     infolist: {
         width: 450,
         height: 150
+    },
+    listItem: {
+        width: 285, // 270
+        overflow: "hidden",
+        // whiteSpace: "nowrap",
+        // textOverflow: "ellipsis"
     },
     dropzone: {
 
@@ -109,6 +116,14 @@ class Drawer extends React.Component {
         }
     }
 
+    breakFilenameToLines(filename) {
+        const len = 21
+        if (filename.length > len) {
+            return filename.substr(0, len) + ' ' + filename.substr(len)
+        }
+        return filename
+    }
+
     render() {
         const {classes, ...other} = this.props;
         const { dense } = this.state;
@@ -133,29 +148,20 @@ class Drawer extends React.Component {
                                 <List dense={dense} className={classes.infolist}>
                                     {this.state.files &&
                                     this.state.files.map(filename => 
-                                    <ListItem key={filename}>
+                                    <ListItem key={filename} className={classes.listItem}>
                                         <ListItemAvatar>
-                                        <Avatar>
-                                            <FolderIcon />
-                                        </Avatar>
+                                            <Avatar>
+                                                <FolderIcon />
+                                            </Avatar>
                                         </ListItemAvatar>
-                                        <ListItemText 
-                                            primary={filename}
-                                        />
-                                        {/* <div onDragOver={e=>e.preventDefault()}>
-                                            <p 
-                                                draggable={true}
-                                                id={`dragtarget${filename}`}
-                                                ondragstart={e=>{
-                                                    e.dataTransfer.setData("Text", e.target.id)
-                                            }}>
-                                                {filename}
-                                            </p>
-                                        </div> */}
+                                        <ListItemText primary={this.breakFilenameToLines(filename)}/>
                                         <ListItemSecondaryAction>
-                                        {/* <button>View</button> */}
-                                        {/* <button>Download</button> */}
-                                        {/* <ShareBrn {...other} filename={filename}/> */}
+                                        <ViewButton 
+                                            {...other} 
+                                            filename={filename}
+                                            username={this.props.cookies.get("name")}
+                                            password={this.props.cookies.get("password")}
+                                            />
                                         <ShareBrn {...other} filename={filename}/>
                                         <IconButton aria-label="Download" onClick={() => this.handleDownload(filename)}>
                                             <FileDownload />
