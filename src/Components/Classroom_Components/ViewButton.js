@@ -46,6 +46,7 @@ class ViewButton extends React.Component {
             || filename.substr(-4) === ".gif"
             || filename.substr(-4) === ".svg"
             || filename.substr(-4) === ".bmp"
+            || filename.substr(-4) === ".pdf"
             || filename.substr(-5) === ".jpeg"
             || filename.substr(-5) === ".apng"){
             return false

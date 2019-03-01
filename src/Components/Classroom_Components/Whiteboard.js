@@ -1,5 +1,4 @@
-import React, { Component } from 'react';
-import { render } from 'react-dom'
+import React from 'react';
 import {withStyles} from '@material-ui/core/styles'
 import {Card, CardHeader, Divider, Button} from '@material-ui/core'
 import RndContainer from '../Classroom_Components/RndContainer'
