@@ -6,6 +6,9 @@ import LocalStream from '../Classroom_Components/LocalStream'
 import RemoteStream from '../Classroom_Components/RemoteStream'
 import UserCardMenu from '../Classroom_Components/UserCardMenu'
 import RndContainer from '../Classroom_Components/RndContainer'
+import IconButton from '@material-ui/core/IconButton';
+import { PinDrop } from '@material-ui/icons';
+
 
 const styles = theme => ({
     card: {
@@ -35,10 +38,17 @@ class UserCard extends React.Component {
         const {classes, ...other} = this.props;
         return (
             <RndContainer {...other}>
-                <Card className={classes.card} style={{overflow: "hidden"}}>
-                    <CardHeader //this height is 74px
-                        style={{overflow: "hidden"}}
+                <Card className={classes.card} style={{overflow: "hidden"}} elevation={7}>
+                    <CardHeader
                         id={`draggable${this.props.id}`}
+                        title= {<div style={{paddingTop: 9}}>{user}</div>}
+                        style={{
+                            height: 18,
+                            paddingTop: 7,
+                            overflow: "hidden",
+                            whiteSpace: "nowrap",
+                            textOverflow: "ellipsis"
+                        }}
                         // avatar={
                         //     <Avatar aria-label="user whiteboard" className={classes.avatar}>
                         //         {user.substring(0, 3)}
@@ -47,7 +57,11 @@ class UserCard extends React.Component {
                         action={
                             <UserCardMenu disableWebcam={this.disableWebcam.bind(this)}/>
                         }
-                        subheader={`${user}'s Webcam`}
+                        action={
+                            <IconButton onClick={() => this.props.pinTop}>
+                                <PinDrop />
+                            </IconButton>
+                        }
                         // subheader={this.state.drawRight}
                     />
                     <Divider/>

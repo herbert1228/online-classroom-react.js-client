@@ -48,7 +48,10 @@ var DEBUG = false
 ;(function () {
     var send = WebSocket.prototype.send
     WebSocket.prototype.send = function (msg) {
-        if (DEBUG) if (JSON.parse(msg) !== "keep_alive") console.log("websocket sending:\n", JSON.parse(msg))
+        if (!DEBUG) return send.call(this, msg)
+        if (JSON.parse(msg) == "keep_alive") return send.call(this, msg)
+
+        console.log("websocket sending:\n", JSON.parse(msg))
         return send.call(this, msg)
     }
 })()
@@ -152,9 +155,24 @@ const signalingChannel = {
     }
 }
 
-const WhiteboardChannel = {
+const WhiteboardChannel = { // use owner as target
     cast(type, params) {
-        connection.cast(websocket, ["whiteboard_cast", type, params])
+        connection.cast(type, params, "whiteboard_cast")
+    },
+    call(type, params) {
+        connection.call(type, params, "whiteboard_call")
+    },
+    connect(target) {
+        this.call("connect", target)
+    },
+    disconnect(target) {
+        this.call("disconnect", target)
+    },
+    draw(target, lines) {
+        this.cast("draw", {target, lines})
+    },
+    onReceiveDraw(target, callback) {
+        connection.addListener("whiteboard_draw_" + target, callback)
     }
 }
 

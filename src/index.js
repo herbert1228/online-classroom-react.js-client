@@ -29,6 +29,7 @@ const initialState = {
     location: 0,
     self: null,
     joined: null,
+    drawerOpen: true
 }
 
 function reducer(state = initialState, action) {
@@ -54,6 +55,8 @@ function reducer(state = initialState, action) {
             return {...state, joined: {owner: action.owner, class_name: action.class_name}}
         case "leaveClass":
             return {...state, joined: null, session_user: []}
+        case "drawerOpen":
+            return {...state, drawerOpen: action.drawerOpen}
         default: 
             return state
     }

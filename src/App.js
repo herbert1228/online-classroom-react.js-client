@@ -92,13 +92,15 @@ class App extends React.Component {
                     handleExited={this.processQueue}/>
                 {(this.props.self) &&
                     <div className={classes.root}>
-                        <DrawerLeft
-                            open={this.state.open}
-                            changeScene={this.changeScene}
-                            location={this.props.location}
-                            handleNotification={this.handleNotification}
-                            {...others}
-                        />
+                        {this.props.drawerOpen &&
+                            <DrawerLeft
+                                open={this.state.open}
+                                changeScene={this.changeScene}
+                                location={this.props.location}
+                                handleNotification={this.handleNotification}
+                                {...others}
+                            />
+                        }
                         <div className={classes.content}>
                             {this.props.location === 0 &&<Content {...this.state} {...others} handleNotification={this.handleNotification}/>}
                             {this.props.location === 1 &&<Classroom {...this.state} {...others} handleNotification={this.handleNotification} changeScene={this.changeScene}/>}
@@ -134,6 +136,7 @@ function mapStateToProps(state) {
         self: state.self,
         joined: state.joined,
         peerConn: state.peerConn,
+        drawerOpen: state.drawerOpen
     }
 }
 

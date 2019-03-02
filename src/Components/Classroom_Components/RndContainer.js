@@ -16,6 +16,24 @@ class RndContainer extends React.Component {
                 default={{...size, ...position}}
                 onMouseDown={() => this.props.bringTop()}
                 onDragStart={() => this.props.bringTop()}
+                // TODO need physically click the card header to handle blur problem
+                // onDragStop={() => {
+                //     setTimeout(() => {
+                //         let {x, y} = document.getElementById(`draggable${id}`).getBoundingClientRect()
+                //         x += 10
+                //         y += 10
+                //         console.log("clicking", x, y)
+                //         const ev = new MouseEvent('click', {
+                //             'view': window,
+                //             'bubbles': true,
+                //             'cancelable': true,
+                //             screenX: x,
+                //             screenY: y
+                //         })
+                //         const el = document.elementFromPoint(x, y)
+                //         el.dispatchEventev
+                //     }, 2000)
+                // }}
                 lockAspectRatio={lockAspectRatio || false}
                 enableResizing={(enableResizing === false)?  {} : {
                     bottom: true, bottomLeft: true, bottomRight: true,

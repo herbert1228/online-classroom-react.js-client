@@ -23,12 +23,12 @@ class JoinedLayoutStudent extends Component {
             teacherWebcam: { id: "teacherWebcam", zIndex: 3, position: {x: 0, y: 5}, size: {width: 460, height: 345+72} }, 
         },
         whiteboard: {
-            selfWhiteboard: { id: "selfWhiteboard", user: this.props.self, zIndex: 2, position: {x: 800, y: 150}, size: {width: 800, height: 774} },
-            teacherWhiteboard: { id: "teacherWhiteboard", user: this.props.joined.owner, zIndex: 2, position: {x: 0, y: 150}, size: {width: 800, height: 774} }, 
+            selfWhiteboard: { id: "selfWhiteboard", user: this.props.self, zIndex: 2, position: {x: 800, y: 150}, size: {width: 800, height: 682} },
+            teacherWhiteboard: { id: "teacherWhiteboard", user: this.props.joined.owner, zIndex: 2, position: {x: 0, y: 150}, size: {width: 800, height: 682} }, 
         },
         drawer: {
-            selfDrawer: { id: "selfDrawer", zIndex: 0, position: {x: 660, y: 5}, size: {width: 450, height: 550} }, 
-            classDrawer: { id: "classDrawer", zIndex: 0, position: {x: 0, y: 5} },// to distribute/receive files class esources
+            selfDrawer: { id: "Personal Drawer", zIndex: 0, position: {x: 660, y: 5}, size: {width: 450, height: 550} }, 
+            classDrawer: { id: "Class Resources", zIndex: 0, position: {x: 0, y: 5} },// to distribute/receive files class esources
         },
         other: {
             PList: { id: "PList", zIndex: 1, position: {x: 465, y: 5}, size: {width: 0, height: 0} }, 
@@ -90,7 +90,7 @@ class JoinedLayoutStudent extends Component {
                             zIndex={webcam.zIndex}
                             inputRef={(id, el) => this.ref[id] = el} // delete id field (modifly RndContainer as well)
                             lockAspectRatio={4/3}
-                            lockAspectRatioExtraHeight={72}
+                            lockAspectRatioExtraHeight={41} // Change with card header and teacher's layout
                             {...other}
                             user={(webcam.id === "teacherWebcam") ? 
                                 this.props.joined.owner : this.props.self}

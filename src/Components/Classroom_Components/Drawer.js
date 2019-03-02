@@ -17,14 +17,14 @@ import {connection as conn, uploadURL} from '../../interface/connection'
 import {withCookies} from 'react-cookie'
 import {compose} from 'redux'
 import RndContainer from './RndContainer';
-import { FileDownload } from '@material-ui/icons';
+import { FileDownload, PinDrop } from '@material-ui/icons';
 import ShareBrn from './ShareBtn'
 import ViewButton from './ViewButton'
 
 const styles = theme => ({
     card: {
         width: 450,
-        height: 550
+        height: 550,
     },
     griditems: {
         display: 'flex',
@@ -47,8 +47,6 @@ const styles = theme => ({
     listItem: {
         width: 285, // 270
         overflow: "hidden",
-        // whiteSpace: "nowrap",
-        // textOverflow: "ellipsis"
     },
     dropzone: {
 
@@ -57,9 +55,7 @@ const styles = theme => ({
 
 class Drawer extends React.Component {
     state = {
-        // files: [{name: "file1.pdf", time: "4/2/2019 15:01"}, {name: "file2.jpg", time: "4/2/2019 15:30"}],
         files: [],
-        dense: false,
     }
     
     async componentDidMount() {
@@ -126,15 +122,26 @@ class Drawer extends React.Component {
 
     render() {
         const {classes, ...other} = this.props;
-        const { dense } = this.state;
         return (
             <RndContainer 
                 {...other}
             >   
-                <Card className={classes.card}>
-                <CardHeader //this height is 74px
-                    title= "Personal Drawer"
+                <Card className={classes.card} elevation={7}>
+                <CardHeader
                     id={`draggable${this.props.id}`}
+                    title= {<div style={{paddingTop: 9}}>Personal Drawer</div>}
+                    style={{
+                        height: 18,
+                        paddingTop: 7,
+                        overflow: "hidden",
+                        whiteSpace: "nowrap",
+                        textOverflow: "ellipsis"
+                    }}
+                    action={
+                        <IconButton onClick={() => this.props.pinTop}>
+                            <PinDrop />
+                        </IconButton>
+                    }
                 />
                     <Divider/>
                     <Grid 
@@ -145,7 +152,7 @@ class Drawer extends React.Component {
                     >
                         <Grid item xs={12} md={6}>
                             <div className={classes.demo}>
-                                <List dense={dense} className={classes.infolist}>
+                                <List className={classes.infolist}>
                                     {this.state.files &&
                                     this.state.files.map(filename => 
                                     <ListItem key={filename} className={classes.listItem}>

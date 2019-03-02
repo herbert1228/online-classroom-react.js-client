@@ -119,7 +119,7 @@ class JoinedLayoutTeacher extends Component {
                             zIndex={webcam.zIndex}
                             inputRef={(id, el) => this.ref[id] = el} // delete id field (modifly RndContainer as well)
                             lockAspectRatio={4/3}
-                            lockAspectRatioExtraHeight={72}
+                            lockAspectRatioExtraHeight={41}
                             {...other}
                             user={(webcam.id === "teacherWebcam") ? 
                                 this.props.joined.owner : this.props.self}

@@ -1,6 +1,7 @@
 import React from 'react';
 import {withStyles} from '@material-ui/core/styles'
 import {Image} from 'react-konva'
+import { WhiteboardChannel } from '../../../interface/connection'
 
 const styles = theme => ({
 })
@@ -17,7 +18,7 @@ class CanvasInsideWhiteboard extends React.Component {
         point_record: {},
         undoStack:[],
         redoStack: [],
-        lines: []
+        lines: [] // [{line: [], type: {color, width}}]
     }
 
     componentDidMount() {
@@ -117,37 +118,49 @@ class CanvasInsideWhiteboard extends React.Component {
     handleMouseDown = (e) => {
         const {lines} = this.state
         let [x, y] = getLocalCoord(this.state.stage, e.evt) //e = {evt: MouseEvent, target, currentTarget, type}
+        this.setState({isMouseDown: true})
         if (this.props.mode === "draw") {
-            this.setState({isMouseDown: true})
-            lines.push([[x, y]])
+            this.setState({
+                lines: [
+                    ...this.state.lines, 
+                    {line: [[x, y]], type: {color: this.props.lineColor, width: this.props.lineWidth}}
+                ]
+            })
+            // lines.line.push([[x, y]])
         } else if (this.props.mode === "eraser") {
             let radius = 10
-
             this.setState({lines: lines.filter(line => !eraserInRange(line, x, y, radius))})
-            console.log("clear", x, y)
         }
     }
   
     handleMouseUp = () => {
+        if (!this.state.isMouseDown) return
         const {lines} = this.state
+        this.setState({isMouseDown: false})
         if (this.props.mode === "draw") {
-            this.setState({isMouseDown: false})
     
             // discard empty line
-            if (lines[lines.length - 1].length === 0) {
+            if (lines[lines.length - 1].line.length === 0) {
                 lines.splice(lines.length - 1, 1)
+                return
             }
+
+            // send to server
+            WhiteboardChannel.draw(this.props.user, lines[lines.length - 1].line)
         }
     }
     
     handleMouseMove = e => {
         const {lines} = this.state
+        let [x, y] = getLocalCoord(this.state.stage, e.evt)
+        if (!this.state.isMouseDown) return
+
         if (this.props.mode === "draw") {
-            if (!this.state.isMouseDown) return
-            let [x, y] = getLocalCoord(this.state.stage, e.evt)
-    
             var line = lines[lines.length - 1]
-            line.push([x, y])
+            line.line.push([x, y])
+        } else if (this.props.mode === "eraser") { // TODO not working
+            let radius = 10
+            this.setState({lines: lines.filter(line => !eraserInRange(line, x, y, radius))})
         }
     }
 
@@ -156,10 +169,10 @@ class CanvasInsideWhiteboard extends React.Component {
         this.ctx.clearRect(0, 0, this.state.canvas.width, this.state.canvas.height)
 
         for (let line of lines) {
-            drawStraightLine(this.ctx, line)
+            drawQuadraticCurve(this.ctx, line)
         }
 
-        this.image.getLayer().draw()
+        this.image.getLayer().draw() // source from where?
 
         // console.log(`mode: ${this.props.mode}, active: ${this.state.isMouseDown}, lines: ${JSON.stringify(lines)}`)
         requestAnimationFrame(this.refresh)
@@ -176,13 +189,14 @@ class CanvasInsideWhiteboard extends React.Component {
                 onMouseDown={this.handleMouseDown}
                 onMouseUp={this.handleMouseUp}
                 onMouseMove={this.handleMouseMove}
+                onMouseOut={this.handleMouseUp}
             />
         )
     }
 }
 
 function eraserInRange(line, ex, ey, radius) {
-  for (let [px, py] of line) {
+  for (let [px, py] of line.line) {
       if (intersectCircle(px, py, ex, ey, radius)) {
           return true
       }
@@ -195,30 +209,39 @@ function intersectCircle(px, py, ex, ey, radius) {
 }
 
 function drawStraightLine(ctx, line) {
-    if (line.length === 0) return
-    let [fx, fy] = line[0]
+    if (line.line.length === 0) return
+    let [fx, fy] = line.line[0]
 
     ctx.beginPath()
+    ctx.lineJoin = "round"
+    ctx.strokeStyle = line.type.color
+    ctx.lineWidth = line.type.width
     ctx.moveTo(fx, fy)
-    for (let [x, y] of line) {
+    for (let [x, y] of line.line) {
         ctx.lineTo(x, y)
     }
     ctx.stroke()
 }
 
-function drawQuadraticCurve(ctx, points) {
-    if (points.length < 3) return
-    ctx.moveTo(points[0][0], points[0][1]);
+function drawQuadraticCurve(ctx, line) {
+    const ppts = line.line
+    if (ppts.length < 3) return
+
+    ctx.beginPath()
+    ctx.lineJoin = "round"
+    ctx.strokeStyle = line.type.color
+    ctx.lineWidth = line.type.width
+    ctx.moveTo(ppts[0][0], ppts[0][1])
 
     let i
-    for (i = 1; i < points.length - 2; i ++) {
-        var xc = (points[i][0] + points[i + 1][0]) / 2;
-        var yc = (points[i][1] + points[i + 1][1]) / 2;
-        ctx.quadraticCurveTo(points[i][0], points[i][1], xc, yc);
+    for (i = 1; i < ppts.length - 2; i ++) {
+        var xc = (ppts[i][0] + ppts[i + 1][0]) / 2
+        var yc = (ppts[i][1] + ppts[i + 1][1]) / 2
+        ctx.quadraticCurveTo(ppts[i][0], ppts[i][1], xc, yc)
     }
 
     // curve through the last two points
-    ctx.quadraticCurveTo(points[i][0], points[i][1], points[i+1][0], points[i+1][1]);
+    ctx.quadraticCurveTo(ppts[i][0], ppts[i][1], ppts[i+1][0], ppts[i+1][1])
     ctx.stroke()
 }
 
