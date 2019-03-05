@@ -57,16 +57,21 @@ const styles = theme => ({
 });
 
 class ClassListTeacher extends React.Component {
-    state = {expanded: null, expandedEnroll: null}
+    state = {expanded: null, expandedEnroll: null, pollingID: null}
 
-    async componentDidMount() {
-        setInterval(async () => {
+    componentDidMount() {
+        const pollingID = setInterval(async () => {
             const enrolled = await conn.call("get_enrolled_class")
             store.dispatch({
                 type: "get_enrolled_class",
                 result: enrolled.result
             })
         }, 3000)
+        this.setState({pollingID})
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.state.pollingID)
     }
 
     handleChange = panel => (event, expanded) => {

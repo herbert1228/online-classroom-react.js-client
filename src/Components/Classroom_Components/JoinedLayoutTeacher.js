@@ -8,6 +8,7 @@ import ParticipantList from './ParticipantList'
 import Whiteboard from './Whiteboard'
 import {withCookies} from 'react-cookie'
 import {compose} from 'redux'
+import _ from 'lodash'
 
 const styles = theme => ({ 
     container: {
@@ -22,11 +23,10 @@ class JoinedLayoutTeacher extends Component {
     state = {
         webcam: {
             // selfWebcam: { owner: "", id: "selfWebcam", zIndex: 3, position: {x: 1130, y: 5}, size: {width: 460, height: 345+72} }, 
-            teacherWebcam: { id: "teacherWebcam", zIndex: 3, position: {x: 0, y: 5}, size: {width: 460, height: 345+72} }, 
+            teacherWebcam: { id: "teacherWebcam", zIndex: 3, position: {x: 5, y: 5}, size: {width: 460, height: 345+41} }, 
         },
         whiteboard: {
-            selfWhiteboard: { id: "selfWhiteboard", zIndex: 2, position: {x: 800, y: 150}, size: {width: 800, height: 774} },
-            teacherWhiteboard: { id: "teacherWhiteboard", zIndex: 2, position: {x: 0, y: 150}, size: {width: 800, height: 774} }, 
+            teacherWhiteboard: { id: "teacherWhiteboard", user: this.props.joined.owner, zIndex: 2, position: {x: 5, y: 150}, size: {width: 800, height: 718} }, 
         },
         drawer: {
             selfDrawer: { id: "selfDrawer", zIndex: 0, position: {x: 660, y: 5}, size: {width: 450, height: 550} }, 
@@ -37,19 +37,28 @@ class JoinedLayoutTeacher extends Component {
         }
     }
 
-    // componentDidUpdate(prevProps, prevState) {
-    //     // if (prevProps.session_user && this.props.session_user){
-    //         if (prevProps.session_user !== this.props.session_user) {
-    //             const diff = _.xor(prevProps.session_user, this.props.session_user)
-    //             console.log(diff)
-    //             if (prevProps.session_user.length > this.props.session_user.length) {
-    //                 console.log("less")
-    //             } else {
-    //                 console.log("more")
-    //             }
-    //         }
-    //     // }
-    //   }
+    componentDidUpdate(prevProps) {
+        const {session_user} = this.props
+        if (!session_user) return
+        if (prevProps.session_user === session_user) return
+        const diff = _.xor(prevProps.session_user, this.props.session_user)
+        if (diff === this.props.self) return
+
+        for (let each of diff) {
+            console.log(each)
+            if (each === this.props.self) continue
+            if (prevProps.session_user.length > this.props.session_user.length) {
+                console.log("less")
+            } else {
+                this.setState({whiteboard: {
+                    ...this.state.whiteboard,
+                    [each + "Whiteboard"]: { id: each + "Whiteboard", user: each, zIndex: 2, position: {x: 800, y: 150}, size: {width: 800, height: 718} }
+                }})
+            }
+        }
+
+      }
+
     bringTop = (target) => { // target: selfWebcam/etc
         let maxZ = -1
         Object.values(this.state).forEach(outer => {
@@ -65,10 +74,12 @@ class JoinedLayoutTeacher extends Component {
             }
         })
     }
+
     testfunc = () => {
         this.ref["selfDrawer"].updatePosition({x: 825, y: 230})
         this.bringTop("selfDrawer")
     }
+
     saveLayout = () => {
         const {cookies} = this.props
         Object.values(this.state).forEach(outer => {
@@ -80,6 +91,7 @@ class JoinedLayoutTeacher extends Component {
             })
         })
     }
+
     render() {
         const { classes, ...other } = this.props
         return (
@@ -128,17 +140,18 @@ class JoinedLayoutTeacher extends Component {
                     {Object.values(this.state.whiteboard).map((whiteboard) => (
                         <Whiteboard
                             key={whiteboard.id}
-                            id={whiteboard.id}
+                            // id={whiteboard.id}
                             bringTop={() => this.bringTop(whiteboard.id)}
-                            size={whiteboard.size}
-                            position={whiteboard.position}
-                            zIndex={whiteboard.zIndex}      
-                            inputRef={(id, el) => this.ref[id] = el}
+                            // size={whiteboard.size}
+                            // position={whiteboard.position}
+                            // zIndex={whiteboard.zIndex}      
+                            inputRef={(id, el) => {this.ref[id] = el; console.log(whiteboard)}}
                             lockAspectRatio={4/3}
                             lockAspectRatioExtraHeight={72}
                             enableResizing={false}
                             {...other}
-                            user={(whiteboard.id === "teacherWebcam") ? whiteboard.owner: this.props.self }   
+                            {...whiteboard}
+                            // user={(whiteboard.id === "teacherWebcam") ? whiteboard.owner: this.props.self }   
                         />
                     ))}
                     <Drawer 

@@ -4,7 +4,7 @@ import {withStyles} from '@material-ui/core/styles'
 import {Card, CardHeader, Divider} from '@material-ui/core'
 import LocalStream from '../Classroom_Components/LocalStream'
 import RemoteStream from '../Classroom_Components/RemoteStream'
-import UserCardMenu from '../Classroom_Components/UserCardMenu'
+// import UserCardMenu from '../Classroom_Components/UserCardMenu'
 import RndContainer from '../Classroom_Components/RndContainer'
 import IconButton from '@material-ui/core/IconButton';
 import { PinDrop } from '@material-ui/icons';
@@ -54,9 +54,9 @@ class UserCard extends React.Component {
                         //         {user.substring(0, 3)}
                         //     </Avatar>
                         // }
-                        action={
-                            <UserCardMenu disableWebcam={this.disableWebcam.bind(this)}/>
-                        }
+                        // action={
+                        //     <UserCardMenu disableWebcam={this.disableWebcam.bind(this)}/>
+                        // }
                         action={
                             <IconButton onClick={() => this.props.pinTop}>
                                 <PinDrop />

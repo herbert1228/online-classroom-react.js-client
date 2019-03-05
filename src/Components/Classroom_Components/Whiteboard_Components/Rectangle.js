@@ -10,6 +10,7 @@ export default function Rectangle(props) {
             height={props.height}
             fill={props.fill}
             name={props.name}
+            onDragEnd={e => props.onDragEnd(e)}
             draggable
         />
     )

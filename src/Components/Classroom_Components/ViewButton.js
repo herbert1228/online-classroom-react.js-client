@@ -40,13 +40,13 @@ class ViewButton extends React.Component {
         .catch(e => {this.props.handleNotification(`${e}`)})
     }
 
-    isCannotView(filename) {
+    cannotView(filename) {
         if (filename.substr(-4) === ".jpg"
             || filename.substr(-4) === ".png"
             || filename.substr(-4) === ".gif"
             || filename.substr(-4) === ".svg"
             || filename.substr(-4) === ".bmp"
-            || filename.substr(-4) === ".pdf"
+            // || filename.substr(-4) === ".pdf"
             || filename.substr(-5) === ".jpeg"
             || filename.substr(-5) === ".apng"){
             return false
@@ -60,13 +60,15 @@ class ViewButton extends React.Component {
             <Fragment>
                 <IconButton 
                     aria-label="View" 
-                    disabled={this.isCannotView(filename)}
+                    disabled={this.cannotView(filename)}
                     onClick={() => this.handleView(filename)}>
                     <View />
                 </IconButton>
                 <Popover title="Viewing File" open={this.state.open} onClose={this.handleClose}>
                 <DialogContent>
                     <img 
+                        draggable
+                        onDragStart={this.handleClose}
                         alt="View Selected File"
                         src={uploadURL+`/download/${username}/${password}/${filename}`} 
                         width="100%" height="100%"/>

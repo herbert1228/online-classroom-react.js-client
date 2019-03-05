@@ -44,12 +44,12 @@ const listener = {
 }
 
 // PLEASE DELETE THIS AFTER DEBUGGING
-var DEBUG = false
+var DEBUG = true
 ;(function () {
     var send = WebSocket.prototype.send
     WebSocket.prototype.send = function (msg) {
         if (!DEBUG) return send.call(this, msg)
-        if (JSON.parse(msg) == "keep_alive") return send.call(this, msg)
+        if (JSON.parse(msg) === "keep_alive") return send.call(this, msg)
 
         console.log("websocket sending:\n", JSON.parse(msg))
         return send.call(this, msg)
@@ -128,7 +128,7 @@ const signalingChannel = {
         connection.cast(type, params, "signal_cast")
     },
     call(type, params) {
-        connection.call(type, params, "signal_call")
+        return connection.call(type, params, "signal_call")
     },
     // broadcast(message) {
     //     console.log('Local sending message: ', message.type)
@@ -160,13 +160,16 @@ const WhiteboardChannel = { // use owner as target
         connection.cast(type, params, "whiteboard_cast")
     },
     call(type, params) {
-        connection.call(type, params, "whiteboard_call")
+        return connection.call(type, params, "whiteboard_call")
+    },
+    start() {
+        return this.call("start", null)
     },
     connect(target) {
-        this.call("connect", target)
+        return this.call("connect", target)
     },
     disconnect(target) {
-        this.call("disconnect", target)
+        return this.call("disconnect", target)
     },
     draw(target, lines) {
         this.cast("draw", {target, lines})

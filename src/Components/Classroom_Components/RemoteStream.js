@@ -47,7 +47,7 @@ class RemoteStream extends React.Component {
         conn.addListener("candidate", (e) => {
             if (e.stream_owner !== this.props.user) return
             if (!this.state.requesting) return
-            if (e.candidate == null) return
+            if (e.candidate === null) return
             console.log("Remote adding ice from", e.from)
             setTimeout(() => this.peerConn.addIceCandidate(e.candidate), 1000)
         })

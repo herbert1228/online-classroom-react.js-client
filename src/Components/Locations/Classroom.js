@@ -23,7 +23,7 @@ class Classroom extends React.Component {
         const { classes, ...other } = this.props
         return (
             <Fragment>
-                {(this.props.joined == null) && 
+                {(this.props.joined === null) && 
                     <div className={classes.notJoined}>
                         <Typography variant="headline" gutterBottom>
                             Not joined a classroom yet

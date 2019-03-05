@@ -12,6 +12,7 @@
     "jshint": "^2.9.7",
     "konva": "^2.6.0",
     "loadash": "^1.0.0",
+    "lodash": "^4.17.11",
     "npm": "^6.4.1",
     "prop-types": "^15.6.2",
     "rc-color-picker": "^1.2.6",
@@ -28,6 +29,7 @@
     "redux": "^4.0.1",
     "simple-peer": "^9.1.2",
     "typeface-roboto": "0.0.54",
+    "use-image": "^1.0.3",
     "uuid": "^3.3.2",
     "webrtc-adapter": "^6.4.8"
   },

@@ -82,7 +82,7 @@ class ScrollableTabsButtonAuto extends React.Component {
             // console.log("fetched")
             // console.log("uploaded")
             this.setState({comment: ''});
-            if (this.props.self == null){ return}
+            if (this.props.self === null){ return}
             let message = {
                 name: 'user chat',
                 data: {

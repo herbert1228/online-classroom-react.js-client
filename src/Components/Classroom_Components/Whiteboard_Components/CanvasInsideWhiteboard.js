@@ -33,6 +33,20 @@ class CanvasInsideWhiteboard extends React.Component {
         requestAnimationFrame(this.refresh)
     }
 
+    componentDidUpdate(prevProps){
+        const { linesReceived } = this.props
+        if (!linesReceived) return
+        if (linesReceived.length === 0) return
+        if (prevProps.linesReceived === linesReceived) return
+        // for (let data of linesReceived) 
+        this.setState({
+            lines: [
+                ...this.state.lines, 
+                ...linesReceived
+            ]
+        })
+    }
+
     // handleMouseDown = (e) => {
     //   //console.log("mousedown")
     //   console.log("line color in child is", this.props.lineColor)
@@ -146,7 +160,19 @@ class CanvasInsideWhiteboard extends React.Component {
             }
 
             // send to server
-            WhiteboardChannel.draw(this.props.user, lines[lines.length - 1].line)
+            WhiteboardChannel.draw(
+                this.props.user,
+                {
+                    type: "canvasDraw", 
+                    lines: {
+                        line: lines[lines.length - 1].line,
+                        type: {
+                            color: this.props.lineColor, 
+                            width: this.props.lineWidth
+                        }
+                    }
+                }
+            )
         }
     }
     
@@ -158,7 +184,7 @@ class CanvasInsideWhiteboard extends React.Component {
         if (this.props.mode === "draw") {
             var line = lines[lines.length - 1]
             line.line.push([x, y])
-        } else if (this.props.mode === "eraser") { // TODO not working
+        } else if (this.props.mode === "eraser") {
             let radius = 10
             this.setState({lines: lines.filter(line => !eraserInRange(line, x, y, radius))})
         }
@@ -172,7 +198,7 @@ class CanvasInsideWhiteboard extends React.Component {
             drawQuadraticCurve(this.ctx, line)
         }
 
-        this.image.getLayer().draw() // source from where?
+        if (this.image) this.image.getLayer().draw() // source from where?
 
         // console.log(`mode: ${this.props.mode}, active: ${this.state.isMouseDown}, lines: ${JSON.stringify(lines)}`)
         requestAnimationFrame(this.refresh)
@@ -208,6 +234,7 @@ function intersectCircle(px, py, ex, ey, radius) {
   return (px - ex) * (px - ex) + (py - ey) * (py - ey) <= radius * radius
 }
 
+// eslint-disable-next-line
 function drawStraightLine(ctx, line) {
     if (line.line.length === 0) return
     let [fx, fy] = line.line[0]
@@ -223,9 +250,19 @@ function drawStraightLine(ctx, line) {
     ctx.stroke()
 }
 
+function drawDot(ctx, line) {
+    let [fx, fy] = line.line[0]
+    ctx.beginPath()
+    ctx.arc(fx, fy, line.type.width/2 , 0, 2 * Math.PI)
+    ctx.fill()
+}
+
 function drawQuadraticCurve(ctx, line) {
     const ppts = line.line
-    if (ppts.length < 3) return
+    if (ppts.length < 3) {
+        drawDot(ctx, line)
+        return
+    }
 
     ctx.beginPath()
     ctx.lineJoin = "round"
@@ -245,6 +282,7 @@ function drawQuadraticCurve(ctx, line) {
     ctx.stroke()
 }
 
+// eslint-disable-next-line
 function drawStraightLineWithHightlight(ctx, line) {
     if (line.length === 0) return
     let [fx, fy] = line[0]

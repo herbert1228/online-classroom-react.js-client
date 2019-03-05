@@ -129,6 +129,7 @@ class ClassList extends React.Component {
                 <Divider className={classes.divider}/>
                 <div className={classes.ex_root}>
                 {
+                    (this.props.createdClass) &&
                     (this.props.createdClass.length > 0) ?
                         this.props.createdClass.map((c, index) => (
                             <ExpansionPanel
@@ -179,6 +180,7 @@ class ClassList extends React.Component {
                 <Divider className={classes.divider}/>
                 <div className={classes.ex_root}>
                 {
+                    (this.props.enrolledClass) &&
                     (this.props.enrolledClass.length > 0) ?
                         this.props.enrolledClass.map((en, index) => (
                             <ExpansionPanel key={index} expanded={expandedEnroll === index} onChange={this.handleChangeEnroll(index)}>
