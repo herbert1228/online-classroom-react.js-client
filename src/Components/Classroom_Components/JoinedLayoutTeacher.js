@@ -49,6 +49,9 @@ class JoinedLayoutTeacher extends Component {
             if (each === this.props.self) continue
             if (prevProps.session_user.length > this.props.session_user.length) {
                 console.log("less")
+                const tmpState = this.state
+                delete tmpState.whiteboard[each + "Whiteboard"]
+                this.setState(tmpState)
             } else {
                 this.setState({whiteboard: {
                     ...this.state.whiteboard,
@@ -145,7 +148,7 @@ class JoinedLayoutTeacher extends Component {
                             // size={whiteboard.size}
                             // position={whiteboard.position}
                             // zIndex={whiteboard.zIndex}      
-                            inputRef={(id, el) => {this.ref[id] = el; console.log(whiteboard)}}
+                            inputRef={(id, el) => this.ref[id] = el}
                             lockAspectRatio={4/3}
                             lockAspectRatioExtraHeight={72}
                             enableResizing={false}

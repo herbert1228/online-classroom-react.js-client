@@ -98,9 +98,23 @@ class Whiteboard extends React.Component {
     }
 
     handleReceiveDraw = data => {
-        if (data.type === "canvasDraw") {
-            this.setState({canvasReceived: [data.lines]})
-        }
+        switch (data.type) {
+            case "canvasDraw":
+                this.setState({canvasReceived: [data.lines]})
+                break
+            case "new image":
+                const imageUrl = data.imageUrl
+                const image = new window.Image()
+                image.src = imageUrl
+                image.onload = () => {
+                    this.setState({objects: [...this.state.objects, defaultImage(image)]})
+                }
+                break
+            default:
+                console.log(data)
+
+        } 
+        
     }
 
     handleStageMouseDown = e => {
@@ -120,6 +134,7 @@ class Whiteboard extends React.Component {
     }
 
     handleZIndex = type => { // type = "top" || "bottom"
+        console.log(this.state.objects)
         const obj = this.state.objects.find(r => r.name === this.state.selectedShapeName)
         if (!obj) {
             this.props.handleNotification("No object selected!")
@@ -129,9 +144,9 @@ class Whiteboard extends React.Component {
         if (type === "top") {
             this.setState({objects: [...this.state.objects, obj]})
         } else if (type === "bottom") {
-            const whiteboard = this.state.objects.find(r => r.name === "whiteboard")
-            this.state.objects.splice(this.state.objects.indexOf(whiteboard), 1)
-            this.setState({objects: [whiteboard, obj, ...this.state.objects]})
+            // const whiteboard = this.state.objects.find(r => r.name === "whiteboard")
+            // this.state.objects.splice(this.state.objects.indexOf(whiteboard), 1)
+            this.setState({objects: [obj, ...this.state.objects]})
         } else throw new Error("Invalid type for handleZIndex")
     }
 
@@ -238,6 +253,7 @@ class Whiteboard extends React.Component {
         image.src = imageUrl
         image.onload = () => {
             this.setState({objects: [...this.state.objects, defaultImage(image)]})
+            WhiteboardChannel.draw(this.props.user, { type: "new image", imageUrl})
         }
     }
 
@@ -401,9 +417,10 @@ class Whiteboard extends React.Component {
                                                 onDblClick={e => this.handleEditText(e, obj)}
                                                 onDragEnd={e => this.updatePosOnDragEnd(obj.name, e.target._lastPos)}
                                             />
-                                else if (obj.type === "image")
+                                else if (obj.type === "image") {
                                     console.log(obj)
                                     return <Image key={obj.name} {...obj} onDragEnd={e => this.updatePosOnDragEnd(obj.name, e.target._lastPos)} draggable/>
+                                }
                                 // return <Canvas />
                             })}
                             <TransformerComponent selectedShapeName={this.state.selectedShapeName}/>
