@@ -2,11 +2,11 @@ let websocket
 const TIMEOUT = 5000
 const callsInProgress = {}
 
-const url = `ws://${window.location.hostname}:8500/`
-// const url = "ws://overcoded.tk:8500"
+// const url = `ws://${window.location.hostname}:8500/`
+const url = window.SERVER_URL
 
-const uploadURL = `http://${window.location.hostname}:8600`
-// const uploadURL = 'http://overcoded.tk:8600'
+// const uploadURL = `http://${window.location.hostname}:8600`
+const uploadURL = window.UPLOAD_URL
 
 function genid() {
     // https://stackoverflow.com/a/2117523
@@ -44,7 +44,7 @@ const listener = {
 }
 
 // PLEASE DELETE THIS AFTER DEBUGGING
-var DEBUG = true
+var DEBUG = false
 ;(function () {
     var send = WebSocket.prototype.send
     WebSocket.prototype.send = function (msg) {
@@ -152,6 +152,10 @@ const signalingChannel = {
     },
     gotUserMedia() {
         this.cast("got_media", null)
+    },
+    broadcastAction(action) {
+        console.log(`Broadcasting action:`, action)
+        this.cast("action", action)
     }
 }
 

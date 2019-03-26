@@ -34,8 +34,8 @@ function defaultRect() {
     return {type: "rectangle", x: 150, y: 150, width: 100, height: 100, fill: 'grey', name: genid()}
 }
 
-function defaultImage(image) {
-    return {type: "image", x: 137, y: 250, width: 400, height: 300, image, name: genid()}
+function defaultImage(image, name = genid()) {
+    return {type: "image", x: 137, y: 250, width: 400, height: 300, image, name}
 }
 
 class Whiteboard extends React.Component {
@@ -58,7 +58,7 @@ class Whiteboard extends React.Component {
 
     async componentDidMount() {
         let result
-        WhiteboardChannel.onReceiveDraw(this.props.user, this.handleReceiveDraw)
+        WhiteboardChannel.onReceiveDraw(this.props.user, this.handleActionReceived)
         if (isOwner(this.props)) {
             result = await WhiteboardChannel.start()
             this.setState({connected: true})
@@ -67,7 +67,6 @@ class Whiteboard extends React.Component {
             if (this.props.session_user.includes(this.props.user)) {
                 do {
                     result = await WhiteboardChannel.connect(this.props.user)
-                    console.log(result)
                 } while(!Array.isArray(result))
                 this.setState({connected: true})
             }
@@ -81,7 +80,6 @@ class Whiteboard extends React.Component {
         if (session_user.includes(this.props.user)) {
             do {
                 result = await WhiteboardChannel.connect(this.props.user)
-                // console.log(result)
             } while(result.reason === "pending")
 
             if (result.length > 0) {
@@ -97,24 +95,68 @@ class Whiteboard extends React.Component {
         }
     }
 
-    handleReceiveDraw = data => {
+    sendWhiteboardAction = (type, args) => {
+        WhiteboardChannel.draw(this.props.user, {type, ...args})
+    }
+
+    handleActionReceived = data => {
+        console.log(data.type)
         switch (data.type) {
             case "canvasDraw":
                 this.setState({canvasReceived: [data.lines]})
                 break
             case "new image":
-                const imageUrl = data.imageUrl
+                const {name, imageUrl} = data
                 const image = new window.Image()
                 image.src = imageUrl
                 image.onload = () => {
-                    this.setState({objects: [...this.state.objects, defaultImage(image)]})
+                    this.setState({objects: [...this.state.objects, defaultImage(image, name)]})
                 }
+                break
+            case "drag":
+                const {objName, x, y} = data
+                this.updatePos(objName, {x, y})
+                break
+            case "remove":
+                const obj = this.state.objects.find(r => r.name === data.targetName)
+                if (!obj) {
+                    console.log("Remote deleting an already deleted object")
+                    return
+                }
+                this.state.objects.splice(this.state.objects.indexOf(obj), 1)
                 break
             default:
                 console.log(data)
 
         } 
         
+    }
+
+    handleStageContextMenu = e => {
+        e.evt.preventDefault()
+        // clicked on stage/whiteboard - clear selection
+        if (e.target === e.target.getStage() || e.target.name === "whiteboard") {
+            this.setState({selectedShapeName: ''})
+            return
+        }
+
+        const name = e.target.name()
+        const obj = this.state.objects.find(r => r.name === name)
+
+        console.log("context menu")
+        const stage = e.currentTarget // same as: stage = this.stageRef.getStage(), or: stage = e.target.getStage()
+
+        console.log(e.evt.clientX+stage.getPointerPosition().x)
+        console.log(e.evt.clientY+stage.getPointerPosition().y)
+    }
+
+    getMousePos(e) {
+        const stage = e.currentTarget // same as: stage = this.stageRef.getStage(), or: stage = e.target.getStage()
+
+        return {
+            x: e.evt.clientX+stage.getPointerPosition().x,
+            y: e.evt.clientY+stage.getPointerPosition().y
+        }
     }
 
     handleStageMouseDown = e => {
@@ -133,8 +175,12 @@ class Whiteboard extends React.Component {
         else {this.setState({selectedShapeName: ''})}
     }
 
+    handleMouseMove = e => {
+        var stage = e.currentTarget // same as: stage = this.stageRef.getStage(), or: stage = e.target.getStage()
+        this.setState({ cursor: stage.getPointerPosition() })
+    }
+
     handleZIndex = type => { // type = "top" || "bottom"
-        console.log(this.state.objects)
         const obj = this.state.objects.find(r => r.name === this.state.selectedShapeName)
         if (!obj) {
             this.props.handleNotification("No object selected!")
@@ -157,11 +203,7 @@ class Whiteboard extends React.Component {
             return
         }
         this.state.objects.splice(this.state.objects.indexOf(obj), 1)
-    }
-    
-    handleMouseMove = e => {
-        var stage = e.currentTarget // same as: stage = this.stageRef.getStage(), or: stage = e.target.getStage()
-        this.setState({ cursor: stage.getPointerPosition() })
+        this.sendWhiteboardAction("remove", {targetName: obj.name})
     }
 
     handleEditText = (e, obj) => {
@@ -232,7 +274,12 @@ class Whiteboard extends React.Component {
       this.setState({ startDownload: true })
     }
 
-    updatePosOnDragEnd = (objName, {x, y}) => {
+    handleDragEnd = (objName, {x, y}) => {
+        this.updatePos(objName, {x, y})
+        this.sendWhiteboardAction("drag", {objName, x, y})
+    }
+
+    updatePos = (objName, {x, y}) => {
         const updateObj = this.state.objects.find(r => r.name === objName)
         this.state.objects.splice(this.state.objects.indexOf(updateObj), 1)
         let modifliedObj = updateObj
@@ -240,8 +287,6 @@ class Whiteboard extends React.Component {
         modifliedObj.y = y
 
         this.setState({objects: [...this.state.objects, modifliedObj]})
-
-        console.log(objName, x, y)
     }
 
     handleOnDrop = e => {
@@ -251,17 +296,16 @@ class Whiteboard extends React.Component {
 
         const image = new window.Image()
         image.src = imageUrl
+        const newImage = defaultImage(image)
         image.onload = () => {
-            this.setState({objects: [...this.state.objects, defaultImage(image)]})
-            WhiteboardChannel.draw(this.props.user, { type: "new image", imageUrl})
+            this.setState({objects: [...this.state.objects, newImage]})
+            this.sendWhiteboardAction("new image", {imageUrl, name: newImage.name})
         }
     }
 
     handleNoPermission = () => {
         this.props.handleNotification(`Sorry, please gain permission of this whiteboard from your teacher`)
     }
-
-    changeCanvasMode = () => this.setState({canvasMode: !this.state.canvasMode})
 
     render() {
         const {classes, id, ...other} = this.props;
@@ -304,7 +348,7 @@ class Whiteboard extends React.Component {
                                         <Button onClick={this.handleRemove}>
                                             Remove
                                         </Button>
-                                        <Button onClick={this.changeCanvasMode}>
+                                        <Button onClick={() => this.setState({canvasMode: true})}>
                                             Draw
                                         </Button>
                                     </Fragment>
@@ -339,7 +383,7 @@ class Whiteboard extends React.Component {
                                             </Button>
                                         </span> */}
 
-                                        <Button onClick={this.changeCanvasMode}>
+                                        <Button onClick={() => this.setState({canvasMode: false})}>
                                             Finish Draw
                                         </Button>
                                     </Fragment>
@@ -353,6 +397,7 @@ class Whiteboard extends React.Component {
                         // onClick={()=>console.log(this.stageRef.getPointerPosition())}
                         // onDragMove = { () => {console.log("aaa")}}
                         onMouseMove={this.state.permission? this.handleMouseMove : null}
+                        onContextMenu={this.state.permission? this.handleStageContextMenu : this.handleNoPermission}
                         onMouseDown={this.state.permission? this.handleStageMouseDown : this.handleNoPermission}
                     >
                         {this.state.canvasMode &&
@@ -363,7 +408,7 @@ class Whiteboard extends React.Component {
                                     return <Rectangle 
                                                 key={obj.name} 
                                                 {...obj}
-                                                onDragEnd={e => this.updatePosOnDragEnd(obj.name, e.target._lastPos)}
+                                                onDragEnd={e => this.handleDragEnd(obj.name, e.target._lastPos)}
                                             />
                                 else if (obj.type === "text")
                                     return <Text 
@@ -371,10 +416,11 @@ class Whiteboard extends React.Component {
                                                 {...obj} 
                                                 draggable 
                                                 onDblClick={e => this.handleEditText(e, obj)}
-                                                onDragEnd={e => this.updatePosOnDragEnd(obj.name, e.target._lastPos)}
+                                                onDragEnd={e => this.handleDragEnd(obj.name, e.target._lastPos)}
                                             />
                                 else if (obj.type === "image") 
-                                    return <Image key={obj.name} {...obj} onDragEnd={e => this.updatePosOnDragEnd(obj.name, e.target._lastPos)} draggable/>
+                                    return <Image key={obj.name} {...obj} onDragEnd={e => this.handleDragEnd(obj.name, e.target._lastPos)} draggable/>
+                                return
                             })}
                             <TransformerComponent selectedShapeName={this.state.selectedShapeName}/>
                             <Portal>
@@ -407,7 +453,7 @@ class Whiteboard extends React.Component {
                                     return <Rectangle 
                                                 key={obj.name} 
                                                 {...obj}
-                                                onDragEnd={e => this.updatePosOnDragEnd(obj.name, e.target._lastPos)}
+                                                onDragEnd={e => this.handleDragEnd(obj.name, e.target._lastPos)}
                                             />
                                 else if (obj.type === "text")
                                     return <Text 
@@ -415,13 +461,11 @@ class Whiteboard extends React.Component {
                                                 {...obj} 
                                                 draggable 
                                                 onDblClick={e => this.handleEditText(e, obj)}
-                                                onDragEnd={e => this.updatePosOnDragEnd(obj.name, e.target._lastPos)}
+                                                onDragEnd={e => this.handleDragEnd(obj.name, e.target._lastPos)}
                                             />
-                                else if (obj.type === "image") {
-                                    console.log(obj)
-                                    return <Image key={obj.name} {...obj} onDragEnd={e => this.updatePosOnDragEnd(obj.name, e.target._lastPos)} draggable/>
-                                }
-                                // return <Canvas />
+                                else if (obj.type === "image") 
+                                    return <Image key={obj.name} {...obj} onDragEnd={e => this.handleDragEnd(obj.name, e.target._lastPos)} draggable/>
+                                return
                             })}
                             <TransformerComponent selectedShapeName={this.state.selectedShapeName}/>
                             {/* <Image

@@ -3,18 +3,43 @@ import {withStyles} from '@material-ui/core/styles'
 import {Button} from '@material-ui/core'
 import {signalingChannel as channel, connection as conn, checkTURNServer} from '../../interface/connection'
 import poster from '../../css/ask_camera_permission.jpg'
+import classNames from 'classnames'
+import { MicOff, Mic, Videocam, VideocamOff, Call, CallEnd } from '@material-ui/icons';
 
 const styles = theme => ({
     button: {
         position: 'absolute', 
-        left: '50%', 
-        top: '50%', 
-        height: 160,
-        width: 220,
-        backgroundColor: '#eee',
-        opacity: '80%',
-        transform: 'translateX(-50%) translateY(-50%)'
+        // backgroundColor: '#eee',
+        backgroundColor: 'rgba(238,238,238,0.7)',
     },
+    callBtn: {
+        left: '50%', 
+        top: '0%', 
+        height: '20%',
+        width: '100%',
+        transform: 'translateX(-50%) translateY(-0%)'
+    },
+    disableMicBtn: {
+        left: '0%', 
+        top: '0%', 
+        height: '20%',
+        width: '33.33%',
+        transform: 'translateX(-0%) translateY(-0%)'
+    },
+    disableCameraBtn: {
+        left: '33.33%', 
+        top: '0%', 
+        height: '20%',
+        width: '33.33%',
+        transform: 'translateX(-cal(33.33/2)%) translateY(-0%)'
+    },
+    hangupBtn: {
+        left: '66.66%', 
+        top: '0%', 
+        height: '20%',
+        width: '33.33%',
+        transform: 'translateX(-cal(33.33/2)%) translateY(-0%)'
+    }
 })
 
 const offerOptions = {
@@ -39,7 +64,9 @@ class LocalStream extends React.Component {
                 'username': 'user',
                 'credential': "root"
             }]
-        }
+        },
+        micEnabled: false,
+        cameraEnabled: false,
     }
 
     state = this.defaultState
@@ -49,26 +76,15 @@ class LocalStream extends React.Component {
             .then((bool) => console.log('is TURN server active? ', bool? 'yes':'no'))
             .catch(console.error.bind(console))
 
-        try {
-            const stream = await navigator.mediaDevices
-                .getUserMedia({
-                    audio: true,
-                    video: true
-                })
-
-            this.gotStream(stream)
-            await this.setState({
-                called: false,
-                started: true
-            }) // state changes before stream is added
-            console.info("!!!turned to true!!!")
-        } catch (e) {
-            console.log("getUserMedia() error: ", e)
-        }
-        conn.addListener("request_offer", (from) => this.inRequestForPeerConn(from))
+        conn.addListener("request_offer", (from) => {
+            if (this.state.called) this.inRequestForPeerConn(from)
+        })
         conn.addListener("answer", (e) => {
             if (this.state.called) {
                 console.log("received answer from", e.from)
+                console.warn(e.from)
+                console.warn(this.pc[e.from])
+                console.warn(this.pc[e.from].signalingState)
                 this.pc[e.from].setRemoteDescription(e.answer)
             }
         })
@@ -85,33 +101,79 @@ class LocalStream extends React.Component {
                 console.log(e)
             }
         })
+        conn.addListener("action", e => {
+            switch (e.action) {
+                case "hangup":
+                    if (this.pc[e.from]) {
+                        console.log("localstream received hangup from", e.from)
+                        this.pc[e.from].close()
+                        this.pc[e.from] = null
+                    }
+                    break
+                default:
+            }
+        })
+        this.getUserMedia()
+    }
+
+    getUserMedia = async () => {
+        let constrains = { audio: true, video: true }
+        await navigator.mediaDevices
+            .getUserMedia(constrains)
+            .then(stream => this.gotStream(stream))
+            .then(async () => await this.setState({
+                called: false,
+                started: true,
+                cameraEnabled: true,
+                micEnabled: true
+            }))
+            .then(() => console.info("got user media with constrains:", Object.keys(constrains)))
+            .catch (async e => {
+                console.log(`getUserMedia() with constrains ${Object.keys(constrains)} failed: `, e)
+                constrains = { audio: true }
+                await navigator.mediaDevices
+                    .getUserMedia(constrains)
+                    .then(stream => this.gotStream(stream))
+                    .then(async () => await this.setState({
+                        called: false,
+                        started: true,
+                        micEnabled: true
+                    }))
+                    .then(() => console.info("got user media with constrains:", Object.keys(constrains)))
+                    .catch (e => {
+                        console.log(`getUserMedia() with constrains ${Object.keys(constrains)} failed: `, e)                               
+                    })                  
+            })
     }
 
     componentWillUnmount() {
-        this.stop()
+        if (this.state.called) this.hangup()
     }
 
-    stop = () => {
-        this.setState(this.defaultState)
+    hangup = () => {
+        console.log(this.state)
+        this.setState(this.defaultState, () => console.log(this.state))
         // this.props.ws.removeEventListener("message", this.wsEventListener)
         for (let target in this.pc) {
-            // if (typeof target === typeof RTCPeerConnection)
-            // target.close()
-            this.pc[target].close()
-            this.pc[target] = null
+            if (this.pc[target]) {
+                this.pc[target].close()
+                this.pc[target] = null
+            }
         }
         if (this.localStream !== undefined) {
-            this.localStream.getTracks()[0].stop()
-            this.localStream.getTracks()[1].stop()
+            try {this.localStream.getTracks()[0].stop()} catch(_ignore) {}
+            try {this.localStream.removeTrack(this.localStream.getTracks()[0])} catch(_ignore) {}
+            try {this.localStream.getTracks()[1].stop()} catch(_ignore) {}
+            try {this.localStream.removeTrack(this.localStream.getTracks()[1])} catch(_ignore) {}
+            this.localVideo.srcObject = null
+            this.localVideo.srcObject = this.localStream
         }
         //gotAnswer
         console.info(`closing Local stream...`)
     }
 
     call = () => {
-        this.setState({
-            called: true
-        })
+        this.setState({ called: true })
         console.log("Starting calls")
         const audioTracks = this.localStream.getAudioTracks()
         const videoTracks = this.localStream.getVideoTracks()
@@ -149,11 +211,32 @@ class LocalStream extends React.Component {
 
     gotStream = (stream) => { //called after start and before call
         console.log("Receive local stream")
+        // stream = this.modifyGain(stream)
         this.localVideo.srcObject = stream
         this.localStream = stream //hide call btn after this //label, enabled, muted
     }
 
+    // modifyGain = (stream) => {
+    //     const gainValue = 2.5
+    //     const ctx = new AudioContext()
+    //     const src = ctx.createMediaStreamSource(stream)
+    //     const dst = ctx.createMediaStreamDestination()
+    //     const gainNode = ctx.createGain()
+    //     gainNode.gain.value = gainValue
+    //     [src, gainNode, dst].reduce((a, b) => a && a.connect(b))
+
+    //     const audioTrack = stream.getAudioTracks()[0]
+    //     stream.removeTrack(audioTrack)
+    //     var newAudioTrack = dst.stream.getAudioTracks()[0]
+    //     stream.addTrack(newAudioTrack)
+    //     return stream
+    //     // return dst.stream
+    // }
+    
     sendOfferDescription = (offerDesc, target) => {
+        console.warn(target)
+        console.warn(this.pc[target])
+        console.warn(this.pc[target].signalingState)
         this.pc[target].setLocalDescription(offerDesc)
         channel.sendOffer(this.props.self, offerDesc, target) //send offer and wait for answer
     }
@@ -181,7 +264,18 @@ class LocalStream extends React.Component {
         console.log(`AddIceCandidateFailed: ${e.toString()}`)
     }
 
+    toggleMic = () => {
+        this.setState({micEnabled: !this.state.micEnabled})
+        channel.broadcastAction("toggleMic")
+    }
+    
+    toggleCamera = () => {
+        this.setState({cameraEnabled: !this.state.cameraEnabled})
+        channel.broadcastAction("toggleCamera")
+    }
+
     render() {
+        const {classes} = this.props
         return (
             <div style={{position: 'relative'}}>
                 <video poster={poster}
@@ -191,11 +285,35 @@ class LocalStream extends React.Component {
                         video => {this.localVideo = video
                     }}> </video>
                 <Button 
+                    style={{visibility: (this.state.called)? 'visible' : 'hidden'}}
+                    className={classNames(classes.disableMicBtn, classes.button)}
+                    onClick = {this.toggleMic} >
+                    {this.state.micEnabled && <MicOff/>}
+                    {!this.state.micEnabled && <Mic/>}
+                </Button> 
+                <Button 
+                    style={{visibility: (this.state.called)? 'visible' : 'hidden'}}
+                    className={classNames(classes.disableCameraBtn, classes.button)}
+                    onClick = {this.toggleCamera} >
+                    {this.state.cameraEnabled && <VideocamOff/>}
+                    {!this.state.cameraEnabled && <Videocam/>}
+                </Button> 
+                <Button 
+                    style={{visibility: (this.state.called)? 'visible' : 'hidden'}}
+                    className={classNames(classes.hangupBtn, classes.button)}
+                    onClick = {() => {
+                        channel.broadcastAction("hangup")
+                        this.hangup()
+                        this.getUserMedia()
+                    }} >
+                    <CallEnd/>
+                </Button> 
+                <Button 
                     style={{visibility: (!this.state.started || this.state.called)? 'hidden' : 'visible'}}
-                    className={this.props.classes.button}
+                    className={classNames(classes.callBtn, classes.button)}
                     onClick = {this.call}
                     disabled = {!this.state.started || this.state.called} > 
-                    Call
+                    <Call/>
                 </Button> 
             </div>
         )

@@ -43,6 +43,7 @@ class ViewButton extends React.Component {
     cannotView(filename) {
         if (filename.substr(-4) === ".jpg"
             || filename.substr(-4) === ".png"
+            || filename.substr(-4) === ".PNG"
             || filename.substr(-4) === ".gif"
             || filename.substr(-4) === ".svg"
             || filename.substr(-4) === ".bmp"
