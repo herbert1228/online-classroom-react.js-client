@@ -38,7 +38,7 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "build": "react-scripts build",
-    "deploy": "react-scripts build && rsync -avh ./build overcoded.tk:"
+    "deploy": "react-scripts build && rsync -avh ./build/* overcoded.tk:overcoded.tk"
   },
   "devDependencies": {
     "babel-plugin-transform-decorators": "^6.24.1",

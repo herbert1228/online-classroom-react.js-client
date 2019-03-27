@@ -5,34 +5,73 @@ import Typography from '@material-ui/core/Typography'
 import { Button } from '@material-ui/core'
 import JoinedLayoutStudent from '../Classroom_Components/JoinedLayoutStudent'
 import JoinedLayoutTeacher from '../Classroom_Components/JoinedLayoutTeacher'
+import {connection as conn} from '../../interface/connection'
+import {store} from '../../index'
 
 const styles = theme => ({
     notJoined: {
         position: 'absolute',
         top: '50%',
         left: '50%',
-        transform: 'translateX(-55%) translateY(-60%)'
+        transform: 'translateX(-55%) translateY(-60%)',
+        textAlign: 'center',
+        display: 'flex', 
+        justifyContent: 'space-around',
+        flexDirection: 'column',
     },
-    btn_notJoinged: {
-        marginLeft: 35
+    notJoinHeading: {
+        // marginBottom: '20px'
     }
 })
 
 class Classroom extends React.Component {
+    async joinClass(owner, class_name) {
+        const response = await conn.call("join_class", {owner, class_name})
+        if (response.type === "ok") {
+            store.dispatch({type: "joinClass", owner, class_name: class_name})
+            this.props.handleNotification(`join ${owner}'s class: ${class_name} success`)
+        }
+        if (response.type === "reject") {
+            this.props.handleNotification(`join class failed, reason: ${response.reason}`)
+        }
+    }
+
     render() {
         const { classes, ...other } = this.props
         return (
             <Fragment>
                 {(this.props.joined === null) && 
                     <div className={classes.notJoined}>
-                        <Typography variant="headline" gutterBottom>
+                        <Typography variant="headline" gutterBottom >
                             Not joined a classroom yet
                         </Typography>
-                        <Button 
-                            className={classes.btn_notJoinged}
-                            onClick={() => this.props.changeScene(2.2)}
-                            size="small">
-                        Select a classroom here!</Button>
+                        <div style={{display: 'flex', justifyContent: 'space-around'}}>
+                            <Button 
+                                onClick={() => this.props.changeScene(2.2)}
+                                size="small">
+                                Learn here!
+                            </Button>
+                            <Button 
+                                onClick={() => this.props.changeScene(2.1)}
+                                size="small">
+                                Teach here!
+                            </Button>
+                        </div>
+                        {this.props.lastJoin && 
+                            <div style={{height: 20}}></div>
+                        }
+                        {this.props.lastJoin && 
+                            <Typography variant="subheading">Or join where you left last time:</Typography>
+                        }
+                        {this.props.lastJoin &&
+                            <Fragment>
+                                <Button 
+                                    onClick={() => this.joinClass(this.props.lastJoin.owner, this.props.lastJoin.class_name)}
+                                    size="small">
+                                    Class: {this.props.lastJoin.owner} Teacher: {this.props.lastJoin.owner}
+                                </Button>
+                            </Fragment>
+                        }
                     </div>
                 }
                 {(this.props.joined) && (this.props.joined.owner !== this.props.self) &&

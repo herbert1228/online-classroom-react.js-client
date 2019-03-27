@@ -23,25 +23,34 @@ function genid() {
 const listener = {
     listener: {},
     addListener(type, callback) {
-        if (!listener[type]) {
-            listener[type] = []
+        if (!this.listener[type]) {
+            this.listener[type] = []
         }
-        listener[type].push(callback)
+        this.listener[type].push(callback)
     },
     removeListener(type, callback) {
-        if (listener[type]) {
-            let i = listener[type].indexOf(callback)
-            listener[type].slice(i, 1)
+        if (this.listener[type]) {
+            // console.warn(this.listener)
+            // console.warn("Removing listener:", type)
+            let i = this.listener[type].indexOf(callback)
+            this.listener[type].splice(i, 1)
+            // console.warn(this.listener)
+        } else {
+            console.warn("Cannot find listener", type, callback)
         }
     },
     emit(type, params) {
-        if (listener[type]) {
-            for (let callback of listener[type]) {
+        if (this.listener[type]) {
+            for (let callback of this.listener[type]) {
+                // console.warn("emitting callback for type:", type)
+                // console.warn(callback)
                 callback(params)
             }
         }
     }
 }
+
+window.l = listener
 
 // PLEASE DELETE THIS AFTER DEBUGGING
 var DEBUG = false
@@ -156,6 +165,11 @@ const signalingChannel = {
     broadcastAction(action) {
         console.log(`Broadcasting action:`, action)
         this.cast("action", action)
+    },
+
+    // non-signaling
+    getPermission() {
+        this.call("get_permission", null)
     }
 }
 

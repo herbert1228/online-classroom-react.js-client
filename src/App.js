@@ -136,7 +136,8 @@ function mapStateToProps(state) {
         self: state.self,
         joined: state.joined,
         peerConn: state.peerConn,
-        drawerOpen: state.drawerOpen
+        drawerOpen: state.drawerOpen,
+        lastJoin: state.lastJoin
     }
 }
 

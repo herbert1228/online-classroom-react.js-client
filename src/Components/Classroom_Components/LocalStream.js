@@ -76,44 +76,60 @@ class LocalStream extends React.Component {
             .then((bool) => console.log('is TURN server active? ', bool? 'yes':'no'))
             .catch(console.error.bind(console))
 
-        conn.addListener("request_offer", (from) => {
-            if (this.state.called) this.inRequestForPeerConn(from)
-        })
-        conn.addListener("answer", (e) => {
-            if (this.state.called) {
-                console.log("received answer from", e.from)
-                console.warn(e.from)
-                console.warn(this.pc[e.from])
-                console.warn(this.pc[e.from].signalingState)
-                this.pc[e.from].setRemoteDescription(e.answer)
-            }
-        })
-        conn.addListener("candidate", (e) => {
-            if (e.stream_owner !== this.props.self) return
-            console.log(e.stream_owner, this.props.self)
-            console.log(e)
-            if (this.state.called && e.candidate === null) return
-            try {
-                setTimeout(() => this.pc[e.from].addIceCandidate(e.candidate), 1000)
-                console.log("Local adding ice from", e.from)
-            } catch (_ignore) {
-                console.log("Catch ERROR")
-                console.log(e)
-            }
-        })
-        conn.addListener("action", e => {
-            switch (e.action) {
-                case "hangup":
-                    if (this.pc[e.from]) {
-                        console.log("localstream received hangup from", e.from)
-                        this.pc[e.from].close()
-                        this.pc[e.from] = null
-                    }
-                    break
-                default:
-            }
-        })
+        conn.addListener("request_offer", this.requestOfferListener)
+        conn.addListener("answer", this.answerListener)
+        conn.addListener("candidate", this.candidateListener)
+        conn.addListener("action", this.actionListener)
         this.getUserMedia()
+    }
+
+    componentWillUnmount() {
+        conn.removeListener("request_offer", this.requestOfferListener)
+        conn.removeListener("candidate", this.candidateListener)
+        conn.removeListener("action", this.actionListener)
+        conn.removeListener("answer", this.answerListener)
+        if (this.state.called) this.hangup()
+    }
+
+    requestOfferListener = from => {
+        if (this.state.called) this.inRequestForPeerConn(from)
+    }
+
+    answerListener = e => {
+        if (this.state.called) {
+            console.log("received answer from", e.from)
+            console.warn(e.from)
+            console.warn(this.pc[e.from])
+            console.warn(this.pc[e.from].signalingState)
+            this.pc[e.from].setRemoteDescription(e.answer)
+        }
+    }
+
+    candidateListener = e => {
+        if (e.stream_owner !== this.props.self) return
+        console.log(e.stream_owner, this.props.self)
+        console.log(e)
+        if (this.state.called && e.candidate === null) return
+        try {
+            setTimeout(() => this.pc[e.from].addIceCandidate(e.candidate), 1000)
+            console.log("Local adding ice from", e.from)
+        } catch (_ignore) {
+            console.log("Catch ERROR")
+            console.log(e)
+        }
+    }
+
+    actionListener = e => {
+        // switch (e.action) {
+        //     case "hangup":
+        //         if (this.pc[e.from]) {
+        //             console.log("localstream received hangup from", e.from)
+        //             this.pc[e.from].close()
+        //             this.pc[e.from] = null
+        //         }
+        //         break
+        //     default:
+        // }
     }
 
     getUserMedia = async () => {
@@ -144,10 +160,6 @@ class LocalStream extends React.Component {
                         console.log(`getUserMedia() with constrains ${Object.keys(constrains)} failed: `, e)                               
                     })                  
             })
-    }
-
-    componentWillUnmount() {
-        if (this.state.called) this.hangup()
     }
 
     hangup = () => {
@@ -215,23 +227,6 @@ class LocalStream extends React.Component {
         this.localVideo.srcObject = stream
         this.localStream = stream //hide call btn after this //label, enabled, muted
     }
-
-    // modifyGain = (stream) => {
-    //     const gainValue = 2.5
-    //     const ctx = new AudioContext()
-    //     const src = ctx.createMediaStreamSource(stream)
-    //     const dst = ctx.createMediaStreamDestination()
-    //     const gainNode = ctx.createGain()
-    //     gainNode.gain.value = gainValue
-    //     [src, gainNode, dst].reduce((a, b) => a && a.connect(b))
-
-    //     const audioTrack = stream.getAudioTracks()[0]
-    //     stream.removeTrack(audioTrack)
-    //     var newAudioTrack = dst.stream.getAudioTracks()[0]
-    //     stream.addTrack(newAudioTrack)
-    //     return stream
-    //     // return dst.stream
-    // }
     
     sendOfferDescription = (offerDesc, target) => {
         console.warn(target)

@@ -29,6 +29,7 @@ const initialState = {
     location: 0,
     self: null,
     joined: null,
+    lastJoin: null,
     drawerOpen: true
 }
 
@@ -52,7 +53,8 @@ function reducer(state = initialState, action) {
         case "login":
             return {...state, self: action.loginName}
         case "joinClass":
-            return {...state, joined: {owner: action.owner, class_name: action.class_name}}
+            const joined = {owner: action.owner, class_name: action.class_name}
+            return {...state, joined, lastJoin: joined}
         case "leaveClass":
             return {...state, joined: null, session_user: []}
         case "drawerOpen":
@@ -72,6 +74,14 @@ class Index extends React.Component {
         conn.addListener("broadcast_message", (e) => console.log(e.result))
         conn.addListener("get_session_user", (e) => this.dispatch("get_session_user", e.result))
         conn.addListener("get_exist_peer_conn", (e) => this.dispatch("get_exist_peer_conn", e.result))
+    }
+
+    componentWillUnmount() {
+        conn.removeListener("socketclose", this.handleSocketClose)
+        conn.removeListener("get_started_class", (e) => this.dispatch("get_started_class", e.result))
+        conn.removeListener("broadcast_message", (e) => console.log(e.result))
+        conn.removeListener("get_session_user", (e) => this.dispatch("get_session_user", e.result))
+        conn.removeListener("get_exist_peer_conn", (e) => this.dispatch("get_exist_peer_conn", e.result))
     }
 
     dispatch = (type, result) => {

@@ -28,54 +28,65 @@ class RemoteStream extends React.Component {
         this.peerConn.onnegotiationneeded = ev => console.log("negotiationneeded", ev)
         console.log(`${this.props.user}: created remote peer connection object`)
 
-        conn.addListener("got_media", (e) => {
-            // if (!this.state.requesting) 
-            if (e === this.props.user) this.requestOffer()
-        })
-        conn.addListener("offer", (e) => {
-            if (this.peerConn === null) {
-                this.peerConn = new RTCPeerConnection(this.state.pcConfig)
-                this.peerConn.ontrack = this.gotRemoteStream
-                this.peerConn.onicecandidate = this.iceCallbackRemote
-                this.peerConn.onnegotiationneeded = ev => console.log("negotiationneeded", ev)
-                console.log(`${this.props.user}: created remote peer connection object`)
-            }
-            if( e.from === this.props.user) {
-                console.log("received offer from", e.from)
-                this.setRemoteDescriptionForPeerConn(e.offer)
-            }
-        })
-        conn.addListener("candidate", (e) => {
-            if (e.stream_owner !== this.props.user) return
-            if (!this.state.requesting) return
-            if (e.candidate === null) return
-            console.log("Remote adding ice from", e.from)
-            setTimeout(() => this.peerConn.addIceCandidate(e.candidate), 1000)
-        })
-        conn.addListener("action", e => {
-            if (e.from !== this.props.user) return
-            console.log(e.action, e.from)
-            switch (e.action) {
-                case "toggleMic":
-                    this.toggleTrack(this.remoteVideo.srcObject, "audio")
-                    break
-                case "toggleCamera":
-                    this.toggleTrack(this.remoteVideo.srcObject, "video")
-                    break
-                case "hangup":
-                    this.hangup()
-                    break
-                default:
-                    console.warn("Unexpected action from server:", e.action, e.from)
-            }
-        })
+        conn.addListener("got_media", this.gotMediaListener)
+        conn.addListener("offer", this.offerListener)
+        conn.addListener("candidate", this.candidateListener)
+        conn.addListener("action", this.actionListener)
 
-        // case "get_exist_peer_conn":
-        // this.setState({ peerConn: event.exist_peer_conn })
-        // break
         // if (this.props.peerConn.includes(this.props.user)) {
             this.requestOffer()
         // }
+    }
+
+    componentWillUnmount() {
+        conn.removeListener("got_media", this.gotMediaListener)
+        conn.removeListener("offer", this.offerListener)
+        conn.removeListener("candidate", this.candidateListener)
+        conn.removeListener("action", this.actionListener)
+    }
+
+    gotMediaListener = e => {
+        // if (!this.state.requesting) 
+        if (e === this.props.user) this.requestOffer()
+    }
+
+    offerListener = e => { // created twice
+        if (this.peerConn === null) {
+            this.peerConn = new RTCPeerConnection(this.state.pcConfig)
+            this.peerConn.ontrack = this.gotRemoteStream
+            this.peerConn.onicecandidate = this.iceCallbackRemote
+            this.peerConn.onnegotiationneeded = ev => console.log("negotiationneeded", ev)
+            console.log(`${this.props.user}: created remote peer connection object`)
+        }
+        if( e.from === this.props.user) {
+            this.setRemoteDescriptionForPeerConn(e.offer)
+        }
+    }
+
+    candidateListener = e => {
+        if (e.stream_owner !== this.props.user) return
+        if (!this.state.requesting) return
+        if (e.candidate === null) return
+        console.log("Remote adding ice from", e.from)
+        setTimeout(() => this.peerConn.addIceCandidate(e.candidate), 1000)
+    }
+
+    actionListener = e => {
+        if (e.from !== this.props.user) return
+        console.log(e.action, e.from)
+        switch (e.action) {
+            case "toggleMic":
+                this.toggleTrack(this.remoteVideo.srcObject, "audio")
+                break
+            case "toggleCamera":
+                this.toggleTrack(this.remoteVideo.srcObject, "video")
+                break
+            case "hangup":
+                this.hangup()
+                break
+            default:
+                console.warn("Unexpected action from server:", e.action, e.from)
+        }
     }
 
     toggleTrack = (stream, type) => {
@@ -89,12 +100,13 @@ class RemoteStream extends React.Component {
     }
 
     hangup = () => {
+        this.setState({requesting: false})
+        if (!this.peerConn) return
         if (this.remoteVideo === null) return
         console.info(`closing remote stream: ${this.props.user}...`)
         this.peerConn.close()
         this.peerConn = null
         this.remoteVideo.srcObject = null
-        this.setState({requesting: false})
     }
 
     requestOffer = () => {
@@ -117,7 +129,7 @@ class RemoteStream extends React.Component {
         console.log(`Failed to create session desc for ${this.props.user}: ${err.toString()}`)
     }
 
-    gotRemoteStream = (e) => {
+    gotRemoteStream = async (e) => {
         if (this.remoteVideo !== null) {
             if (this.remoteVideo.srcObject !== e.streams[0]) {
                 this.remoteVideo.srcObject = e.streams[0]
@@ -125,6 +137,10 @@ class RemoteStream extends React.Component {
             }
         }
         this.setState({ requesting: false })
+
+        //set track enable/disable
+        const result = await channel.getPermission()
+        
     }
 
     iceCallbackRemote = (event) => {

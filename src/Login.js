@@ -44,12 +44,18 @@ class Login extends React.Component {
         loginName: "dev",
         loginPassword: "dev",
         showPassword: false,
-        fade: false
+        fade: false,
+        refreshIntervalId: null
     }
 
     componentDidMount() {
-        setInterval(() => this.setState({fade: true}), 500)
+        const refreshIntervalId = setInterval(() => this.setState({fade: true}), 500)
+        this.setState({refreshIntervalId})
         conn.addListener("socketopen", this.handleSocketOpen)
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.state.refreshIntervalId)
     }
 
     handleSocketOpen = () => {
@@ -72,8 +78,11 @@ class Login extends React.Component {
         const result = await conn.call("login", {username: this.state.loginName, password: this.state.loginPassword})
         if (result["type"] === "ok") {
             const {cookies} = this.props
-            store.dispatch({type:"login", loginName: this.state.loginName})
             this.setState({connected: true})
+            cookies.set("name", this.state.loginName) // option: {path: "/"}
+            cookies.set("password", this.state.loginPassword)
+            this.setState({loginPassword: ""})
+            store.dispatch({type:"login", loginName: this.state.loginName})
             //TODO listen the following events
             const created = await conn.call("get_created_class")
             const enrolled = await conn.call("get_enrolled_class")
@@ -90,9 +99,6 @@ class Login extends React.Component {
                 type: "get_started_class",
                 result: started.result
             })
-            cookies.set("name", this.state.loginName) // option: {path: "/"}
-            cookies.set("password", this.state.loginPassword)
-            this.setState({loginPassword: ""})
             this.props.handleNotification(`Welcome ${this.state.loginName}`)
         } else {
             if (result["type"] === "reject") {

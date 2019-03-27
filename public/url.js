@@ -1,6 +1,10 @@
 // url @overcoded
-// SERVER_URL = "wss://overcoded.tk/socket"
-// UPLOAD_URL = "http://overcoded.tk"
+SERVER_URL = `wss://${window.location.hostname}/socket`
+UPLOAD_URL = `https://${window.location.hostname}`
+
+
+
+// @localhost
 
 // SERVER_URL = "ws://overcoded.tk:8500"
 // UPLOAD_URL = "http://overcoded.tk:8600"
