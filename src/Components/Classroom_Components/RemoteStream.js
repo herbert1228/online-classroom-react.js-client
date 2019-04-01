@@ -139,7 +139,7 @@ class RemoteStream extends React.Component {
         this.setState({ requesting: false })
 
         //set track enable/disable
-        const result = await channel.getPermission()
+        // const result = await channel.getPermission()
         
     }
 

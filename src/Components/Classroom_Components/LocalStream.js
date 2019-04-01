@@ -229,9 +229,9 @@ class LocalStream extends React.Component {
     }
     
     sendOfferDescription = (offerDesc, target) => {
-        console.warn(target)
-        console.warn(this.pc[target])
-        console.warn(this.pc[target].signalingState)
+        // console.warn(target)
+        // console.warn(this.pc[target])
+        // console.warn(this.pc[target].signalingState)
         this.pc[target].setLocalDescription(offerDesc)
         channel.sendOffer(this.props.self, offerDesc, target) //send offer and wait for answer
     }
