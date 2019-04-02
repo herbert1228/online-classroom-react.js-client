@@ -81,7 +81,7 @@ export class ListItems extends React.Component {
                         <ListItemIcon>
                             <ReportIcon/>
                         </ListItemIcon>
-                        <ListItemText primary="Spam"/>
+                        <ListItemText primary="Notification"/>
                     </ListItem>
                 </List>
             </Fragment>

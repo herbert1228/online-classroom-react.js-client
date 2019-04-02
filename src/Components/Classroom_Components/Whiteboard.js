@@ -27,11 +27,12 @@ const styles = theme => ({
 })
 
 function defaultText() {
-    return {type: "text", x: 40, y: 40, text:"New Text\nwith Line Break", fontSize: 18, fontFamily: "Calibri", fill: 'blue', name: genid()}
+    return {type: "text", x: 40, y: 40, text:"New Text\nwith Line Break", fontSize: 18, fontFamily: "Calibri", fill: 'black', name: genid()}
+    // return {type: "text", x: 40, y: 40, text:"New Text\nwith Line Break", fontSize: 18, fontFamily: "Calibri", fill: '#15474b', name: genid()}
 }
 
 function defaultRect() {
-    return {type: "rectangle", x: 150, y: 150, width: 100, height: 100, fill: 'grey', name: genid()}
+    return {type: "rectangle", x: 150, y: 150, width: 100, height: 100, fill: '#ffff0080', name: genid()}
 }
 
 function defaultImage(image, name = genid()) {
@@ -113,6 +114,14 @@ class Whiteboard extends React.Component {
                     this.setState({objects: [...this.state.objects, defaultImage(image, name)]})
                 }
                 break
+            case "new text":
+                const {newText} = data
+                this.setState({objects: [...this.state.objects, newText]})
+                break
+            case "new rect":
+                const {newRect} = data
+                this.setState({objects: [...this.state.objects, newRect]})
+                break
             case "drag":
                 const {objName, x, y} = data
                 this.updatePos(objName, {x, y})
@@ -124,6 +133,11 @@ class Whiteboard extends React.Component {
                     return
                 }
                 this.state.objects.splice(this.state.objects.indexOf(obj), 1)
+                this.refreshWhiteboard()
+                break
+            case "zIndex":
+                const {action, target} = data
+                this.handleZIndex(action, false, target)
                 break
             default:
                 console.log(data)
@@ -134,7 +148,7 @@ class Whiteboard extends React.Component {
 
     handleStageContextMenu = e => {
         e.evt.preventDefault()
-        // clicked on stage/whiteboard - clear selection
+        // clicked on stage/whiteboard - clfear selection
         if (e.target === e.target.getStage() || e.target.name === "whiteboard") {
             this.setState({selectedShapeName: ''})
             return
@@ -180,12 +194,17 @@ class Whiteboard extends React.Component {
         this.setState({ cursor: stage.getPointerPosition() })
     }
 
-    handleZIndex = type => { // type = "top" || "bottom"
-        const obj = this.state.objects.find(r => r.name === this.state.selectedShapeName)
+    handleZIndex = (type, triggerFromLocal, ...objName) => { // type = "top" || "bottom"
+        const obj = triggerFromLocal?
+            this.state.objects.find(r => r.name === this.state.selectedShapeName)
+            : this.state.objects.find(r => r.name === objName[0])
+            
         if (!obj) {
             this.props.handleNotification("No object selected!")
             return
         }
+        if (triggerFromLocal) this.sendWhiteboardAction("zIndex", {target: obj.name, action: type})
+
         this.state.objects.splice(this.state.objects.indexOf(obj), 1)
         if (type === "top") {
             this.setState({objects: [...this.state.objects, obj]})
@@ -281,12 +300,15 @@ class Whiteboard extends React.Component {
 
     updatePos = (objName, {x, y}) => {
         const updateObj = this.state.objects.find(r => r.name === objName)
-        this.state.objects.splice(this.state.objects.indexOf(updateObj), 1)
+        const index = this.state.objects.indexOf(updateObj)
+        this.state.objects.splice(index, 1)
         let modifliedObj = updateObj
         modifliedObj.x = x
         modifliedObj.y = y
-
-        this.setState({objects: [...this.state.objects, modifliedObj]})
+        
+        this.state.objects.splice(index, 0, modifliedObj)
+        this.refreshWhiteboard()
+        // this.setState({objects: [...this.state.objects, modifliedObj]})
     }
 
     handleOnDrop = e => {
@@ -303,13 +325,26 @@ class Whiteboard extends React.Component {
         }
     }
 
+    refreshWhiteboard = () => this.setState({connected: this.state.connected})
+
+    addText = () => {
+        const newText = defaultText()
+        this.setState({objects: [...this.state.objects, newText]})
+        this.sendWhiteboardAction("new text", {newText})
+    }
+    
+    addRect = () => {
+        const newRect = defaultRect()
+        this.setState({objects: [...this.state.objects, newRect]})
+        this.sendWhiteboardAction("new rect", {newRect})
+    }
+
     handleNoPermission = () => {
         this.props.handleNotification(`Sorry, please gain permission of this whiteboard from your teacher`)
     }
 
     render() {
         const {classes, id, ...other} = this.props;
-
         return (
             <RndContainer id={id} {...other}>
                 <Card className={classes.card}
@@ -332,17 +367,17 @@ class Whiteboard extends React.Component {
                             <div className={classes.panel}>
                                 {!this.state.canvasMode &&
                                     <Fragment>
-                                        <Button onClick={()=> this.setState({objects: [...this.state.objects, defaultText()]})}>
+                                        <Button onClick={this.addText}>
                                             Add Text
                                         </Button>
-                                        <Button onClick={()=> this.setState({objects: [...this.state.objects, defaultRect()]})}>
+                                        <Button onClick={this.addRect}>
                                             Add Rect
                                         </Button>
                                         {/* <SketchPicker/> */}
-                                        <Button onClick={() => this.handleZIndex("top")}>
+                                        <Button onClick={() => this.handleZIndex("top", true)}>
                                             Top
                                         </Button>
-                                        <Button onClick={() => this.handleZIndex("bottom")}>
+                                        <Button onClick={() => this.handleZIndex("bottom", true)}>
                                             Bottom
                                         </Button>
                                         <Button onClick={this.handleRemove}>
@@ -404,12 +439,14 @@ class Whiteboard extends React.Component {
                         <Layer>
                             {this.state.objects.map((obj, i) => {
                                 if (obj === undefined) console.log(obj)
-                                else if (obj.type === "rectangle") 
+                                else if (obj.type === "rectangle") {
                                     return <Rectangle 
-                                                key={obj.name} 
-                                                {...obj}
-                                                onDragEnd={e => this.handleDragEnd(obj.name, e.target._lastPos)}
-                                            />
+                                                    key={obj.name} 
+                                                    {...obj}
+                                                    onDragEnd={e => this.handleDragEnd(obj.name, e.target._lastPos)}
+                                                    onTransformation={() => window.alert("transforming")}
+                                                />
+                                }
                                 else if (obj.type === "text")
                                     return <Text 
                                                 key={obj.name} 

@@ -1,8 +1,18 @@
 import React from 'react'
 import {withStyles} from '@material-ui/core/styles'
 import {signalingChannel as channel, connection as conn} from '../../interface/connection'
+import { Avatar } from '@material-ui/core';
 
-const styles = theme => ({})
+const styles = theme => ({
+    avatar: {
+        position: 'absolute', 
+        left: '50%', 
+        top: '30%', 
+        height: 50,
+        width: 50,
+        transform: 'translateX(-50%) translateY(0%)'
+    },
+})
 
 class RemoteStream extends React.Component {
     defaultState = {
@@ -33,9 +43,11 @@ class RemoteStream extends React.Component {
         conn.addListener("candidate", this.candidateListener)
         conn.addListener("action", this.actionListener)
 
-        // if (this.props.peerConn.includes(this.props.user)) {
+        console.log(this.props.peerConn)
+        console.log(this.props.session_user)
+        if (this.props.session_user.includes(this.props.user)) {
             this.requestOffer()
-        // }
+        } else {console.warn("Not requesting offer when initializing")}
     }
 
     componentWillUnmount() {
@@ -161,6 +173,7 @@ class RemoteStream extends React.Component {
     }
 
     render() {
+        const {classes} = this.props
         return ( 
             <div style={{position: 'relative'}}>
                 <video 
@@ -174,6 +187,7 @@ class RemoteStream extends React.Component {
                             this.remoteVideo = video
                         }
                 } > </video>
+                <Avatar className={classes.avatar}>{this.props.user.substring(10)}</Avatar>
             </div>
         )
     }

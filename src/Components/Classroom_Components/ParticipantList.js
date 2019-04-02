@@ -6,12 +6,13 @@ import RndContainer from './RndContainer';
 
 const styles = theme => ({
     grid_item: {
-        marginBottom: 50,
+        marginBottom: 25,
     },
     participantList : {
         padding: 20,
         backgroundColor: "rgba(15,25,30,0.15)",
-        borderRadius: 25
+        borderRadius: 25,
+        width: 137
     }
 })
 

@@ -7,8 +7,16 @@ import RemoteStream from '../Classroom_Components/RemoteStream'
 
 const styles = theme => ({
     card: {
-        width: 92,
-        height: 80
+        // width: 92,
+        // height: 80,
+        width: 460 / 5,
+        height: 300 / 5 + 9
+    },
+    container: {
+                display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        justifyItems: 'center',
     }
 })
 
@@ -31,10 +39,12 @@ class UserCardSmall extends React.Component {
         const { user } = this.props;
         const { classes, ...other } = this.props;
         return (
-            <Card className={classes.card}>
+            <div className={classes.container}>
                 {user}
-                <Webcam {...other} camOpen={this.state.camOpen} />
-            </Card>
+                <Card className={classes.card}>
+                    <Webcam {...other} camOpen={this.state.camOpen} />
+                </Card>
+            </div>
         )
     }
 }
@@ -53,7 +63,7 @@ function Webcam(props) {
         return (
             <RemoteStream
                 width={460 / 5}
-                height={300 / 5 + 15}
+                height={300 / 5 + 9}
                 {...props}
                 small={true}
                 key={user}
