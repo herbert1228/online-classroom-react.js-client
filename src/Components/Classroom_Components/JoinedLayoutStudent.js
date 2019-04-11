@@ -19,19 +19,19 @@ class JoinedLayoutStudent extends Component {
     ref={}
     state = {
         webcam: {
-            selfWebcam: { id: "selfWebcam", zIndex: 3, position: {x: 1130, y: 5}, size: {width: 460, height: 345+41} }, 
-            teacherWebcam: { id: "teacherWebcam", zIndex: 3, position: {x: 5, y: 5}, size: {width: 460, height: 345+41} }, 
+            selfWebcam: { id: "selfWebcam", zIndex: 2, position: {x: 1130, y: 5}, size: {width: 460, height: 345+41} }, 
+            teacherWebcam: { id: "teacherWebcam", zIndex: 2, position: {x: 5, y: 5}, size: {width: 460, height: 345+41} }, 
         },
         whiteboard: {
-            selfWhiteboard: { id: "selfWhiteboard", user: this.props.self, zIndex: 2, position: {x: 800, y: 150}, size: {width: 800, height: 718} },
-            teacherWhiteboard: { id: "teacherWhiteboard", user: this.props.joined.owner, zIndex: 2, position: {x: 5, y: 150}, size: {width: 800, height: 718} }, 
+            selfWhiteboard: { id: "selfWhiteboard", user: this.props.self, zIndex: 3, position: {x: 800, y: 150}, size: {width: 800, height: 718} },
+            teacherWhiteboard: { id: "teacherWhiteboard", user: this.props.joined.owner, zIndex: 3, position: {x: 5, y: 150}, size: {width: 800, height: 718} }, 
         },
         drawer: {
             selfDrawer: { id: "Personal Drawer", zIndex: 0, position: {x: 660, y: 5}, size: {width: 450, height: 550} }, 
             classDrawer: { id: "Class Resources", zIndex: 0, position: {x: 5, y: 5} },// to distribute/receive files class esources
         },
         other: {
-            PList: { id: "PList", zIndex: 1, position: {x: 465, y: 5}, size: {width: 0, height: 0} }, 
+            PList: { id: "PList", zIndex: 1, position: {x: 480, y: 5}, size: {width: 0, height: 0} }, 
         }
     }
     bringTop = (target) => { // target: selfWebcam/etc
@@ -97,6 +97,9 @@ class JoinedLayoutStudent extends Component {
                         />
                     ))}
                     {Object.values(this.state.whiteboard).map((whiteboard) => (
+                        (whiteboard.id !== 'teacherWhiteboard' || 
+                            (whiteboard.id === 'teacherWhiteboard' && 
+                                this.props.session_user.includes(this.props.joined.owner))) &&
                         <Whiteboard
                             key={whiteboard.id}
                             {...whiteboard}

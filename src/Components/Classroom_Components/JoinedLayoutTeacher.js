@@ -22,18 +22,18 @@ class JoinedLayoutTeacher extends Component {
     ref={}
     state = {
         webcam: {
-            // selfWebcam: { owner: "", id: "selfWebcam", zIndex: 3, position: {x: 1130, y: 5}, size: {width: 460, height: 345+72} }, 
-            teacherWebcam: { id: "teacherWebcam", zIndex: 3, position: {x: 5, y: 5}, size: {width: 460, height: 345+41} }, 
+            // selfWebcam: { owner: "", id: "selfWebcam", zIndex: 2, position: {x: 1130, y: 5}, size: {width: 460, height: 345+72} }, 
+            teacherWebcam: { id: "teacherWebcam", zIndex: 2, position: {x: 5, y: 5}, size: {width: 460, height: 345+41} }, 
         },
         whiteboard: {
-            teacherWhiteboard: { id: "teacherWhiteboard", user: this.props.joined.owner, zIndex: 2, position: {x: 5, y: 150}, size: {width: 800, height: 718} }, 
+            teacherWhiteboard: { id: "teacherWhiteboard", user: this.props.joined.owner, zIndex: 3, position: {x: 5, y: 150}, size: {width: 800, height: 718} }, 
         },
         drawer: {
             selfDrawer: { id: "selfDrawer", zIndex: 0, position: {x: 660, y: 5}, size: {width: 450, height: 550} }, 
             classDrawer: { id: "classDrawer", zIndex: 0, position: {x: 0, y: 5} },// to distribute/receive files class esources
         },
         other: {
-            PList: { id: "PList", zIndex: 1, position: {x: 465, y: 5}, size: {width: 0, height: 0} }, 
+            PList: { id: "PList", zIndex: 1, position: {x: 1450, y: 5}, size: {width: 0, height: 0} }, 
         }
     }
 

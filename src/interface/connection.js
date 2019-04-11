@@ -119,7 +119,8 @@ const connection = {
         return new Promise((resolve, reject) => {
             callsInProgress[id] = resolve
             setTimeout(
-                () => reject(new Error(`call timeout, type: ${type}, params: ${params}`)),
+                // () => reject(new Error(`call timeout, type: ${type}, params: ${params}`)),
+                () => reject(`call timeout, type: ${type}, params: ${params}`),
                 TIMEOUT
             )
         })
@@ -187,13 +188,16 @@ const WhiteboardChannel = { // use owner as target
         return this.call("connect", target)
     },
     disconnect(target) {
-        return this.call("disconnect", target)
+        this.cast("disconnect", target)
     },
     draw(target, lines) {
         this.cast("draw", {target, lines})
     },
     onReceiveDraw(target, callback) {
         connection.addListener("whiteboard_draw_" + target, callback)
+    },
+    removeListener(target, callback) {
+        connection.removeListener("whiteboard_draw_" + target, callback)
     }
 }
 

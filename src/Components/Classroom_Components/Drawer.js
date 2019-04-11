@@ -133,6 +133,7 @@ class Drawer extends React.Component {
                     style={{
                         height: 18,
                         paddingTop: 7,
+                        backgroundColor: "#e9e7e74d",
                         overflow: "hidden",
                         whiteSpace: "nowrap",
                         textOverflow: "ellipsis"

@@ -2,6 +2,7 @@ import React from 'react';
 import {withStyles} from '@material-ui/core/styles'
 import {Image} from 'react-konva'
 import { WhiteboardChannel } from '../../../interface/connection'
+// import _ from 'lodash'
 
 const styles = theme => ({
 })
@@ -34,10 +35,16 @@ class CanvasInsideWhiteboard extends React.Component {
     }
 
     componentDidUpdate(prevProps){
-        const { linesReceived } = this.props
+        const { linesReceived, erasedLines } = this.props
+        this.drawReceivedLines(linesReceived, prevProps.linesReceived)
+        this.removeErasedLines(erasedLines, prevProps.erasedLines)
+    }
+
+    // sync new lines
+    drawReceivedLines = (linesReceived, prevLinesReceived) => {
         if (!linesReceived) return
         if (linesReceived.length === 0) return
-        if (prevProps.linesReceived === linesReceived) return
+        if (prevLinesReceived === linesReceived) return
         // for (let data of linesReceived) 
         this.setState({
             lines: [
@@ -47,104 +54,18 @@ class CanvasInsideWhiteboard extends React.Component {
         })
     }
 
-    // handleMouseDown = (e) => {
-    //   //console.log("mousedown")
-    //   console.log("line color in child is", this.props.lineColor)
-    //   //console.log("line color in child is", this.state.lineColor)
-    //   this.setState({ isMouseDown: true })
-    //   var stage = this.image.parent.parent
-    //   this.lastPointerPosition = stage.getPointerPosition()
+    //sync deleted lines
+    removeErasedLines = (erasedLines, prevErasedLines) => {
+        if (!erasedLines) return
+        if (erasedLines.length === 0) return
+        if (prevErasedLines === erasedLines) return
 
-    //   if (this.props.mode === "draw") {
-    //     var point_record = {
-    //       mode: this.props.mode,
-    //       lineWidth: this.props.lineWidth,
-    //       lineColor: this.props.lineColor,
-    //       point: []
-    //     }
-    //   } else if (this.props.mode === "eraser") {
-    //     var point_record = {
-    //       mode: this.props.mode,
-    //       lineWidth: this.props.lineWidth,
-    //       point: []
-    //     }
-    //   }
-    //   this.setState({point_record: point_record})
-    // }
-
-    // handleMouseUp = () => {
-    //   this.setState({ isMouseDown: false })
-    //   if (this.state.point_record.point.length > 0) {
-    //     //this.state.undoStack.push(this.state.point_record)
-    //     this.setState({undoStack: [...this.state.undoStack, this.state.point_record]})
-    //   }
-    // }
-
-    // handleMouseMove = (e) => {
-    //   const { isMouseDown} = this.state
-
-    //   if(isMouseDown) {
-    //     console.log("mode is ", this.props.mode)
-    //     this.ctx.save()
-
-    //     this.ctx.strokeStyle = this.props.lineColor
-    //     this.ctx.lineJoin = "round"
-    //     this.ctx.lineWidth = this.props.lineWidth
-
-    //     if (this.props.mode === "draw") {
-    //       this.ctx.globalCompositeOperation = "source-over"
-
-    //     } else if (this.props.mode === "eraser") {
-    //       this.ctx.globalCompositeOperation = "destination-out"
-    //     }
-
-    //     this.ctx.beginPath()
-
-    //     var localPos = {
-    //       x: this.lastPointerPosition.x - this.image.x(),
-    //       y: this.lastPointerPosition.y - this.image.y()
-    //     }
-    //     this.ctx.moveTo(localPos.x, localPos.y)
-    //     console.log("moveTo", localPos)
-    //     this.state.point_record.point.push({mouseX: localPos.x, mouseY: localPos.y})
-    //     var stage = this.image.parent.parent
-    //     var pos = stage.getPointerPosition()
-
-    //     localPos = {
-    //       x: pos.x - this.image.x(),
-    //       y: pos.y - this.image.y()
-    //     }
-    //     this.ctx.lineTo(localPos.x, localPos.y)
-    //     console.log("lineTo", localPos)
-    //     this.state.point_record.point.push({mouseX: localPos.x, mouseY: localPos.y})
-
-    //     this.ctx.closePath()
-    //     this.ctx.stroke()
-
-    //     this.lastPointerPosition = pos
-    //     this.image.getLayer().draw()
-
-    //     this.ctx.restore()
-    //     console.log(this.state.point_record)
-    //     }
-    // }
-
-    handleMouseDown = (e) => {
-        const {lines} = this.state
-        let [x, y] = getLocalCoord(this.state.stage, e.evt) //e = {evt: MouseEvent, target, currentTarget, type}
-        this.setState({isMouseDown: true})
-        if (this.props.mode === "draw") {
-            this.setState({
-                lines: [
-                    ...this.state.lines, 
-                    {line: [[x, y]], type: {color: this.props.lineColor, width: this.props.lineWidth}}
-                ]
-            })
-            // lines.line.push([[x, y]])
-        } else if (this.props.mode === "eraser") {
-            let radius = 10
-            this.setState({lines: lines.filter(line => !eraserInRange(line, x, y, radius))})
-        }
+        // console.log(compareArrOfObj(erasedLines, this.state.lines))
+        this.setState({
+            lines: this.state.lines.filter(
+                line => !erasedLines.some(other => JSON.stringify(line) === JSON.stringify(other))
+            )
+        })
     }
   
     handleMouseUp = () => {
@@ -175,18 +96,44 @@ class CanvasInsideWhiteboard extends React.Component {
             )
         }
     }
+
+    handleMouseDown = (e) => { //e = {evt: MouseEvent, target, currentTarget, type}
+        this.setState({isMouseDown: true})
+        this.commonMoveOrDownHandler(e, true)
+    }
     
     handleMouseMove = e => {
+        if (!this.state.isMouseDown) return
+        this.commonMoveOrDownHandler(e, false)
+    }
+
+    commonMoveOrDownHandler = (e, mousedown) => {
         const {lines} = this.state
         let [x, y] = getLocalCoord(this.state.stage, e.evt)
-        if (!this.state.isMouseDown) return
+        if (this.props.mode === "eraser") {
+            const radius = 10
+            const newLines = lines.filter(line => !eraserInRange(line, x, y, radius))
+            const erasedLines = lines.filter(line => eraserInRange(line, x, y, radius))
 
-        if (this.props.mode === "draw") {
-            var line = lines[lines.length - 1]
-            line.line.push([x, y])
-        } else if (this.props.mode === "eraser") {
-            let radius = 10
-            this.setState({lines: lines.filter(line => !eraserInRange(line, x, y, radius))})
+            if ((!lines) || (lines.length === newLines.length)) return
+            this.setState({lines: newLines})
+            WhiteboardChannel.draw(
+                this.props.user,
+                { type: "canvas erase", erasedLines }
+            )
+
+        } else if (this.props.mode === "draw") {
+            if (mousedown) {
+                this.setState({
+                    lines: [
+                        ...this.state.lines, 
+                        {line: [[x, y]], type: {color: this.props.lineColor, width: this.props.lineWidth}}
+                    ]
+                })
+            } else {
+                var line = lines[lines.length - 1]
+                line.line.push([x, y])
+            }
         }
     }
 
@@ -307,6 +254,5 @@ function getLocalCoord(stage, {clientX, clientY}) {
     // return [clientX - bbox.x, clientY - bbox.y]
     return [bbox.x, bbox.y]
 }
-
 
 export default withStyles(styles)(CanvasInsideWhiteboard);

@@ -2,6 +2,7 @@ import React from 'react'
 import {withStyles} from '@material-ui/core/styles'
 import {signalingChannel as channel, connection as conn} from '../../interface/connection'
 import { Avatar } from '@material-ui/core';
+import { Person } from '@material-ui/icons';
 
 const styles = theme => ({
     avatar: {
@@ -26,7 +27,8 @@ class RemoteStream extends React.Component {
                 'username': 'user',
                 'credential': "root"
             }]
-        }
+        },
+        videoEnabled: false
     }
 
     state = this.defaultState
@@ -108,6 +110,7 @@ class RemoteStream extends React.Component {
         }
         stream.getTracks().forEach(track => {
             if (track.kind === type) track.enabled = ! track.enabled
+            if (type === "video") this.setState({videoEnabled: track.enabled})
         })
     }
 
@@ -119,6 +122,7 @@ class RemoteStream extends React.Component {
         this.peerConn.close()
         this.peerConn = null
         this.remoteVideo.srcObject = null
+        this.setState({videoEnabled: false})
     }
 
     requestOffer = () => {
@@ -145,6 +149,9 @@ class RemoteStream extends React.Component {
         if (this.remoteVideo !== null) {
             if (this.remoteVideo.srcObject !== e.streams[0]) {
                 this.remoteVideo.srcObject = e.streams[0]
+                e.streams[0].getTracks().forEach(track => {
+                    if (track.kind === "video") this.setState({videoEnabled: true})
+                })
                 console.log(`${this.props.user}'s pc: received remote stream (webcam)`)
             }
         }
@@ -187,7 +194,10 @@ class RemoteStream extends React.Component {
                             this.remoteVideo = video
                         }
                 } > </video>
-                <Avatar className={classes.avatar}>{this.props.user.substring(10)}</Avatar>
+                {!this.state.videoEnabled && 
+                    // <Avatar className={classes.avatar}>{this.props.user.substring(0,3)}</Avatar>
+                    <Avatar className={classes.avatar}><Person/></Avatar>
+                }
             </div>
         )
     }

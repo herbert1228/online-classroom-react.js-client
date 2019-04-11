@@ -9,7 +9,6 @@ import CanvasInsideWhiteboard from './Whiteboard_Components/CanvasInsideWhiteboa
 // import { CompactPicker } from 'react-color'
 import penButton from "./thumbnail/pen.png"
 import eraserButton from "./thumbnail/eraser.png"
-// import downloadButton from "./thumbnail/download.png"
 // import { SketchPicker } from 'react-color'
 import Portal from './Whiteboard_Components/Portal'
 import {genid, WhiteboardChannel} from '../../interface/connection'
@@ -19,24 +18,26 @@ const styles = theme => ({
         width: '100%',
         height: '100%'
     },
-    // avatar: {
-    //     backgroundColor: "#769da8"
-    // },
     stage: {height: '800', width: '674'},
-    panel: { width: '100%'}
+    panel: { width: '100%'},
+    normalTitle: {color: "#484747", fontSize: 22},
+    teacherTitle: {color: "#ff4500e6", fontSize: 22}
 })
 
+const IMAGE_LOAD_TIME = 100
+
+const generalAttrs = {rotation: 0, scaleX: 1, scaleY: 1}
+
 function defaultText() {
-    return {type: "text", x: 40, y: 40, text:"New Text\nwith Line Break", fontSize: 18, fontFamily: "Calibri", fill: 'black', name: genid()}
-    // return {type: "text", x: 40, y: 40, text:"New Text\nwith Line Break", fontSize: 18, fontFamily: "Calibri", fill: '#15474b', name: genid()}
+    return {type: "text", x: 800/2 - 72, y: 600/2 - 70, text:"New Text\nwith Line Break", fontSize: 18, fontFamily: "Calibri", fill: '#15474b', name: genid(), ...generalAttrs}
 }
 
 function defaultRect() {
-    return {type: "rectangle", x: 150, y: 150, width: 100, height: 100, fill: '#ffff0080', name: genid()}
+    return {type: "rectangle", x: 800/2 - 65, y: 600/2 - 75, width: 100, height: 100, fill: '#ffff0080', name: genid(), ...generalAttrs}
 }
 
 function defaultImage(image, name = genid()) {
-    return {type: "image", x: 137, y: 250, width: 400, height: 300, image, name}
+    return {type: "image", x: 800/2 - 210, y: 600/2 - 180, width: 400, height: 300, image, name, ...generalAttrs}
 }
 
 class Whiteboard extends React.Component {
@@ -54,6 +55,7 @@ class Whiteboard extends React.Component {
         cursor: {x: null, y: null},
         image: null,
         canvasReceived: null,
+        erasedLines: null,
         canvasMode: false,
     }
 
@@ -63,15 +65,25 @@ class Whiteboard extends React.Component {
         if (isOwner(this.props)) {
             result = await WhiteboardChannel.start()
             this.setState({connected: true})
-            console.log(result)
+            // Get old Whiteboard data from result
+            // console.log(result)
         } else {
             if (this.props.session_user.includes(this.props.user)) {
                 do {
                     result = await WhiteboardChannel.connect(this.props.user)
                 } while(!Array.isArray(result))
+                for (let i = result.length - 1; i>=0; i--) { 
+                    this.handleActionReceived(result[i])
+                }
                 this.setState({connected: true})
             }
         }
+        console.log("whiteboard: "+ this.props.user)
+    }
+
+    componentWillUnmount() {
+        WhiteboardChannel.disconnect(this.props.user)
+        WhiteboardChannel.removeListener(this.props.user, this.handleActionReceived);
     }
 
     async componentWillReceiveProps({session_user}){
@@ -84,13 +96,10 @@ class Whiteboard extends React.Component {
             } while(result.reason === "pending")
 
             if (result.length > 0) {
-                let canvasReceived = []
-                for (let data of result) {
-                    if (data.type === "canvasDraw") {
-                        canvasReceived.push(data.lines)
-                    }
+                // elixir use head concatenation for better performance so the result is reversed 
+                for (let i = result.length - 1; i>=0; i--) { 
+                    this.handleActionReceived(result[i])
                 }
-                this.setState({canvasReceived})
             }
             this.setState({connected: true})
         }
@@ -101,18 +110,24 @@ class Whiteboard extends React.Component {
     }
 
     handleActionReceived = data => {
-        console.log(data.type)
+        // console.log(data.type)
         switch (data.type) {
             case "canvasDraw":
                 this.setState({canvasReceived: [data.lines]})
                 break
+            case "canvas erase":
+                this.setState({erasedLines: data.erasedLines})
+                break
             case "new image":
                 const {name, imageUrl} = data
                 const image = new window.Image()
-                image.src = imageUrl
+                image.crossOrigin = "Anonymous"
+                console.log("loading image")
                 image.onload = () => {
                     this.setState({objects: [...this.state.objects, defaultImage(image, name)]})
+                    console.log("loaded image")
                 }
+                image.src = imageUrl
                 break
             case "new text":
                 const {newText} = data
@@ -129,7 +144,7 @@ class Whiteboard extends React.Component {
             case "remove":
                 const obj = this.state.objects.find(r => r.name === data.targetName)
                 if (!obj) {
-                    console.log("Remote deleting an already deleted object")
+                    console.warn("Remote deleting an already deleted object")
                     return
                 }
                 this.state.objects.splice(this.state.objects.indexOf(obj), 1)
@@ -139,8 +154,17 @@ class Whiteboard extends React.Component {
                 const {action, target} = data
                 this.handleZIndex(action, false, target)
                 break
+            case "edit text":
+                const {editingText} = data
+                const modiflyingText = this.state.objects.find(r => r.name === editingText.name)
+                modiflyingText.text = editingText.text
+                this.refreshWhiteboard()
+                break
+            case "transform":
+                this.updateTransform(data)
+                break
             default:
-                console.log(data)
+                console.warn(data)
 
         } 
         
@@ -153,20 +177,16 @@ class Whiteboard extends React.Component {
             this.setState({selectedShapeName: ''})
             return
         }
-
-        const name = e.target.name()
-        const obj = this.state.objects.find(r => r.name === name)
-
+        // const name = e.target.name()
+        // const obj = this.state.objects.find(r => r.name === name)
         console.log("context menu")
         const stage = e.currentTarget // same as: stage = this.stageRef.getStage(), or: stage = e.target.getStage()
-
         console.log(e.evt.clientX+stage.getPointerPosition().x)
         console.log(e.evt.clientY+stage.getPointerPosition().y)
     }
 
     getMousePos(e) {
         const stage = e.currentTarget // same as: stage = this.stageRef.getStage(), or: stage = e.target.getStage()
-
         return {
             x: e.evt.clientX+stage.getPointerPosition().x,
             y: e.evt.clientY+stage.getPointerPosition().y
@@ -174,6 +194,7 @@ class Whiteboard extends React.Component {
     }
 
     handleStageMouseDown = e => {
+        this.deleteAllInputBox()
         // clicked on stage/whiteboard - clear selection
         if (e.target === e.target.getStage() || e.target.name === "whiteboard") {
             this.setState({selectedShapeName: ''})
@@ -222,6 +243,7 @@ class Whiteboard extends React.Component {
             return
         }
         this.state.objects.splice(this.state.objects.indexOf(obj), 1)
+        this.refreshWhiteboard()
         this.sendWhiteboardAction("remove", {targetName: obj.name})
     }
 
@@ -237,35 +259,70 @@ class Whiteboard extends React.Component {
                 key={obj}
                 style={{
                     position: 'absolute',
+                    overflowX: 'auto',
+                    overflowY: 'auto',
                     top: stageY + obj.y - 10,
                     left: stageX + obj.x - 10,
                     width: e.target.textWidth * e.target.attrs.scaleX + 20,
-                    height: e.target.textHeight * e.target.attrs.scaleY * 2 + 20,
+                    // TODO dynamic height
+                    height: e.target.textHeight * e.target.attrs.scaleY * 2 * obj.text.split(/\r*\n/).length,
+                    fontFamily: obj.fontFamily,
+                    fontSize: obj.fontSize * e.target.attrs.scaleY,
+                    color: obj.fill,
                     zIndex: 9999999
                 }}
                 defaultValue={obj.text}
                 onKeyDown={e => {
-                    if (e.keyCode === 13 && !e.shiftKey) {
-                        const remoteTarget = this.state.inputBox.find(r => r === this.textAreaRef[obj.name])
-                        this.state.inputBox.splice(this.state.inputBox.indexOf(remoteTarget), 1)
-
+                    if (e.keyCode === 13 && e.shiftKey) {
                         const editingText = this.state.objects.find(r => r.name === obj.name)
-                        this.state.objects.splice(this.state.objects.indexOf(editingText), 1)
-                        let modifliedText = editingText
-                        modifliedText.text = this.textAreaRef[obj.name].value
-                        // this.layerRef.draw() // useless?
-
-                        this.setState({objects: [...this.state.objects, modifliedText]})
-                       
-                        this.setState({inputBox: [
-                            ...this.state.inputBox
-                        ]})
-                        delete this.textAreaRef[obj.name]
+                        editingText.text = this.textAreaRef[obj.name].value
+                        this.refreshWhiteboard()
+                        this.sendWhiteboardAction("edit text", {editingText})
+                        this.deleteInputBox(obj.name)
                     }
+                }}
+                onKeyUp={e => {
+                    // same as onKeyDown
+                    const editingText = this.state.objects.find(r => r.name === obj.name)
+                    editingText.text = this.textAreaRef[obj.name].value
+                    this.refreshWhiteboard()
+
+                    const el = this.textAreaRef[obj.name]
+                    if (el.scrollHeight > el.clientHeight) el.style.height = (el.scrollHeight) + "px"
+
+                    this.sendWhiteboardAction("edit text", {editingText})
                 }}
             />
         ]})
         this.textAreaRef[obj.name].focus()
+    }
+
+    deleteInputBox = objName => {
+        const remoteTarget = this.state.inputBox.find(r => r === this.textAreaRef[objName])
+        this.state.inputBox.splice(this.state.inputBox.indexOf(remoteTarget), 1)
+
+        this.setState({inputBox: [
+            ...this.state.inputBox
+        ]})
+        delete this.textAreaRef[objName]
+    }
+
+    deleteAllInputBox = () => {
+        for (const inputBox of Object.values(this.textAreaRef)) {
+            if (inputBox) this.triggerClick(inputBox)
+        }
+    }
+
+    triggerClick = target => {
+        const keyboardevent = new KeyboardEvent('keydown', {
+            key: 'Enter',
+            keyCode: 13,
+            shiftKey: true,
+            view: window,
+            bubbles: true,
+            cancelable: true
+        })
+        target.dispatchEvent(keyboardevent)
     }
 
     handleColorChange = (color, event) => {
@@ -298,17 +355,48 @@ class Whiteboard extends React.Component {
         this.sendWhiteboardAction("drag", {objName, x, y})
     }
 
-    updatePos = (objName, {x, y}) => {
-        const updateObj = this.state.objects.find(r => r.name === objName)
-        const index = this.state.objects.indexOf(updateObj)
-        this.state.objects.splice(index, 1)
-        let modifliedObj = updateObj
-        modifliedObj.x = x
-        modifliedObj.y = y
-        
-        this.state.objects.splice(index, 0, modifliedObj)
-        this.refreshWhiteboard()
-        // this.setState({objects: [...this.state.objects, modifliedObj]})
+    handleTransformEnd = (objName, {x, y, rotation, scaleX, scaleY}) => {
+        this.sendWhiteboardAction("transform", {objName, x, y, rotation, scaleX, scaleY})
+        this.updateTransform({objName, x, y, rotation, scaleX, scaleY})
+    }
+
+    updateTransform = async ({objName, x, y, rotation, scaleX, scaleY}) => {
+        let updateObj 
+        const interval = setInterval(() => {
+            if (updateObj === undefined) {
+                updateObj = this.state.objects.find(r => r.name === objName)
+            } else {
+                clearInterval(interval)
+
+                updateObj.rotation = rotation
+                updateObj.scaleX = scaleX
+                updateObj.scaleY = scaleY
+                updateObj.x = x
+                updateObj.y = y
+                this.refreshWhiteboard()
+            }
+        }, IMAGE_LOAD_TIME)        
+    }
+
+    updatePos = async (objName, {x, y}) => {
+        // const updateObj = this.state.objects.find(r => r.name === objName)
+        let updateObj 
+        const interval = setInterval(() => {
+            if (updateObj === undefined) {
+                updateObj = this.state.objects.find(r => r.name === objName)
+            } else {
+                clearInterval(interval)
+                
+                const index = this.state.objects.indexOf(updateObj)
+                this.state.objects.splice(index, 1)
+                let modifliedObj = updateObj
+                modifliedObj.x = x
+                modifliedObj.y = y
+                
+                this.state.objects.splice(index, 0, modifliedObj)
+                this.refreshWhiteboard()
+            }
+        }, IMAGE_LOAD_TIME)   
     }
 
     handleOnDrop = e => {
@@ -317,14 +405,16 @@ class Whiteboard extends React.Component {
         const imageUrl = e.dataTransfer.getData('Text')
 
         const image = new window.Image()
-        image.src = imageUrl
+        image.crossOrigin = "Anonymous"
         const newImage = defaultImage(image)
         image.onload = () => {
             this.setState({objects: [...this.state.objects, newImage]})
             this.sendWhiteboardAction("new image", {imageUrl, name: newImage.name})
         }
+        image.src = imageUrl
     }
 
+    // this.layerRef.draw() ?
     refreshWhiteboard = () => this.setState({connected: this.state.connected})
 
     addText = () => {
@@ -340,7 +430,7 @@ class Whiteboard extends React.Component {
     }
 
     handleNoPermission = () => {
-        this.props.handleNotification(`Sorry, please gain permission of this whiteboard from your teacher`)
+        this.props.handleNotification(`Read Only`)
     }
 
     render() {
@@ -356,16 +446,19 @@ class Whiteboard extends React.Component {
                         title={"Whiteboard"+ (this.state.permission? '' : ' (Read Only)')}
                         subheader={
                             (isTeacher(this.props)? 'Teacher: ' : '') 
-                            + this.props.user
+                            + this.props.user 
+                            + ((this.props.user === this.props.self)? ' (yourself)' : '')
                         }
                         id={`draggable${id}`}
-                        style={{height: 50}}
+                        style={{height: 45, backgroundColor: "#e9e7e74d"}}
+                        classes={{title: isTeacher(this.props)? classes.teacherTitle : classes.normalTitle}}
                     />
                     <Divider/>
                     {this.state.permission && 
                         <Fragment>
                             <div className={classes.panel}>
                                 {!this.state.canvasMode &&
+                                    // TODO below btns need to trigger remove all inputBox
                                     <Fragment>
                                         <Button onClick={this.addText}>
                                             Add Text
@@ -383,7 +476,7 @@ class Whiteboard extends React.Component {
                                         <Button onClick={this.handleRemove}>
                                             Remove
                                         </Button>
-                                        <Button onClick={() => this.setState({canvasMode: true})}>
+                                        <Button onClick={() => this.setState({canvasMode: true, selectedShapeName: ''})}>
                                             Draw
                                         </Button>
                                     </Fragment>
@@ -410,15 +503,11 @@ class Whiteboard extends React.Component {
                                         </Button>
                                         }
 
-                                        {/* <span id="download" ref="download">
-                                            <Button onClick={this.startDownload}>
-                                                <img
-                                                alt="btn-download" id="btn-download" src={downloadButton}
-                                                width="20" height="20"/>
-                                            </Button>
-                                        </span> */}
+                                        {/* <Button onClick={this.startDownload}>
+                                        </Button> */}
 
-                                        <Button onClick={() => this.setState({canvasMode: false})}>
+
+                                        <Button onClick={() => this.setState({canvasMode: false, mode:"draw"})}>
                                             Finish Draw
                                         </Button>
                                     </Fragment>
@@ -435,29 +524,24 @@ class Whiteboard extends React.Component {
                         onContextMenu={this.state.permission? this.handleStageContextMenu : this.handleNoPermission}
                         onMouseDown={this.state.permission? this.handleStageMouseDown : this.handleNoPermission}
                     >
+                        {/* onEventListener no needed in canvasMode, TODO remove all listener inside it  */}
                         {this.state.canvasMode &&
                         <Layer>
                             {this.state.objects.map((obj, i) => {
                                 if (obj === undefined) console.log(obj)
                                 else if (obj.type === "rectangle") {
-                                    return <Rectangle 
-                                                    key={obj.name} 
-                                                    {...obj}
-                                                    onDragEnd={e => this.handleDragEnd(obj.name, e.target._lastPos)}
-                                                    onTransformation={() => window.alert("transforming")}
-                                                />
+                                    return <Rectangle key={obj.name} {...obj}
+                                                // onDragEnd={e => this.handleDragEnd(obj.name, e.target._lastPos)}
+                                            />
                                 }
                                 else if (obj.type === "text")
-                                    return <Text 
-                                                key={obj.name} 
-                                                {...obj} 
-                                                draggable 
-                                                onDblClick={e => this.handleEditText(e, obj)}
-                                                onDragEnd={e => this.handleDragEnd(obj.name, e.target._lastPos)}
+                                    return <Text key={obj.name} {...obj} //draggable 
+                                                // onDblClick={e => this.handleEditText(e, obj)}
+                                                // onDragEnd={e => this.handleDragEnd(obj.name, e.target._lastPos)}
                                             />
                                 else if (obj.type === "image") 
                                     return <Image key={obj.name} {...obj} onDragEnd={e => this.handleDragEnd(obj.name, e.target._lastPos)} draggable/>
-                                return
+                                return null
                             })}
                             <TransformerComponent selectedShapeName={this.state.selectedShapeName}/>
                             <Portal>
@@ -477,6 +561,7 @@ class Whiteboard extends React.Component {
                                 mode={ this.state.mode }
                                 startDownload={ this.state.startDownload }
                                 linesReceived={this.state.canvasReceived}
+                                erasedLines={this.state.erasedLines}
                                 user={this.props.user}
                             />
                         </Layer>
@@ -486,12 +571,14 @@ class Whiteboard extends React.Component {
                             <Rect x={0} y={0} width={800} height={600} fill="rgba(0,0,0,0)"/>
                             {this.state.objects.map((obj, i) => {
                                 if (obj === undefined) console.log(obj)
-                                else if (obj.type === "rectangle") 
+                                else if (obj.type === "rectangle") {
                                     return <Rectangle 
                                                 key={obj.name} 
                                                 {...obj}
                                                 onDragEnd={e => this.handleDragEnd(obj.name, e.target._lastPos)}
+                                                onTransformEnd={e => this.handleTransformEnd(obj.name, e.target.attrs)}
                                             />
+                                }
                                 else if (obj.type === "text")
                                     return <Text 
                                                 key={obj.name} 
@@ -499,10 +586,17 @@ class Whiteboard extends React.Component {
                                                 draggable 
                                                 onDblClick={e => this.handleEditText(e, obj)}
                                                 onDragEnd={e => this.handleDragEnd(obj.name, e.target._lastPos)}
+                                                onTransformEnd={e => this.handleTransformEnd(obj.name, e.target.attrs)}
                                             />
                                 else if (obj.type === "image") 
-                                    return <Image key={obj.name} {...obj} onDragEnd={e => this.handleDragEnd(obj.name, e.target._lastPos)} draggable/>
-                                return
+                                    return <Image 
+                                                key={obj.name} 
+                                                {...obj} 
+                                                onDragEnd={e => this.handleDragEnd(obj.name, e.target._lastPos)} 
+                                                onTransformEnd={e => this.handleTransformEnd(obj.name, e.target.attrs)}
+                                                draggable
+                                            />
+                                return null
                             })}
                             <TransformerComponent selectedShapeName={this.state.selectedShapeName}/>
                             {/* <Image
