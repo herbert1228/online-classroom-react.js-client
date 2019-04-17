@@ -29,9 +29,14 @@ Realistic and Interactive Online Classroom
         - Delete a file
         - Download a file
         - Share a file with teacher or students
-- Connection driver for communicating with an elixir server
+        ![image](https://github.com/herbert1228/online-classroom-react.js-client/blob/master/src/css/whiteboard.png)
+- Connection driver for communicating with an elixir backend hosted at AWS ec2 server
     - 3 protocols
         - simple call / cast (call is synchronous which returns the value, cast is asynchronous)
     - Websocket secure wss (major)
     - Https (upload/download file)
     - Also support: ws and http
+    
+Screenshot
+
+    ![image](https://github.com/herbert1228/online-classroom-react.js-client/blob/master/src/css/classroom.png)
