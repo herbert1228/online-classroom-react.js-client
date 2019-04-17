@@ -39,4 +39,4 @@ Realistic and Interactive Online Classroom
     
 Screenshot
 
-    ![image](https://github.com/herbert1228/online-classroom-react.js-client/blob/master/src/css/classroom.png)
+![image](https://github.com/herbert1228/online-classroom-react.js-client/blob/master/src/css/classroom.png)
