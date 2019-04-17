@@ -126,7 +126,7 @@ class Drawer extends React.Component {
             <RndContainer 
                 {...other}
             >   
-                <Card className={classes.card} elevation={7}>
+                <Card className={classes.card} elevation={20}>
                 <CardHeader
                     id={`draggable${this.props.id}`}
                     title= {<div style={{paddingTop: 9}}>Personal Drawer</div>}

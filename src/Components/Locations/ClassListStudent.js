@@ -89,6 +89,11 @@ class ClassListStudent extends React.Component {
     async joinClass(owner, class_name) {
         const response = await conn.call("join_class", {owner, class_name})
         if (response.type === "ok") {
+            const s_user = await conn.call("get_session_user")
+            store.dispatch({
+                type: "get_session_user",
+                result: s_user.result
+            })
             store.dispatch({type: "joinClass", owner, class_name: class_name})
             this.props.handleNotification(`join ${owner}'s class: ${class_name} success`)
             this.props.changeScene(1)

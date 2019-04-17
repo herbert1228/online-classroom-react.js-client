@@ -81,6 +81,9 @@ class JoinedLayoutStudent extends Component {
                         minWidth={0}
                         {...other}/>
                     {Object.values(this.state.webcam).map((webcam) => (
+                        (webcam.id !== 'teacherWebcam' || 
+                        (webcam.id === 'teacherWebcam' && 
+                            this.props.session_user.includes(this.props.joined.owner))) &&
                         <UserCard
                             key={webcam.id}
                             id={webcam.id}

@@ -40,7 +40,7 @@ class UserCard extends React.Component {
         const {classes, ...other} = this.props;
         return (
             <RndContainer {...other}>
-                <Card className={classes.card} style={{overflow: "hidden"}} elevation={7}>
+                <Card className={classes.card} style={{overflow: "hidden"}} elevation={20}>
                     <CardHeader
                         id={`draggable${this.props.id}`}
                         title= {<div style={{paddingTop: 9}}>{user}</div>}

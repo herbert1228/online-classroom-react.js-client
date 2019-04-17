@@ -59,7 +59,7 @@ var DEBUG = false
     WebSocket.prototype.send = function (msg) {
         if (!DEBUG) return send.call(this, msg)
         if (JSON.parse(msg) === "keep_alive") return send.call(this, msg)
-
+        
         console.log("websocket sending:\n", JSON.parse(msg))
         return send.call(this, msg)
     }

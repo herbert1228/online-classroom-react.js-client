@@ -29,11 +29,11 @@ const IMAGE_LOAD_TIME = 100
 const generalAttrs = {rotation: 0, scaleX: 1, scaleY: 1}
 
 function defaultText() {
-    return {type: "text", x: 800/2 - 72, y: 600/2 - 70, text:"New Text\nwith Line Break", fontSize: 18, fontFamily: "Calibri", fill: '#15474b', name: genid(), ...generalAttrs}
+    return {type: "text", x: 800/2 - 72, y: 600/2 - 70, text:"Double click\nto edit me", fontSize: 22, fontFamily: "Calibri", fill: '#15474b', name: genid(), ...generalAttrs}
 }
 
 function defaultRect() {
-    return {type: "rectangle", x: 800/2 - 65, y: 600/2 - 75, width: 100, height: 100, fill: '#ffff0080', name: genid(), ...generalAttrs}
+    return {type: "rectangle", x: 800/2 - 50, y: 600/2 - 50, width: 100, height: 30, fill: '#ffff0080', name: genid(), ...generalAttrs}
 }
 
 function defaultImage(image, name = genid()) {
@@ -255,21 +255,29 @@ class Whiteboard extends React.Component {
         this.setState({inputBox: [
             ...this.state.inputBox,
             <textarea
+                wrap='off'
                 ref={ref => this.textAreaRef[obj.name] = ref}
                 key={obj}
                 style={{
                     position: 'absolute',
-                    overflowX: 'auto',
-                    overflowY: 'auto',
-                    top: stageY + obj.y - 10,
-                    left: stageX + obj.x - 10,
-                    width: e.target.textWidth * e.target.attrs.scaleX + 20,
+                    overflow: 'scroll',
+                    overflowX: 'scroll',
+                    overflowY: 'scroll',
+                    top: stageY + obj.y - 8,
+                    left: stageX + obj.x - 5,
+                    width: e.target.textWidth * e.target.attrs.scaleX + 22,
                     // TODO dynamic height
-                    height: e.target.textHeight * e.target.attrs.scaleY * 2 * obj.text.split(/\r*\n/).length,
+                    height: e.target.textHeight * 1.25 * obj.text.split(/\r*\n/).length * e.target.attrs.scaleY,
                     fontFamily: obj.fontFamily,
                     fontSize: obj.fontSize * e.target.attrs.scaleY,
                     color: obj.fill,
-                    zIndex: 9999999
+                    zIndex: 9999999,
+                    border: 'dotted',
+                    outline: 'none',
+                    WebkitBoxShadow: 'none',
+                    MozBoxShadow: 'none',
+                    boxShadow: 'none',
+                    resize: 'none'
                 }}
                 defaultValue={obj.text}
                 onKeyDown={e => {
@@ -289,12 +297,14 @@ class Whiteboard extends React.Component {
 
                     const el = this.textAreaRef[obj.name]
                     if (el.scrollHeight > el.clientHeight) el.style.height = (el.scrollHeight) + "px"
+                    if (el.scrollWidth > el.clientWidth) el.style.width = (el.scrollWidth) + "px"
 
                     this.sendWhiteboardAction("edit text", {editingText})
                 }}
             />
         ]})
         this.textAreaRef[obj.name].focus()
+        this.textAreaRef[obj.name].select()
     }
 
     deleteInputBox = objName => {
@@ -438,7 +448,7 @@ class Whiteboard extends React.Component {
         return (
             <RndContainer id={id} {...other}>
                 <Card className={classes.card}
-                    elevation={7}
+                    elevation={20}
                     // onDragOver={() => console.log("onDragOver")} //!!! e.preventDefault()
                     onDrop={this.state.permission? this.handleOnDrop : this.handleNoPermission} // e.preventDefault() then add image at pointer position
                 >
@@ -461,10 +471,10 @@ class Whiteboard extends React.Component {
                                     // TODO below btns need to trigger remove all inputBox
                                     <Fragment>
                                         <Button onClick={this.addText}>
-                                            Add Text
+                                            Text
                                         </Button>
                                         <Button onClick={this.addRect}>
-                                            Add Rect
+                                            Highlighter
                                         </Button>
                                         {/* <SketchPicker/> */}
                                         <Button onClick={() => this.handleZIndex("top", true)}>
@@ -524,51 +534,7 @@ class Whiteboard extends React.Component {
                         onContextMenu={this.state.permission? this.handleStageContextMenu : this.handleNoPermission}
                         onMouseDown={this.state.permission? this.handleStageMouseDown : this.handleNoPermission}
                     >
-                        {/* onEventListener no needed in canvasMode, TODO remove all listener inside it  */}
-                        {this.state.canvasMode &&
-                        <Layer>
-                            {this.state.objects.map((obj, i) => {
-                                if (obj === undefined) console.log(obj)
-                                else if (obj.type === "rectangle") {
-                                    return <Rectangle key={obj.name} {...obj}
-                                                // onDragEnd={e => this.handleDragEnd(obj.name, e.target._lastPos)}
-                                            />
-                                }
-                                else if (obj.type === "text")
-                                    return <Text key={obj.name} {...obj} //draggable 
-                                                // onDblClick={e => this.handleEditText(e, obj)}
-                                                // onDragEnd={e => this.handleDragEnd(obj.name, e.target._lastPos)}
-                                            />
-                                else if (obj.type === "image") 
-                                    return <Image key={obj.name} {...obj} onDragEnd={e => this.handleDragEnd(obj.name, e.target._lastPos)} draggable/>
-                                return null
-                            })}
-                            <TransformerComponent selectedShapeName={this.state.selectedShapeName}/>
-                            <Portal>
-                                {this.state.inputBox}
-                            </Portal>
-                            {!this.state.permission &&
-                                // Intervening transparent Rect
-                                <Rect x={0} y={0} width={800} height={600} fill="rgba(0,0,0,0)"/>
-                            }
-                        </Layer>
-                        }
-                        <Layer>
-                            <CanvasInsideWhiteboard 
-                                key="whiteboard"
-                                lineColor={ this.state.lineColor }
-                                lineWidth={ this.state.lineWidth }
-                                mode={ this.state.mode }
-                                startDownload={ this.state.startDownload }
-                                linesReceived={this.state.canvasReceived}
-                                erasedLines={this.state.erasedLines}
-                                user={this.props.user}
-                            />
-                        </Layer>
-                        {!this.state.canvasMode &&
-                        <Layer>
-                            {/* Intervening transparent Rect */}
-                            <Rect x={0} y={0} width={800} height={600} fill="rgba(0,0,0,0)"/>
+                        <Layer hitGraphEnabled={!this.state.canvasMode}>
                             {this.state.objects.map((obj, i) => {
                                 if (obj === undefined) console.log(obj)
                                 else if (obj.type === "rectangle") {
@@ -583,6 +549,7 @@ class Whiteboard extends React.Component {
                                     return <Text 
                                                 key={obj.name} 
                                                 {...obj} 
+                                                lineHeight= {1.2}
                                                 draggable 
                                                 onDblClick={e => this.handleEditText(e, obj)}
                                                 onDragEnd={e => this.handleDragEnd(obj.name, e.target._lastPos)}
@@ -610,7 +577,20 @@ class Whiteboard extends React.Component {
                                 <Rect x={0} y={0} width={800} height={600} fill="rgba(0,0,0,0)"/>
                             }
                         </Layer>
-                        }
+
+                        <Layer 
+                            hitGraphEnabled={this.state.canvasMode}>
+                            <CanvasInsideWhiteboard 
+                                key="whiteboard"
+                                lineColor={ this.state.lineColor }
+                                lineWidth={ this.state.lineWidth }
+                                mode={ this.state.mode }
+                                startDownload={ this.state.startDownload }
+                                linesReceived={this.state.canvasReceived}
+                                erasedLines={this.state.erasedLines}
+                                user={this.props.user}
+                            />
+                        </Layer>
                     </Stage>
                 </Card>
             </RndContainer>

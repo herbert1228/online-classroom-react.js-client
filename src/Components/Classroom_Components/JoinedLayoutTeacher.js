@@ -37,6 +37,18 @@ class JoinedLayoutTeacher extends Component {
         }
     }
 
+    componentDidMount() {
+        const {session_user} = this.props
+        if (!session_user) return
+        for (let each of session_user) {
+            if (each === this.props.self) continue
+            this.setState({whiteboard: {
+                ...this.state.whiteboard,
+                [each + "Whiteboard"]: { id: each + "Whiteboard", user: each, zIndex: 2, position: {x: 800, y: 150}, size: {width: 800, height: 718} }
+            }})
+        }
+    }
+
     componentDidUpdate(prevProps) {
         const {session_user} = this.props
         if (!session_user) return

@@ -1,4 +1,4 @@
-// Version 2 (Sync Whiteboard Done)
+// Version 2.1 (Sync Whiteboard Done, with more bug fixed)
 
 // url @overcoded
 // SERVER_URL = `wss://${window.location.hostname}/socket`
@@ -8,8 +8,8 @@
 
 // @localhost
 
-// SERVER_URL = "ws://overcoded.tk:8500"
-// UPLOAD_URL = "http://overcoded.tk:8600"
+SERVER_URL = "ws://overcoded.tk:8500"
+UPLOAD_URL = "http://overcoded.tk:8600"
 
-SERVER_URL = `ws://${window.location.hostname}:8500/`
-UPLOAD_URL = `http://${window.location.hostname}:8600`
+// SERVER_URL = `ws://${window.location.hostname}:8500/`
+// UPLOAD_URL = `http://${window.location.hostname}:8600`
