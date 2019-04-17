@@ -14,6 +14,7 @@ Realistic and Interactive Online Classroom
     - Webcam of teacher and all students
         - Peer to Peer connection
         - Mute, Stop, Re-call
+        
     - Sync and Shared Whiteboard
         - Self-whiteboard is editable
         - Other whiteboards are view only
@@ -23,13 +24,16 @@ Realistic and Interactive Online Classroom
         - Edit with:
             - Add/remove/drag/resize/rotate: images and texts
             - Draw with Pen
+        <img alt="shared whiteboard" src="https://github.com/herbert1228/online-classroom-react.js-client/blob/master/src/css/whiteboard-no-cut.png"  width="500">
+             
     - Drawer (File system)
         - Upload by selecting / dragging
         - View image with popup window component
         - Delete a file
         - Download a file
         - Share a file with teacher or students
-        ![image](https://github.com/herbert1228/online-classroom-react.js-client/blob/master/src/css/whiteboard.png)
+                
+        
 - Connection driver for communicating with an elixir backend hosted at AWS ec2 server
     - 3 protocols
         - simple call / cast (call is synchronous which returns the value, cast is asynchronous)
@@ -39,4 +43,4 @@ Realistic and Interactive Online Classroom
     
 Screenshot
 
-![image](https://github.com/herbert1228/online-classroom-react.js-client/blob/master/src/css/classroom.png)
+![screenshot](https://github.com/herbert1228/online-classroom-react.js-client/blob/master/src/css/classroom.png)
