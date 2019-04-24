@@ -1,8 +1,11 @@
-# online-classroom-react.js-client
+# Realistic and Interactive Online Classroom (Frontend)
 
-Realistic and Interactive Online Classroom
+Demo: [https://overcoded.tk](https://overcoded.tk "Realistic and Interactive Online Classroom")
 
- First stable version with the followings major features:
+Elixir backend Github repo: [https://github.com/herbert1228/online-classroom-elixir-server](https://github.com/herbert1228/online-classroom-elixir-server "Elixir backend")
+
+
+## First stable version with the followings major features:
 
 - Create classroom session letting students to enroll and join.
 - Enter a classroom as Teacher (owner of the classroom).
@@ -37,10 +40,13 @@ Realistic and Interactive Online Classroom
 - Connection driver for communicating with an elixir backend hosted at AWS ec2 server
     - 3 protocols
         - simple call / cast (call is synchronous which returns the value, cast is asynchronous)
+        - signaling server call / cast
+        - whiteboard server call / cast
     - Websocket secure wss (major)
     - Https (upload/download file)
     - Also support: ws and http
+    - STUN/TURN (hosted on our AWS ec2 server) config
     
-Screenshot
+## Screenshot
 
 ![screenshot](https://github.com/herbert1228/online-classroom-react.js-client/blob/master/src/css/classroom.png)
