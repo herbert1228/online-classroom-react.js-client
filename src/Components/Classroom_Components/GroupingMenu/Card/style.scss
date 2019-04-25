@@ -1,0 +1,21 @@
+.card {
+  background-color: #fff;
+  border-radius: 3px;
+  box-shadow: 0 1px 0 rgba(9,45,66,.25);
+  cursor: pointer;
+  display: block;
+  width: 250px;
+  height: 60px;
+  position: relative;
+  text-decoration: none;
+  margin: 8px;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &.empty-card {
+    > * { display: none; }
+    background-color: #c9c9c9;
+  }
+}

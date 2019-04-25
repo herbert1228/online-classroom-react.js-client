@@ -6,6 +6,7 @@ import Drawer from '../Classroom_Components/Drawer'
 import { withStyles } from '@material-ui/core/styles'
 import ParticipantList from './ParticipantList'
 import Whiteboard from './Whiteboard';
+import _ from 'lodash'
 
 const styles = theme => ({ 
     container: {
@@ -32,6 +33,22 @@ class JoinedLayoutStudent extends Component {
         },
         other: {
             PList: { id: "PList", zIndex: 1, position: {x: 480, y: 5}, size: {width: 0, height: 0} }, 
+        }
+    }
+    componentDidUpdate(prevProps) {
+        const {session_user} = this.props
+        if (!session_user) return
+        if (prevProps.session_user === session_user) return
+        const diff = _.xor(prevProps.session_user, this.props.session_user)
+        if (diff === this.props.self) return
+
+        for (let each of diff) {
+            if (each === this.props.self) continue
+            if (prevProps.session_user.length > this.props.session_user.length) {
+                this.props.handleNotification(each + " left")
+            } else {
+                this.props.handleNotification(each + " joined")
+            }
         }
     }
     bringTop = (target) => { // target: selfWebcam/etc

@@ -58,7 +58,9 @@ class RemoteStream extends React.Component {
                 }
             ]
         },
-        videoEnabled: false
+        videoEnabled: false,
+        initCameraState: true,
+        initMicState: true
     }
 
     state = this.defaultState
@@ -94,7 +96,7 @@ class RemoteStream extends React.Component {
         if (e === this.props.user) this.requestOffer()
     }
 
-    offerListener = e => { // created twice
+    offerListener = e => {
         if (this.peerConn === null) {
             this.peerConn = new RTCPeerConnection(this.state.pcConfig)
             this.peerConn.ontrack = this.gotRemoteStream
@@ -105,6 +107,7 @@ class RemoteStream extends React.Component {
         if( e.from === this.props.user) {
             this.setRemoteDescriptionForPeerConn(e.offer)
         }
+        this.setState({initMicState: e.mic, initCameraState: e.camera})
     }
 
     candidateListener = e => {
@@ -134,6 +137,7 @@ class RemoteStream extends React.Component {
     }
 
     toggleTrack = (stream, type) => {
+        console.warn("receive toggle:", type)
         if (!stream) {
             console.warn("stream Object is null, while toggling", type)
             return
@@ -180,9 +184,17 @@ class RemoteStream extends React.Component {
             if (this.remoteVideo.srcObject !== e.streams[0]) {
                 this.remoteVideo.srcObject = e.streams[0]
                 e.streams[0].getTracks().forEach(track => {
-                    if (track.kind === "video") this.setState({videoEnabled: true})
+                    if (track.kind === "video") {
+                        this.setState({videoEnabled: true})
+                        track.enabled = this.state.initCameraState
+                        console.warn("init camera:", this.state.initCameraState)
+                    }
+                    if (track.kind === "audio") {
+                        track.enabled = this.state.initMicState
+                        console.warn("init audio:", this.state.initMicState)
+                    }
                 })
-                console.log(`${this.props.user}'s pc: received remote stream (webcam)`)
+                console.log(`${this.props.user}'s pc: GOT remote stream (webcam)`)
             }
         }
         this.setState({ requesting: false })

@@ -18,7 +18,7 @@ class ClassMenu extends React.Component {
         if (response.type === "ok") {
             store.dispatch({type: "leaveClass"})
             this.props.changeScene(1)
-            this.props.handleNotification("leave_class success")
+            // this.props.handleNotification("leave_class success")
             // this.setState({session_user: [], joined: null}) //TODO 
         } else throw new Error("invalid action: leave class")
     }

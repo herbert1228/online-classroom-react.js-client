@@ -260,9 +260,9 @@ class Whiteboard extends React.Component {
                 key={obj}
                 style={{
                     position: 'absolute',
-                    overflow: 'scroll',
-                    overflowX: 'scroll',
-                    overflowY: 'scroll',
+                    overflow: 'hidden',
+                    overflowX: 'hidden',
+                    overflowY: 'hidden',
                     top: stageY + obj.y - 8,
                     left: stageX + obj.x - 5,
                     width: e.target.textWidth * e.target.attrs.scaleX + 22,
@@ -289,6 +289,13 @@ class Whiteboard extends React.Component {
                         this.deleteInputBox(obj.name)
                     }
                 }}
+                onKeyPress={e => {
+                    const el = this.textAreaRef[obj.name]
+                    el.style.height = 0
+                    el.style.width = 0
+                    if (el.scrollHeight > el.clientHeight) el.style.height = (el.scrollHeight) + "px"
+                    if (el.scrollWidth > el.clientWidth) el.style.width = (el.scrollWidth) + "px"
+                }}
                 onKeyUp={e => {
                     // same as onKeyDown
                     const editingText = this.state.objects.find(r => r.name === obj.name)
@@ -296,6 +303,8 @@ class Whiteboard extends React.Component {
                     this.refreshWhiteboard()
 
                     const el = this.textAreaRef[obj.name]
+                    el.style.height = 0
+                    el.style.width = 0
                     if (el.scrollHeight > el.clientHeight) el.style.height = (el.scrollHeight) + "px"
                     if (el.scrollWidth > el.clientWidth) el.style.width = (el.scrollWidth) + "px"
 
@@ -443,6 +452,22 @@ class Whiteboard extends React.Component {
         this.props.handleNotification(`Read Only`)
     }
 
+    handleStageKeyboardEvent = e => {
+        if (e.keyCode === 46) {
+            // const obj = this.state.objects.find(r => r.name === this.state.selectedShapeName)
+            // if (!obj) {
+            //     this.props.handleNotification("No object selected!")
+            //     return
+            // }
+
+            // this.state.objects.splice(this.state.objects.indexOf(obj), 1)
+            // this.refreshWhiteboard()
+            // this.sendWhiteboardAction("remove", {targetName: obj.name})
+            // document.getElementById("debug1").click()
+            // e.preventDefault()
+        }
+    }
+
     render() {
         const {classes, id, ...other} = this.props;
         return (
@@ -526,6 +551,7 @@ class Whiteboard extends React.Component {
                             <Divider/>
                         </Fragment>
                     }
+                    {/* <div tabIndex="0" onKeyDown={this.handleStageKeyboardEvent} style={{outline: 'none'}}> */}
                     <Stage width={800} height={600}
                         ref={ref=>this.stageRef=ref}
                         // onClick={()=>console.log(this.stageRef.getPointerPosition())}
@@ -572,10 +598,10 @@ class Whiteboard extends React.Component {
                             <Portal>
                                 {this.state.inputBox}
                             </Portal>
-                            {!this.state.permission &&
+                            {/* {!this.state.permission &&
                                 // Intervening transparent Rect
                                 <Rect x={0} y={0} width={800} height={600} fill="rgba(0,0,0,0)"/>
-                            }
+                            } */}
                         </Layer>
 
                         <Layer 
@@ -592,6 +618,7 @@ class Whiteboard extends React.Component {
                             />
                         </Layer>
                     </Stage>
+                    {/* </div> */}
                 </Card>
             </RndContainer>
         )

@@ -26,7 +26,7 @@ class ViewClassStudentsInfo extends React.Component {
         joined: null
     }
 
-    async getStudentsInfo(c) {
+    getStudentsInfo = async (c) => {
         const response = await conn.call("get_student_names_of_a_class", c)
         if (response.result) {
             if (response.result.subed.length <= 1) {

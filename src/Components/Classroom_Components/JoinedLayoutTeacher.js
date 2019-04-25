@@ -57,22 +57,22 @@ class JoinedLayoutTeacher extends Component {
         if (diff === this.props.self) return
 
         for (let each of diff) {
-            console.log(each)
             if (each === this.props.self) continue
             if (prevProps.session_user.length > this.props.session_user.length) {
                 console.log("less")
+                this.props.handleNotification(each + " left")
                 const tmpState = this.state
                 delete tmpState.whiteboard[each + "Whiteboard"]
                 this.setState(tmpState)
             } else {
+                this.props.handleNotification(each + " joined")
                 this.setState({whiteboard: {
                     ...this.state.whiteboard,
                     [each + "Whiteboard"]: { id: each + "Whiteboard", user: each, zIndex: 2, position: {x: 800, y: 150}, size: {width: 800, height: 718} }
                 }})
             }
         }
-
-      }
+    }
 
     bringTop = (target) => { // target: selfWebcam/etc
         let maxZ = -1

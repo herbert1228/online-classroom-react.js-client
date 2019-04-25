@@ -31,7 +31,9 @@
     "typeface-roboto": "0.0.54",
     "use-image": "^1.0.3",
     "uuid": "^3.3.2",
-    "webrtc-adapter": "^6.4.8"
+    "webrtc-adapter": "^6.4.8",
+    "react-dnd": "5.0.0",
+    "react-dnd-html5-backend": "5.0.1"
   },
   "scripts": {
     "start": "PORT=3000 react-scripts start",
@@ -43,7 +45,9 @@
   },
   "devDependencies": {
     "babel-plugin-transform-decorators": "^6.24.1",
+    "node-sass": "^4.11.0",
     "react-redux": "^6.0.0",
+    "sass-loader": "^7.1.0",
     "ws": "^6.1.2"
   }
 }

@@ -50,7 +50,7 @@ export class ListItems extends React.Component {
                         </ListItemIcon>
                         <ListItemText primary="Teach List"/>
                     </ListItem>
-                    <ListItem button onClick={() => this.props.changeScene(3)} disabled={this.props.location === 3}>
+                    {/* <ListItem button onClick={() => this.props.changeScene(3)} disabled={this.props.location === 3}>
                         <ListItemIcon>
                             <NoteIcon/>
                         </ListItemIcon>
@@ -61,7 +61,7 @@ export class ListItems extends React.Component {
                             <MailIcon/>
                         </ListItemIcon>
                         <ListItemText primary="Mailbox"/>
-                    </ListItem>
+                    </ListItem> */}
                 </div>
                 <Divider/>
                 <List>
@@ -71,18 +71,18 @@ export class ListItems extends React.Component {
                         </ListItemIcon>
                         <ListItemText primary="Upload File"/>
                     </ListItem>
-                    <ListItem button>
+                    {/* <ListItem button>
                         <ListItemIcon>
                             <MailIcon/>
                         </ListItemIcon>
-                        <ListItemText primary="All mail"/>
-                    </ListItem>
-                    <ListItem button>
+                        <ListItemText primary="Mailbox"/>
+                    </ListItem> */}
+                    {/* <ListItem button>
                         <ListItemIcon>
                             <ReportIcon/>
                         </ListItemIcon>
                         <ListItemText primary="Notification"/>
-                    </ListItem>
+                    </ListItem> */}
                 </List>
             </Fragment>
         )

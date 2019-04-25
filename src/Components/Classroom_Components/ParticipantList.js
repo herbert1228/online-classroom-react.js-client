@@ -3,6 +3,7 @@ import { withStyles } from '@material-ui/core'
 import UserCardSmall from '../Content_Components/UserCardSmall'
 import { Grid } from '@material-ui/core'
 import RndContainer from './RndContainer';
+import ManageGroup from './GroupingMenu/ManageGroup';
 
 const styles = theme => ({
     grid_item: {
@@ -28,6 +29,9 @@ class ParticipantList extends Component {
                     alignItems="flex-start"
                     className={classes.participantList}
                 >
+                    <Grid item className={classes.grid_item}>
+                        <ManageGroup {...other}/>
+                    </Grid>
                     <Grid key={"Member List"} item className={classes.grid_item}>
                         Students: 
                     </Grid>

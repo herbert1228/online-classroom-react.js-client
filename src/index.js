@@ -1,7 +1,7 @@
 import React from 'react';
 import App from './App'
 import Upload from './Components/Locations/Upload'
-import registerServiceWorker from './registerServiceWorker';
+// import registerServiceWorker from './registerServiceWorker';
 import {createMuiTheme, MuiThemeProvider} from '@material-ui/core/styles'
 import {amber, blueGrey} from '@material-ui/core/colors'
 import {BrowserRouter as Router, Route} from "react-router-dom"
@@ -9,6 +9,7 @@ import { Provider } from 'react-redux'
 import { createStore } from 'redux'
 import ReactDOM from 'react-dom'
 import { connection as conn } from './interface/connection'
+import AppT from './Components/Classroom_Components/GroupingMenu/App'
 
 let themeType = 'light';
 
@@ -66,7 +67,7 @@ function reducer(state = initialState, action) {
 
 export const store = createStore(reducer, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
 
-class Index extends React.Component {
+class AppContainer extends React.Component {
     componentDidMount() {
         conn.connect()
         conn.addListener("socketclose", this.handleSocketClose)
@@ -100,21 +101,38 @@ class Index extends React.Component {
 
     render() {
         return (
-            <Provider store={store}>
-                <MuiThemeProvider theme={theme}>
-                    <Router>
-                        <div>
-                            <Route path="/" exact component={props => <App/>}/>
-                            <Route path="/upload" exact component={props => <Upload/>}/>
-                        </div>
-                    </Router>
-                    {/* <App/> */}
-                </MuiThemeProvider>
-            </Provider>
+            <App/>
+            // <Provider store={store}>
+            //     <MuiThemeProvider theme={theme}>
+            //         <Router>
+            //             <div>
+            //                 <Route path="/" exact component={props => <App/>}/>
+            //                 <Route path="/upload" exact component={props => <Upload/>}/>
+            //             </div>
+            //         </Router>
+            //         {/* <App/> */}
+            //     </MuiThemeProvider>
+            // </Provider>
         )
     }
 }
 
-ReactDOM.render(<Index/>, document.getElementById('root'));
+function Index() {
+    return (
+        <Provider store={store}>
+            <MuiThemeProvider theme={theme}>
+                <Router>
+                    <div>
+                        <Route path="/" exact component={props => <AppContainer/>}/>
+                        <Route path="/upload" exact component={props => <Upload/>}/>
+                    </div>
+                </Router>
+                {/* <App/> */}
+            </MuiThemeProvider>
+        </Provider>
+    )
+}
 
-registerServiceWorker();
+ReactDOM.render(<AppT/>, document.getElementById('root'));
+
+// registerServiceWorker();

@@ -95,7 +95,7 @@ class ClassListStudent extends React.Component {
                 result: s_user.result
             })
             store.dispatch({type: "joinClass", owner, class_name: class_name})
-            this.props.handleNotification(`join ${owner}'s class: ${class_name} success`)
+            // this.props.handleNotification(`join ${owner}'s class: ${class_name} success`)
             this.props.changeScene(1)
         }
         if (response.type === "reject") {

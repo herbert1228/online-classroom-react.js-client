@@ -49,7 +49,7 @@ class App extends React.Component {
             const response = await conn.call("leave_class")
             if (response.type === "ok") {
                 store.dispatch({type: "leaveClass"})
-                this.handleNotification("leave_class success")
+                // this.handleNotification("leave_class success")
             } else throw new Error("invalid action: leave class")
         }
         store.dispatch({type: "changeLocation", target})
