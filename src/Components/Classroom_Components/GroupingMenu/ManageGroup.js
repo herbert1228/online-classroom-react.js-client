@@ -5,6 +5,7 @@ import {Stage, Layer} from 'react-konva'
 import {connection as conn, genid} from '../../../interface/connection'
 import Rectangle from '../Whiteboard_Components/Rectangle';
 import Card from './Card'
+import App from './App';
 
 const styles = theme => ({
 })
@@ -18,23 +19,7 @@ function defaultRect() {
 class ManageGroup extends React.Component {
     stageRef = null
     state = {
-        open: false,
         groups: []
-    }
-
-    handleGroup = async () => {
-        this.setState({open: true})
-        // const response = await conn.call("get_student_names_of_a_class", c)
-        // if (response.result) {
-        //     if (response.result.subed.length <= 1) {
-        //         this.props.handleNotification(`No one enrolled ${c.class_name} yet`)
-        //         return
-        //     }
-        //     this.setState({
-        //         open: true, 
-        //         subed: response.result.subed, 
-        //         joined: response.result.joined})
-        // }
     }
 
     addGroup = () => {
@@ -44,58 +29,23 @@ class ManageGroup extends React.Component {
     }
 
     render() { 
-        const {classes} = this.props
+        const {classes, ...others} = this.props
         return (
             <Fragment>
-                <Button variant="outlined" onClick={this.handleGroup}>
-                    Groups
-                </Button>
                 <Popover 
-                    title="Group Management" open={this.state.open} 
-                    onClose={()=>this.setState({open: false})}>
+                    title="Group Management" open={this.props.open} 
+                    onClose={this.props.onClose}>
                     <DialogContent>
-                    <Card
-                      key={1}
-                      id={1}
-                      name={'Test'}
-                      status={'Testing'}
-                    />
-                    {/* <Grid container spacing={24}>
-                        <Grid item xs={9}>
-                            <Stage
-                                ref={ref=>this.stageRef=ref}
-                                // onClick={()=>console.log(this.stageRef.getPointerPosition())}
-                                onMouseMove={this.handleMouseMove}
-                                onContextMenu={this.handleStageContextMenu}
-                                onMouseDown={this.handleStageMouseDown}
-                            >
-                                <Layer>
-                                    {this.state.groups.map((group, i) => {
-                                        if (group === undefined) console.log(group)
-                                        else if (group.type === "group") {
-                                            return <Rectangle 
-                                                        key={group.name} 
-                                                        {...group}
-                                                    />
-                                        }
-                                        else if (group.type === "user")
-                                            return null
-                                        return null
-                                    })}
-                                </Layer>
-                            </Stage>
-                        </Grid>
-                        <Grid item xs={3}>
-                            <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'flex-start'}}>
-                                <Button onClick={this.addGroup}>Add Group</Button>
-
-                                {(this.props.session_user).map(user => {
-                                    console.warn(user)
-                                    {user}
-                                })}
-                            </div>
-                        </Grid>
-                    </Grid> */}
+                        <App {...others}/>
+                        {/* <Grid container spacing={24}>
+                            <Grid item xs={9}>
+                            </Grid>
+                            <Grid item xs={3}>
+                                <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'flex-start'}}>
+                                    <Button onClick={this.addGroup}>Add Group</Button>
+                                </div>
+                            </Grid>
+                        </Grid> */}
                     </DialogContent>
                 </Popover>
             </Fragment>

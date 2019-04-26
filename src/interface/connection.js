@@ -133,7 +133,7 @@ const connection = {
     }
 }
 
-const signalingChannel = {
+const SignalingChannel = {
     cast(type, params) {
         connection.cast(type, params, "signal_cast")
     },
@@ -201,6 +201,27 @@ const WhiteboardChannel = { // use owner as target
     }
 }
 
+const ClassStatusChannel = { // use owner as target
+    cast(type, params) {
+        connection.cast(type, params, "class_status_cast")
+    },
+    call(type, params) {
+        return connection.call(type, params, "class_status_call")
+    },
+    async changeGroup(student, group) {
+        return await this.call("change_group", {student, group})
+    },
+    async getGroups() { // list of groups
+        return await this.call("get_groups", null)
+    },
+    onGroupStatusChange(callback) {
+        connection.addListener("group_status_change", callback)
+    },
+    removeListener(callback) {
+        connection.removeListener("group_status_change", callback)
+    }
+}
+
 function checkTURNServer(turnConfig, timeout){ 
 
     return new Promise(function(resolve, reject){
@@ -233,9 +254,10 @@ function checkTURNServer(turnConfig, timeout){
 
 export {
     connection,
-    signalingChannel,
+    SignalingChannel,
     checkTURNServer,
     WhiteboardChannel,
+    ClassStatusChannel,
     uploadURL,
     genid
     // listener // for debug use

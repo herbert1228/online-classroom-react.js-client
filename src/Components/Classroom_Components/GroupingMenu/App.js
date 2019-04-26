@@ -5,6 +5,7 @@ import HTML5Backend from 'react-dnd-html5-backend'
 import Card from './Card'
 import CardWall from './CardWall'
 import CardLayer from './CardLayer'
+import {ClassStatusChannel} from '../../../interface/connection'
 
 import './App.scss'
 
@@ -12,34 +13,25 @@ class App extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      cards: [
-        { id: '1', name: 'issue 1111', status: 'todo' },
-        { id: '2', name: 'issue 104', status: 'todo' },
-        { id: '3', name: 'issue 9527', status: 'todo' },
-        { id: '4', name: 'issue 5278', status: 'todo' },
-        { id: '5', name: 'issue 591', status: 'develop' },
-        { id: '6', name: 'issue 666', status: 'develop' },
-        { id: '7', name: 'issue 9453', status: 'develop' },
-        { id: '8', name: 'issue 8591', status: 'deploy' },
-        { id: '9', name: 'issue 9999', status: 'deploy' },
-      ]
+      groups: ['All', 'Group1', 'Group2', 'Group3']
     }
     this.updateCardStatus = this.updateCardStatus.bind(this)
   }
 
   updateCardStatus(cardId, targetStatus) {
-    const { cards } = this.state
+    const cards = this.props.groupCards
     const targetIndex = cards.findIndex(c => (cardId === c.id))
-    cards[targetIndex].status = targetStatus // 更新 card status
+    cards[targetIndex].status = targetStatus // update card status
 
-    const targetCard = cards.splice(targetIndex, 1)[0] // 刪除原始陣列位置的 card
-    cards.push(targetCard) // 將目標 card 放入陣列最後一筆
-
-    this.setState({ cards })
+    const targetCard = cards.splice(targetIndex, 1)[0] // delete old card
+    cards.push(targetCard) // insert target card to last position of the array
+    
+    const result = ClassStatusChannel.changeGroup(cardId, targetStatus)
+    this.props.handleNotification(`${cardId} is grouped to ${targetStatus}`)
   }
 
   groupOfCards() {
-    const { cards } = this.state
+    const cards = this.props.groupCards
     const cardsGroup = {}
 
     cards.forEach((card) => {
@@ -60,7 +52,7 @@ class App extends Component {
         <div className="board">
           <CardLayer />
           {
-            ['todo', 'develop', 'test', 'deploy'].map(status => (
+            this.state.groups.map(status => (
               <CardWall
                 key={status}
                 status={status}
@@ -78,7 +70,7 @@ class App extends Component {
                 }
               </CardWall>
             ))
-          }
+            }
         </div>
       </div>
     );

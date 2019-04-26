@@ -7,6 +7,9 @@ import { withStyles } from '@material-ui/core/styles'
 import ParticipantList from './ParticipantList'
 import Whiteboard from './Whiteboard';
 import _ from 'lodash'
+import {ClassStatusChannel} from '../../interface/connection'
+import {store} from '../../index'
+import GroupStatus from './GroupStatus';
 
 const styles = theme => ({ 
     container: {
@@ -35,6 +38,12 @@ class JoinedLayoutStudent extends Component {
             PList: { id: "PList", zIndex: 1, position: {x: 480, y: 5}, size: {width: 0, height: 0} }, 
         }
     }
+    componentDidMount() {
+        ClassStatusChannel.onGroupStatusChange(this.handleGroupStatusChange)
+    }
+    componentWillUnmount() {
+        ClassStatusChannel.removeListener(this.handleGroupStatusChange)
+    }
     componentDidUpdate(prevProps) {
         const {session_user} = this.props
         if (!session_user) return
@@ -50,6 +59,10 @@ class JoinedLayoutStudent extends Component {
                 this.props.handleNotification(each + " joined")
             }
         }
+    }
+    handleGroupStatusChange = group => {
+        // e.members, e.group
+        store.dispatch({type: "updateGroup", group})
     }
     bringTop = (target) => { // target: selfWebcam/etc
         let maxZ = -1
@@ -67,8 +80,8 @@ class JoinedLayoutStudent extends Component {
         })
     }
     testfunc = () => {
-        this.ref["selfDrawer"].updatePosition({x: 825, y: 230})
-        this.bringTop("selfDrawer")
+        this.ref["PList"].updatePosition({x: 825, y: 230})
+        this.bringTop("PList")
     }
     render() {
         const { classes, ...other } = this.props
@@ -83,6 +96,7 @@ class JoinedLayoutStudent extends Component {
                                     {inner}
                                 </Button>
                         )))}
+                        <GroupStatus {...other}/>
                         <Button onClick={()=>this.testfunc()}>update position</Button>
                     </Toolbar>
                 </AppBar>

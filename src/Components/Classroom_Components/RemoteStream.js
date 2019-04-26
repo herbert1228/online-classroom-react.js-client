@@ -1,6 +1,6 @@
 import React from 'react'
 import {withStyles} from '@material-ui/core/styles'
-import {signalingChannel as channel, connection as conn} from '../../interface/connection'
+import {SignalingChannel as channel, connection as conn} from '../../interface/connection'
 import { Avatar } from '@material-ui/core';
 import { Person } from '@material-ui/icons';
 

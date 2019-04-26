@@ -1,6 +1,6 @@
 .App {
   height: 100%;
-  background-color: #1D7BBB;
+  background-color: rgba(126, 196, 243, 0.068);
 }
 
 .board {
@@ -10,12 +10,13 @@
   user-select: none;
   white-space: nowrap;
   margin-bottom: 8px;
+  margin-top: 45px;
   overflow-x: auto;
-  overflow-y: hidden;
-  padding: 8px;
+  overflow-y: auto;
+  padding: 16px;
   position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  top: 10px;
+  right: 4%;
+  bottom: 4%;
+  left: 4%;
 }

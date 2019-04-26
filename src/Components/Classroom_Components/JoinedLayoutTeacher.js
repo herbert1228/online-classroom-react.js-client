@@ -9,6 +9,8 @@ import Whiteboard from './Whiteboard'
 import {withCookies} from 'react-cookie'
 import {compose} from 'redux'
 import _ from 'lodash'
+import {store} from '../../index'
+import { ClassStatusChannel } from '../../interface/connection';
 
 const styles = theme => ({ 
     container: {
@@ -37,16 +39,26 @@ class JoinedLayoutTeacher extends Component {
         }
     }
 
-    componentDidMount() {
+    async componentDidMount() {
+        const groupCards = (await ClassStatusChannel.getGroups()).result
+        const groupedStudents = groupCards.map(card => card.id)
+
         const {session_user} = this.props
         if (!session_user) return
         for (let each of session_user) {
+            if (each !== this.props.joined.owner && !groupedStudents.includes(each)){
+                groupCards.push({id: each, name: each, status: 'All'})
+            }
+
             if (each === this.props.self) continue
             this.setState({whiteboard: {
                 ...this.state.whiteboard,
                 [each + "Whiteboard"]: { id: each + "Whiteboard", user: each, zIndex: 2, position: {x: 800, y: 150}, size: {width: 800, height: 718} }
             }})
         }
+
+        console.warn(groupCards)
+        store.dispatch({type: "updateGroupCards", groupCards})
     }
 
     componentDidUpdate(prevProps) {
@@ -61,17 +73,25 @@ class JoinedLayoutTeacher extends Component {
             if (prevProps.session_user.length > this.props.session_user.length) {
                 console.log("less")
                 this.props.handleNotification(each + " left")
+                removeUserFromGroupCards(each, this.props)
+
                 const tmpState = this.state
                 delete tmpState.whiteboard[each + "Whiteboard"]
                 this.setState(tmpState)
             } else {
                 this.props.handleNotification(each + " joined")
+                insertUserToGroupCards(each, this.props)
+
                 this.setState({whiteboard: {
                     ...this.state.whiteboard,
                     [each + "Whiteboard"]: { id: each + "Whiteboard", user: each, zIndex: 2, position: {x: 800, y: 150}, size: {width: 800, height: 718} }
                 }})
             }
         }
+    }
+
+    componentWillUnmount() {
+        resetGroupCards()
     }
 
     bringTop = (target) => { // target: selfWebcam/etc
@@ -91,8 +111,8 @@ class JoinedLayoutTeacher extends Component {
     }
 
     testfunc = () => {
-        this.ref["selfDrawer"].updatePosition({x: 825, y: 230})
-        this.bringTop("selfDrawer")
+        this.ref["PList"].updatePosition({x: 825, y: 230})
+        this.bringTop("PList")
     }
 
     saveLayout = () => {
@@ -192,6 +212,30 @@ function findKeyInNestedObject(key, nestedObj) {
         }
     })
     return result
+}
+
+function insertUserToGroupCards(user, props, ...defaultGroupCards) {
+    if (user === props.joined.owner) return
+    let {groupCards} = props
+    // if (defaultGroupCards) {
+    //     groupCards = defaultGroupCards
+    // }
+    groupCards.push({id: user, name: user, status: 'All'})
+    store.dispatch({type: "updateGroupCards", groupCards})
+}
+
+function removeUserFromGroupCards(user, props) {
+    const {groupCards} = props
+
+    const targetIndex = groupCards.findIndex(c => (user === c.id))
+
+    groupCards.splice(targetIndex, 1)
+
+    store.dispatch({type: "updateGroupCards", groupCards})
+}
+
+function resetGroupCards() {
+    store.dispatch({type: "updateGroupCards", groupCards: []})
 }
 
 export default compose(

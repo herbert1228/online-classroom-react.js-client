@@ -9,7 +9,6 @@ import { Provider } from 'react-redux'
 import { createStore } from 'redux'
 import ReactDOM from 'react-dom'
 import { connection as conn } from './interface/connection'
-import AppT from './Components/Classroom_Components/GroupingMenu/App'
 
 let themeType = 'light';
 
@@ -31,7 +30,9 @@ const initialState = {
     self: null,
     joined: null,
     lastJoin: null,
-    drawerOpen: true
+    drawerOpen: true,
+    groupCards: [],
+    group: {group: null, members: []}
 }
 
 function reducer(state = initialState, action) {
@@ -60,6 +61,10 @@ function reducer(state = initialState, action) {
             return {...state, joined: null, session_user: []}
         case "drawerOpen":
             return {...state, drawerOpen: action.drawerOpen}
+        case "updateGroupCards":
+            return {...state, groupCards: action.groupCards}
+        case "updateGroup":
+            return {...state, group: action.group}
         default: 
             return state
     }
@@ -102,17 +107,6 @@ class AppContainer extends React.Component {
     render() {
         return (
             <App/>
-            // <Provider store={store}>
-            //     <MuiThemeProvider theme={theme}>
-            //         <Router>
-            //             <div>
-            //                 <Route path="/" exact component={props => <App/>}/>
-            //                 <Route path="/upload" exact component={props => <Upload/>}/>
-            //             </div>
-            //         </Router>
-            //         {/* <App/> */}
-            //     </MuiThemeProvider>
-            // </Provider>
         )
     }
 }
@@ -127,12 +121,11 @@ function Index() {
                         <Route path="/upload" exact component={props => <Upload/>}/>
                     </div>
                 </Router>
-                {/* <App/> */}
             </MuiThemeProvider>
         </Provider>
     )
 }
 
-ReactDOM.render(<AppT/>, document.getElementById('root'));
+ReactDOM.render(<Index/>, document.getElementById('root'));
 
 // registerServiceWorker();

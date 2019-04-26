@@ -1,7 +1,7 @@
 import React from 'react'
 import {withStyles} from '@material-ui/core/styles'
 import {Button} from '@material-ui/core'
-import {signalingChannel as channel, connection as conn, checkTURNServer} from '../../interface/connection'
+import {SignalingChannel as channel, connection as conn, checkTURNServer} from '../../interface/connection'
 import poster from '../../css/ask_camera_permission.jpg'
 import classNames from 'classnames'
 import { MicOff, Mic, Videocam, VideocamOff, Call, CallEnd } from '@material-ui/icons';
