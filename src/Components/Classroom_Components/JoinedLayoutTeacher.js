@@ -27,7 +27,7 @@ class JoinedLayoutTeacher extends Component {
     state = {
         webcam: {
             // selfWebcam: { owner: "", id: "selfWebcam", zIndex: 2, position: {x: 1130, y: 5}, size: {width: 460, height: 345+72} }, 
-            teacherWebcam: { id: "teacherWebcam", zIndex: 2, position: {x: 10, y: 5}, size: {width: 460, height: 345+41} }, 
+            teacherWebcam: { id: "teacherWebcam", zIndex: 2, position: {x: 10, y: 5}, size: {width: 460 / 1.5, height: (345+41) / 1.5 + 14.5} }, 
         },
         whiteboard: {
             "Group3Whiteboard": { type: 'group', id: "Group3Whiteboard", user: "Group3", zIndex: 2, position: {x: 810, y: 150}, size: {width: 800, height: 718} },

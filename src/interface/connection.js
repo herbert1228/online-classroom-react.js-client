@@ -241,11 +241,18 @@ const ClassStatusChannel = { // use owner as target
     async getGroups() { // list of groups
         return await this.call("get_groups", null)
     },
+    changeWebcamPermission(user, webcamPermission) {
+        this.cast("change_webcam_permission", {user, webcamPermission})
+    },
     onGroupStatusChange(callback) {
         connection.addListener("group_status_change", callback)
     },
-    removeListener(callback) {
+    onWebcamPermissionChanged(callback) {
+        connection.addListener("webcam_permission_changed", callback)
+    },
+    removeListener(callback, callback2) {
         connection.removeListener("group_status_change", callback)
+        connection.removeListener("webcam_permission_changed", callback2)
     }
 }
 

@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react'
-import { AppBar, Toolbar, Button } from '@material-ui/core'
+import { AppBar, Toolbar } from '@material-ui/core'
 import UserCard from '../Content_Components/UserCard'
 import ClassMenu from '../Classroom_Components/ClassMenu'
 import Drawer from '../Classroom_Components/Drawer'
@@ -11,6 +11,7 @@ import _ from 'lodash'
 import {ClassStatusChannel} from '../../interface/connection'
 import {store} from '../../index'
 import GroupStatus from './GroupStatus';
+import WebcamPermissionStatus from './WebcamPermissionStatus';
 import FindComponent from './FindComponent';
 
 const styles = theme => ({ 
@@ -25,7 +26,7 @@ class JoinedLayoutStudent extends Component {
     ref={}
     state = {
         webcam: {
-            selfWebcam: { id: "selfWebcam", zIndex: 2, position: {x: 1130, y: 5}, size: {width: 460, height: 345+41} }, 
+            selfWebcam: { id: "selfWebcam", zIndex: 2, position: {x: 1312, y: 5}, size: {width: 460 / 1.5, height: (345+41) / 1.5 + 14.5} }, 
             teacherWebcam: { id: "teacherWebcam", zIndex: 2, position: {x: 10, y: 5}, size: {width: 460, height: 345+41} }, 
         },
         whiteboard: {
@@ -42,9 +43,10 @@ class JoinedLayoutStudent extends Component {
     }
     componentDidMount() {
         ClassStatusChannel.onGroupStatusChange(this.handleGroupStatusChange)
+        ClassStatusChannel.onWebcamPermissionChanged(this.handleWebcamPermissionChanged)
     }
     componentWillUnmount() {
-        ClassStatusChannel.removeListener(this.handleGroupStatusChange)
+        ClassStatusChannel.removeListener(this.handleGroupStatusChange, this.handleWebcamPermissionChanged)
     }
     componentDidUpdate(prevProps) {
         const {session_user} = this.props
@@ -71,14 +73,17 @@ class JoinedLayoutStudent extends Component {
             if (group.group !== null) {
                 this.setState({whiteboard: {
                     ...this.state.whiteboard,
-                    [group.group+"Whiteboard"]: { type: 'group', id: group.group+"Whiteboard", user: group.group, zIndex: 2, position: {x: 750, y: 150}, size: {width: 800, height: 718} }
+                    [group.group+"Whiteboard"]: { type: 'group', id: group.group+"Whiteboard", user: group.group, zIndex: 2, position: {x: 850, y: 150}, size: {width: 800, height: 718} }
                 }}, () => this.bringTop(group.group+"Whiteboard"))
             }
             this.props.handleClassNotification(`Assigned to ${group.group}`)
         }
         store.dispatch({type: "updateGroup", group})
     }
-    bringTop = (target) => { // target: selfWebcam/etc
+    handleWebcamPermissionChanged = webcamPermission => {
+        store.dispatch({type: "updateWebcamPermission", webcamPermission})
+    }
+    bringTop = (target) => { // target: selfWebcam/etc...
         let maxZ = -1
         Object.values(this.state).forEach(outer => {
             Object.values(outer).forEach(inner => {
@@ -107,6 +112,7 @@ class JoinedLayoutStudent extends Component {
                         <FindComponent components={this.state} bringTop={this.bringTop}/>
                         {/* <Button onClick={()=>this.testfunc()}>update position</Button> */}
                         <GroupStatus {...other}/>
+                        <WebcamPermissionStatus {...other}/>
                     </Toolbar>
                 </AppBar>
                 <div className={classes.container}>

@@ -32,7 +32,8 @@ const initialState = {
     lastJoin: null,
     drawerOpen: true,
     groupCards: [],
-    group: {group: null, members: []}
+    group: {group: null, members: []},
+    webcamPermission: {video: true, audio: true}
 }
 
 function reducer(state = initialState, action) {
@@ -65,6 +66,8 @@ function reducer(state = initialState, action) {
             return {...state, groupCards: action.groupCards}
         case "updateGroup":
             return {...state, group: action.group}
+        case "updateWebcamPermission":
+            return {...state, webcamPermission: action.webcamPermission}
         default: 
             return state
     }

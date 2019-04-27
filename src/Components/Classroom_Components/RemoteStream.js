@@ -1,8 +1,9 @@
 import React from 'react'
 import {withStyles} from '@material-ui/core/styles'
-import {SignalingChannel as channel, connection as conn} from '../../interface/connection'
-import { Avatar } from '@material-ui/core';
-import { Person } from '@material-ui/icons';
+import {SignalingChannel as channel, connection as conn, ClassStatusChannel} from '../../interface/connection'
+import { Avatar, Button } from '@material-ui/core';
+import { Person, Mic, MicOff, Videocam, VideocamOff } from '@material-ui/icons';
+import classNames from 'classnames'
 
 const styles = theme => ({
     avatar: {
@@ -12,6 +13,25 @@ const styles = theme => ({
         height: 50,
         width: 50,
         transform: 'translateX(-50%) translateY(0%)'
+    },
+    button: {
+        position: 'absolute', 
+        // backgroundColor: '#eee',
+        backgroundColor: 'rgba(238,238,238,0.7)',
+    },
+    disableMicBtn: {
+        left: '0%', 
+        top: '0%', 
+        height: '20%',
+        width: 460 / 5 / 2,
+        transform: 'translateX(-0%) translateY(-0%)'
+    },
+    disableCameraBtn: {
+        left: '50%', 
+        top: '0%', 
+        height: '20%',
+        width: 460 / 5 / 2,
+        transform: 'translateX(-cal(50/2)%) translateY(-0%)'
     },
 })
 
@@ -60,7 +80,11 @@ class RemoteStream extends React.Component {
         },
         videoEnabled: false,
         initCameraState: true,
-        initMicState: true
+        initMicState: true,
+
+        // teacher management
+        micPermission: true,
+        cameraPermission: true,
     }
 
     state = this.defaultState
@@ -221,6 +245,18 @@ class RemoteStream extends React.Component {
         console.log(`AddIceCandidateFailed: ${e.toString()}`)
     }
 
+    changeCameraPermission = () => {
+        const {micPermission, cameraPermission} = this.state
+        ClassStatusChannel.changeWebcamPermission(this.props.user, {mic: micPermission, camera: !cameraPermission})
+        this.setState({cameraPermission: !this.state.cameraPermission})
+    }
+
+    changeMicPermission = () => {
+        const {micPermission, cameraPermission} = this.state
+        ClassStatusChannel.changeWebcamPermission(this.props.user, {mic: !micPermission, camera: cameraPermission})
+        this.setState({micPermission: !this.state.micPermission})
+    }
+
     render() {
         const {classes} = this.props
         return ( 
@@ -240,9 +276,31 @@ class RemoteStream extends React.Component {
                     // <Avatar className={classes.avatar}>{this.props.user.substring(0,3)}</Avatar>
                     <Avatar className={classes.avatar}><Person/></Avatar>
                 }
+                {isTeacher(this.props) &&
+                    <Button 
+                        // style={{visibility: (this.state.called)? 'visible' : 'hidden'}}
+                        className={classNames(classes.disableMicBtn, classes.button)}
+                        onClick = {this.changeMicPermission} >
+                        {this.state.micPermission && <Mic/>}
+                        {!this.state.micPermission && <MicOff/>}
+                    </Button> 
+                }
+                {isTeacher(this.props) &&
+                    <Button 
+                        // style={{visibility: (this.state.called)? 'visible' : 'hidden'}}
+                        className={classNames(classes.disableCameraBtn, classes.button)}
+                        onClick = {this.changeCameraPermission} >
+                        {this.state.cameraPermission && <Videocam/>}
+                        {!this.state.cameraPermission && <VideocamOff/>}
+                    </Button> 
+                }
             </div>
         )
     }
+}
+
+function isTeacher(props) {
+    return props.joined.owner === props.self
 }
 
 export default withStyles(styles)(RemoteStream)

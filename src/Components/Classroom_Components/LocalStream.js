@@ -121,6 +121,33 @@ class LocalStream extends React.Component {
         if (this.state.called) this.hangup()
     }
 
+    // if permission changed by teacher, toggle camera/mic off
+    componentDidUpdate(prevProps) {
+        const {webcamPermission} = this.props
+        console.log(webcamPermission)
+        console.log(webcamPermission.video)
+        console.log(webcamPermission.audio)
+
+        if (prevProps.webcamPermission.video !== webcamPermission.video) {
+            console.log(webcamPermission.video)
+            if (webcamPermission.video === false) {
+                this.props.handleClassNotification(`Camera Disabled by teacher`)
+                console.warn(`Camera Disabled:`, webcamPermission.video, prevProps.webcamPermission.video)
+                this.setState({cameraEnabled: false})
+                channel.broadcastAction("toggleCamera")
+            }
+        }
+        if (prevProps.webcamPermission.audio !== webcamPermission.audio) {
+            console.log(webcamPermission.audio)
+            if (webcamPermission.audio === false) {
+                this.props.handleClassNotification(`Mic Disabled by teacher`)
+                console.warn(`Mic Disabled:`, webcamPermission.audio, prevProps.webcamPermission.audio)
+                this.setState({micEnabled: false})
+                channel.broadcastAction("toggleMic")
+            }
+        }
+    }
+
     requestOfferListener = from => {
         if (this.state.called) this.inRequestForPeerConn(from)
     }
@@ -150,6 +177,7 @@ class LocalStream extends React.Component {
     }
 
     actionListener = e => {
+        console.warn("localstream received invalid action:", e)
         // switch (e.action) {
         //     case "hangup":
         //         if (this.pc[e.from]) {
@@ -256,6 +284,18 @@ class LocalStream extends React.Component {
         // stream = this.modifyGain(stream)
         this.localVideo.srcObject = stream
         this.localStream = stream //hide call btn after this //label, enabled, muted
+
+        // disable webcam after got stream if no permission
+        if (!this.props.webcamPermission.video) {
+            this.props.handleClassNotification(`Camera Disabled by teacher`)
+            this.setState({cameraEnabled: !this.state.cameraEnabled})
+            channel.broadcastAction("toggleCamera")
+        }
+        if (!this.props.webcamPermission.audio ) {
+            this.props.handleClassNotification(`Mic Disabled by teacher`)
+            this.setState({micEnabled: !this.state.micEnabled})
+            channel.broadcastAction("toggleMic")
+        }
     }
     
     sendOfferDescription = (offerDesc, target) => {
@@ -290,13 +330,25 @@ class LocalStream extends React.Component {
     }
 
     toggleMic = () => {
-        this.setState({micEnabled: !this.state.micEnabled})
-        channel.broadcastAction("toggleMic")
+        if (this.props.webcamPermission.audio) {
+            this.props.handleClassNotification(`Mic ${!this.state.micEnabled? 'On':'Off'}`)
+            this.setState({micEnabled: !this.state.micEnabled})
+            channel.broadcastAction("toggleMic")
+        } else {
+            console.warn(this.props.webcamPermission)
+            this.props.handleClassNotification('No Permission to toggle Mic')
+        }
     }
     
     toggleCamera = () => {
-        this.setState({cameraEnabled: !this.state.cameraEnabled})
-        channel.broadcastAction("toggleCamera")
+        if (this.props.webcamPermission.video) {
+            this.props.handleClassNotification(`Camera ${!this.state.cameraEnabled? 'On':'Off'}`)
+            this.setState({cameraEnabled: !this.state.cameraEnabled})
+            channel.broadcastAction("toggleCamera")
+        } else {
+            console.warn(this.props.webcamPermission)
+            this.props.handleClassNotification('No Permission to toggle Camera')
+        }
     }
 
     render() {
@@ -313,15 +365,15 @@ class LocalStream extends React.Component {
                     style={{visibility: (this.state.called)? 'visible' : 'hidden'}}
                     className={classNames(classes.disableMicBtn, classes.button)}
                     onClick = {this.toggleMic} >
-                    {this.state.micEnabled && <MicOff/>}
-                    {!this.state.micEnabled && <Mic/>}
+                    {this.state.micEnabled && <Mic/>}
+                    {!this.state.micEnabled && <MicOff/>}
                 </Button> 
                 <Button 
                     style={{visibility: (this.state.called)? 'visible' : 'hidden'}}
                     className={classNames(classes.disableCameraBtn, classes.button)}
                     onClick = {this.toggleCamera} >
-                    {this.state.cameraEnabled && <VideocamOff/>}
-                    {!this.state.cameraEnabled && <Videocam/>}
+                    {this.state.cameraEnabled && <Videocam/>}
+                    {!this.state.cameraEnabled && <VideocamOff/>}
                 </Button> 
                 <Button 
                     style={{visibility: (this.state.called)? 'visible' : 'hidden'}}

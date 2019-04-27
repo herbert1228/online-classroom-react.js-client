@@ -1,9 +1,10 @@
+
 import React from 'react';
 import Button from '@material-ui/core/Button';
 import Tooltip from '@material-ui/core/Tooltip';
 import { Typography } from '@material-ui/core';
 
-class GroupStatus extends React.Component {
+class WebcamPermissionStatus extends React.Component {
   state = {
     open: false,
   };
@@ -24,19 +25,18 @@ class GroupStatus extends React.Component {
         open={this.state.open}
         title={
             <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-                <Typography>Groupmates: </Typography>
-                {(this.props.group.members || []).map(member => 
-                    <Typography key={member}>{member}</Typography>
-                )}
+                <Typography>Webcam</Typography>
+                <Typography>Video: {this.props.webcamPermission.video? 'Yes' : 'No'}</Typography>
+                <Typography>Audio: {this.props.webcamPermission.audio? 'Yes' : 'No'}</Typography>
             </div>
         }
       >
 
-      <Button disabled={!this.props.group.group}>{this.props.group.group || "No Group"}</Button>
+      <Typography>Permission</Typography>
 
       </Tooltip>
     )
   }
 }
 
-export default GroupStatus;
+export default WebcamPermissionStatus;

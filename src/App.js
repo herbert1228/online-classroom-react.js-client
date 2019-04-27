@@ -174,7 +174,8 @@ function mapStateToProps(state) {
         drawerOpen: state.drawerOpen,
         lastJoin: state.lastJoin,
         groupCards: state.groupCards,
-        group: state.group
+        group: state.group,
+        webcamPermission: state.webcamPermission
     }
 }
 
