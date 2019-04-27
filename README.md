@@ -4,6 +4,16 @@ Demo: [https://overcoded.tk](https://overcoded.tk "Realistic and Interactive Onl
 
 Elixir backend Github repo: [https://github.com/herbert1228/online-classroom-elixir-server](https://github.com/herbert1228/online-classroom-elixir-server "Elixir backend")
 
+## Update:
+
+- Grouping
+  - Teacher can assign students into groups
+  - Students in the same group can edit a shared whiteboard (work together)
+  
+- Class Management
+  - Teacher can control the webcam permission of students
+    - enable/disable audio
+    - enable/disable video
 
 ## First stable version with the followings major features:
 
