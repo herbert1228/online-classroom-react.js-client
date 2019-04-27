@@ -26,7 +26,7 @@ class GroupStatus extends React.Component {
             <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                 <Typography>Groupmates: </Typography>
                 {(this.props.group.members || []).map(member => 
-                    <Typography>{member}</Typography>
+                    <Typography key={member}>{member}</Typography>
                 )}
             </div>
         }

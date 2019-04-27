@@ -6,6 +6,7 @@ import Drawer from '../Classroom_Components/Drawer'
 import { withStyles } from '@material-ui/core/styles'
 import ParticipantList from './ParticipantList'
 import Whiteboard from './Whiteboard';
+import GroupWhiteboard from './GroupWhiteboard';
 import _ from 'lodash'
 import {ClassStatusChannel} from '../../interface/connection'
 import {store} from '../../index'
@@ -24,15 +25,15 @@ class JoinedLayoutStudent extends Component {
     state = {
         webcam: {
             selfWebcam: { id: "selfWebcam", zIndex: 2, position: {x: 1130, y: 5}, size: {width: 460, height: 345+41} }, 
-            teacherWebcam: { id: "teacherWebcam", zIndex: 2, position: {x: 5, y: 5}, size: {width: 460, height: 345+41} }, 
+            teacherWebcam: { id: "teacherWebcam", zIndex: 2, position: {x: 10, y: 5}, size: {width: 460, height: 345+41} }, 
         },
         whiteboard: {
-            selfWhiteboard: { id: "selfWhiteboard", user: this.props.self, zIndex: 3, position: {x: 800, y: 150}, size: {width: 800, height: 718} },
-            teacherWhiteboard: { id: "teacherWhiteboard", user: this.props.joined.owner, zIndex: 3, position: {x: 5, y: 150}, size: {width: 800, height: 718} }, 
+            selfWhiteboard: { id: "selfWhiteboard", user: this.props.self, zIndex: 3, position: {x: 820, y: 150}, size: {width: 800, height: 718} },
+            teacherWhiteboard: { id: "teacherWhiteboard", user: this.props.joined.owner, zIndex: 3, position: {x: 10, y: 150}, size: {width: 800, height: 718} }, 
         },
         drawer: {
             selfDrawer: { id: "Personal Drawer", zIndex: 0, position: {x: 660, y: 5}, size: {width: 450, height: 550} }, 
-            classDrawer: { id: "Class Resources", zIndex: 0, position: {x: 5, y: 5} },// to distribute/receive files class esources
+            classDrawer: { id: "Class Resources", zIndex: 0, position: {x: 10, y: 5} },// to distribute/receive files class esources
         },
         other: {
             PList: { id: "PList", zIndex: 1, position: {x: 480, y: 5}, size: {width: 0, height: 0} }, 
@@ -61,7 +62,19 @@ class JoinedLayoutStudent extends Component {
         }
     }
     handleGroupStatusChange = group => {
-        // e.members, e.group
+        // {members, group}
+        if (this.props.group.group !== group.group) {
+            // const prevGroupIndex = this.state.whiteboard.findIndex(w => (w.type === 'group'))
+            // this.state.whiteboard.splice(prevGroupIndex, 1) // delete old group whiteboard
+            delete this.state.whiteboard[this.props.group.group+"Whiteboard"]
+            if (group.group !== null) {
+                this.setState({whiteboard: {
+                    ...this.state.whiteboard,
+                    [group.group+"Whiteboard"]: { type: 'group', id: group.group+"Whiteboard", user: group.group, zIndex: 2, position: {x: 750, y: 150}, size: {width: 800, height: 718} }
+                }}, () => this.bringTop(group.group+"Whiteboard"))
+            }
+            this.props.handleClassNotification(`Assigned to ${group.group}`)
+        }
         store.dispatch({type: "updateGroup", group})
     }
     bringTop = (target) => { // target: selfWebcam/etc
@@ -130,21 +143,38 @@ class JoinedLayoutStudent extends Component {
                                 this.props.joined.owner : this.props.self}
                         />
                     ))}
-                    {Object.values(this.state.whiteboard).map((whiteboard) => (
-                        (whiteboard.id !== 'teacherWhiteboard' || 
-                            (whiteboard.id === 'teacherWhiteboard' && 
-                                this.props.session_user.includes(this.props.joined.owner))) &&
-                        <Whiteboard
-                            key={whiteboard.id}
-                            {...whiteboard}
-                            bringTop={() => this.bringTop(whiteboard.id)}
-                            inputRef={(id, el) => this.ref[id] = el}
-                            lockAspectRatio={4/3}
-                            lockAspectRatioExtraHeight={72}
-                            enableResizing={false}
-                            {...other}
-                        />
-                    ))}
+                    {Object.values(this.state.whiteboard).map((whiteboard) => {
+                        if (whiteboard.type !== 'group' && 
+                            (whiteboard.id !== 'teacherWhiteboard' || 
+                                (whiteboard.id === 'teacherWhiteboard' && 
+                                    this.props.session_user.includes(this.props.joined.owner)))) {
+                            return (
+                                <Whiteboard
+                                    key={whiteboard.id}
+                                    {...whiteboard}
+                                    bringTop={() => this.bringTop(whiteboard.id)}
+                                    inputRef={(id, el) => this.ref[id] = el}
+                                    lockAspectRatio={4/3}
+                                    lockAspectRatioExtraHeight={72}
+                                    enableResizing={false}
+                                    {...other}
+                                />
+                            )
+                        }
+                        else if (whiteboard.type === 'group')
+                            return (
+                                <GroupWhiteboard
+                                    key={whiteboard.id}
+                                    bringTop={() => this.bringTop(whiteboard.id)}
+                                    inputRef={(id, el) => this.ref[id] = el}
+                                    lockAspectRatio={4/3}
+                                    lockAspectRatioExtraHeight={72}
+                                    enableResizing={false}
+                                    {...whiteboard}
+                                    {...other}
+                                />
+                            )
+                    })}
                     <Drawer 
                         id={"selfDrawer"}
                         bringTop={() => this.bringTop('selfDrawer')}

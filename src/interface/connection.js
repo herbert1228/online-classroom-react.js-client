@@ -201,6 +201,33 @@ const WhiteboardChannel = { // use owner as target
     }
 }
 
+const GroupWhiteboardChannel = { // use {class_name, group}} as target
+    cast(type, params) {
+        connection.cast(type, params, "group_whiteboard_cast")
+    },
+    call(type, params) {
+        return connection.call(type, params, "group_whiteboard_call")
+    },
+    start() {
+        return this.call("start", null)
+    },
+    connect(target) {
+        return this.call("connect", target)
+    },
+    disconnect(target) {
+        this.cast("disconnect", target)
+    },
+    draw(target, lines) {
+        this.cast("draw", {target, lines})
+    },
+    onReceiveDraw(target, callback) {
+        connection.addListener("group_whiteboard_draw_" + target, callback)
+    },
+    removeListener(target, callback) {
+        connection.removeListener("group_whiteboard_draw_" + target, callback)
+    }
+}
+
 const ClassStatusChannel = { // use owner as target
     cast(type, params) {
         connection.cast(type, params, "class_status_cast")
@@ -257,6 +284,7 @@ export {
     SignalingChannel,
     checkTURNServer,
     WhiteboardChannel,
+    GroupWhiteboardChannel,
     ClassStatusChannel,
     uploadURL,
     genid

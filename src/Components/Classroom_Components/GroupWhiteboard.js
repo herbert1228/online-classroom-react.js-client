@@ -1,17 +1,19 @@
 import React, { Fragment } from 'react';
 import {withStyles} from '@material-ui/core/styles'
 import {Card, CardHeader, Divider, Button} from '@material-ui/core'
-import RndContainer from '../Classroom_Components/RndContainer'
+import RndContainer from './RndContainer'
 import {Stage, Layer, Text, Image, Rect} from 'react-konva'
 import Rectangle from './Whiteboard_Components/Rectangle'
 import TransformerComponent from './Whiteboard_Components/TransformerComponent'
-import CanvasInsideWhiteboard from './Whiteboard_Components/CanvasInsideWhiteboard'
+import CanvasInsideGroupWhiteboard from './Whiteboard_Components/CanvasInsideGroupWhiteboard'
 // import { CompactPicker } from 'react-color'
 import penButton from "./thumbnail/pen.png"
 import eraserButton from "./thumbnail/eraser.png"
 // import { SketchPicker } from 'react-color'
 import Portal from './Whiteboard_Components/Portal'
-import {genid, WhiteboardChannel } from '../../interface/connection'
+import {genid, GroupWhiteboardChannel } from '../../interface/connection'
+
+// this.props.user is the groupID (this.props.group.group) in this file
 
 const styles = theme => ({
     card: {
@@ -40,11 +42,11 @@ function defaultImage(image, name = genid()) {
     return {type: "image", x: 800/2 - 210, y: 600/2 - 180, width: 400, height: 300, image, name, ...generalAttrs}
 }
 
-class Whiteboard extends React.Component {
+class GroupWhiteboard extends React.Component {
     textAreaRef = {}
     state = {
         connected: false,
-        permission: this.props.user === this.props.self,
+        permission: true, // this.props.user === this.props.self, //all member have permission
         objects: [],
         inputBox: [],
         selectedShapeName: '',
@@ -61,52 +63,52 @@ class Whiteboard extends React.Component {
 
     async componentDidMount() {
         let result
-        WhiteboardChannel.onReceiveDraw(this.props.user, this.handleActionReceived)
-        if (isOwner(this.props)) {
-            result = await WhiteboardChannel.start()
-            this.setState({connected: true})
-            // Get old Whiteboard data from result
-            // console.log(result)
-        } else {
-            if (this.props.session_user.includes(this.props.user)) {
-                do {
-                    result = await WhiteboardChannel.connect(this.props.user)
-                } while(!Array.isArray(result))
-                for (let i = result.length - 1; i>=0; i--) { 
-                    this.handleActionReceived(result[i])
-                }
-                this.setState({connected: true})
+        GroupWhiteboardChannel.onReceiveDraw(this.props.user, this.handleActionReceived)
+        // if (isOwner(this.props)) {
+        //     result = await GroupWhiteboardChannel.start()
+        //     this.setState({connected: true})
+        //     // Get old Whiteboard data from result
+        //     // console.log(result)
+        // } else {
+        // if (this.props.session_user.includes(this.props.user)) {
+            do {
+                result = await GroupWhiteboardChannel.connect(this.props.user)
+            } while(!Array.isArray(result))
+            for (let i = result.length - 1; i>=0; i--) { 
+                this.handleActionReceived(result[i])
             }
-        }
-        console.log("whiteboard: "+ this.props.user)
+            this.setState({connected: true})
+        // }
+        // }
+        console.log("GroupWhiteboard: "+ this.props.user)
     }
 
     componentWillUnmount() {
-        WhiteboardChannel.disconnect(this.props.user)
-        WhiteboardChannel.removeListener(this.props.user, this.handleActionReceived);
+        GroupWhiteboardChannel.disconnect(this.props.user)
+        GroupWhiteboardChannel.removeListener(this.props.user, this.handleActionReceived);
     }
 
-    async componentWillReceiveProps({session_user}){
-        if (isOwner(this.props)) return
-        if (this.state.connected) return
-        let result
-        if (session_user.includes(this.props.user)) {
-            do {
-                result = await WhiteboardChannel.connect(this.props.user)
-            } while(result.reason === "pending")
+    // async componentWillReceiveProps({session_user}){
+    //     // if (isOwner(this.props)) return
+    //     if (this.state.connected) return
+    //     let result
+    //     if (session_user.includes(this.props.user)) {
+    //         do {
+    //             result = await GroupWhiteboardChannel.connect(this.props.user)
+    //         } while(result.reason === "pending")
 
-            if (result.length > 0) {
-                // elixir use head concatenation for better performance so the result is reversed 
-                for (let i = result.length - 1; i>=0; i--) { 
-                    this.handleActionReceived(result[i])
-                }
-            }
-            this.setState({connected: true})
-        }
-    }
+    //         if (result.length > 0) {
+    //             // elixir use head concatenation for better performance so the result is reversed 
+    //             for (let i = result.length - 1; i>=0; i--) { 
+    //                 this.handleActionReceived(result[i])
+    //             }
+    //         }
+    //         this.setState({connected: true})
+    //     }
+    // }
 
     sendWhiteboardAction = (type, args) => {
-        WhiteboardChannel.draw(this.props.user, {type, ...args})
+        GroupWhiteboardChannel.draw(this.props.user, {type, ...args})
     }
 
     handleActionReceived = data => {
@@ -478,15 +480,18 @@ class Whiteboard extends React.Component {
                     onDrop={this.state.permission? this.handleOnDrop : this.handleNoPermission} // e.preventDefault() then add image at pointer position
                 >
                     <CardHeader //this height is 74px
-                        title={"Whiteboard"+ (this.state.permission? '' : ' (Read Only)')}
+                        title={"Group Whiteboard"+ (this.state.permission? '' : ' (Read Only)')}
                         subheader={
-                            (isTeacher(this.props)? 'Teacher: ' : '') 
-                            + this.props.user 
-                            + ((this.props.user === this.props.self)? ' (yourself)' : '')
+                            `Group ${this.props.user.charAt(5)} (
+                                ${(
+                                    this.props.group.members.join(', ')
+                                )}
+                            )`
                         }
                         id={`draggable${id}`}
                         style={{height: 45, backgroundColor: "#e9e7e74d"}}
-                        classes={{title: isTeacher(this.props)? classes.teacherTitle : classes.normalTitle}}
+                        // classes={{title: isTeacher(this.props)? classes.teacherTitle : classes.normalTitle}}
+                        classes={{title: classes.normalTitle}}
                     />
                     <Divider/>
                     {this.state.permission && 
@@ -606,7 +611,7 @@ class Whiteboard extends React.Component {
 
                         <Layer 
                             hitGraphEnabled={this.state.canvasMode}>
-                            <CanvasInsideWhiteboard 
+                            <CanvasInsideGroupWhiteboard
                                 key="whiteboard"
                                 lineColor={ this.state.lineColor }
                                 lineWidth={ this.state.lineWidth }
@@ -625,12 +630,12 @@ class Whiteboard extends React.Component {
     }
 }
 
-function isOwner(props) {
-    return props.user === props.self
-}
+// function isGroupMember(props) {
+//     return props.user === props.self
+// }
 
-function isTeacher(props) {
-    return props.joined.owner === props.user
-}
+// function isTeacher(props) {
+//     return props.joined.owner === props.user
+// }
 
-export default withStyles(styles)(Whiteboard);
+export default withStyles(styles)(GroupWhiteboard);

@@ -78,6 +78,7 @@ export default class CreateClass extends React.Component {
                                 value={this.state.t_name}
                                 onChange={this.handleT.bind(this)}
                                 onKeyDown={this.keyPress.bind(this)}
+                                autoFocus
                             />
                         </form>
                         <form>

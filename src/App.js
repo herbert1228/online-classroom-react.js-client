@@ -1,6 +1,6 @@
 import React, {Fragment} from 'react'
 import {compose} from 'redux'
-import {Content, Classroom, Notebooks, Mailbox, NotificationBar} from './Components'
+import {Content, Classroom, Notebooks, Mailbox, NotificationBar, ClassNotificationBar} from './Components'
 import PropTypes, {instanceOf} from 'prop-types'
 import {Cookies, withCookies} from 'react-cookie'
 import {withStyles} from '@material-ui/core'
@@ -39,10 +39,13 @@ class App extends React.Component {
     state = {
         showNotification: false,
         notificationMessage: "",
+        showClassNotification: false,
+        classNotificationMessage: "",
         otherId: null,
     }
 
     notificationQueue = []
+    classNotificationQueue = []
 
     changeScene = async (target) => {
         if (this.props.joined && this.props.location === 1) {
@@ -81,6 +84,33 @@ class App extends React.Component {
         this.setState({ showNotification: false });
     }
 
+    // In-class notification
+
+    handleClassNotification = (message) => {
+        this.classNotificationQueue.push(message)
+        if (this.state.showClassNotification) {
+            this.setState({ showClassNotification: false });
+        } else {
+            this.classProcessQueue();
+        }
+    }
+
+    classProcessQueue = () => {
+        if (this.classNotificationQueue.length > 0) {
+            this.setState({
+                classNotificationMessage: this.classNotificationQueue.shift(),
+                showClassNotification: true,
+            })
+        }
+    }
+
+    handleDismissClassNotification = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        this.setState({ showClassNotification: false });
+    }
+    
     render() {
         const {classes, ...others} = this.props
         return (
@@ -90,6 +120,11 @@ class App extends React.Component {
                     open={this.state.showNotification}
                     handleClose={this.handleDismissNotification.bind(this)}
                     handleExited={this.processQueue}/>
+                <ClassNotificationBar
+                    message={this.state.classNotificationMessage}
+                    open={this.state.showClassNotification}
+                    handleClose={this.handleDismissClassNotification.bind(this)}
+                    handleExited={this.classProcessQueue}/>
                 {(this.props.self) &&
                     <div className={classes.root}>
                         {this.props.drawerOpen &&
@@ -103,7 +138,7 @@ class App extends React.Component {
                         }
                         <div className={classes.content}>
                             {this.props.location === 0 &&<Content {...this.state} {...others} handleNotification={this.handleNotification}/>}
-                            {this.props.location === 1 &&<Classroom {...this.state} {...others} handleNotification={this.handleNotification} changeScene={this.changeScene}/>}
+                            {this.props.location === 1 &&<Classroom {...this.state} {...others} handleNotification={this.handleNotification} changeScene={this.changeScene} handleClassNotification={this.handleClassNotification}/>}
                             {/* {this.props.location === 2 &&<ClassList {...this.state} {...others} handleNotification={this.handleNotification} changeScene={this.changeScene}/>} */}
                             {this.props.location === 2.1 &&<ClassListTeacher {...this.state} {...others} handleNotification={this.handleNotification} changeScene={this.changeScene}/>}
                             {this.props.location === 2.2 &&<ClassListStudent {...this.state} {...others} handleNotification={this.handleNotification} changeScene={this.changeScene}/>}

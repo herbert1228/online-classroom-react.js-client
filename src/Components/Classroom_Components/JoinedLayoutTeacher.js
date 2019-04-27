@@ -6,6 +6,7 @@ import Drawer from '../Classroom_Components/Drawer'
 import { withStyles } from '@material-ui/core/styles'
 import ParticipantList from './ParticipantList'
 import Whiteboard from './Whiteboard'
+import GroupWhiteboard from './GroupWhiteboard'
 import {withCookies} from 'react-cookie'
 import {compose} from 'redux'
 import _ from 'lodash'
@@ -25,10 +26,13 @@ class JoinedLayoutTeacher extends Component {
     state = {
         webcam: {
             // selfWebcam: { owner: "", id: "selfWebcam", zIndex: 2, position: {x: 1130, y: 5}, size: {width: 460, height: 345+72} }, 
-            teacherWebcam: { id: "teacherWebcam", zIndex: 2, position: {x: 5, y: 5}, size: {width: 460, height: 345+41} }, 
+            teacherWebcam: { id: "teacherWebcam", zIndex: 2, position: {x: 10, y: 5}, size: {width: 460, height: 345+41} }, 
         },
         whiteboard: {
-            teacherWhiteboard: { id: "teacherWhiteboard", user: this.props.joined.owner, zIndex: 3, position: {x: 5, y: 150}, size: {width: 800, height: 718} }, 
+            "Group2Whiteboard": { type: 'group', id: "Group3Whiteboard", user: "Group3", zIndex: 2, position: {x: 810, y: 150}, size: {width: 800, height: 718} },
+            "Group2Whiteboard": { type: 'group', id: "Group2Whiteboard", user: "Group2", zIndex: 2, position: {x: 810, y: 150}, size: {width: 800, height: 718} },
+            "Group1Whiteboard": { type: 'group', id: "Group1Whiteboard", user: "Group1", zIndex: 2, position: {x: 810, y: 150}, size: {width: 800, height: 718} },
+            teacherWhiteboard: { id: "teacherWhiteboard", user: this.props.joined.owner, zIndex: 3, position: {x: 10, y: 150}, size: {width: 800, height: 718} }, 
         },
         drawer: {
             selfDrawer: { id: "selfDrawer", zIndex: 0, position: {x: 660, y: 5}, size: {width: 450, height: 550} }, 
@@ -53,7 +57,7 @@ class JoinedLayoutTeacher extends Component {
             if (each === this.props.self) continue
             this.setState({whiteboard: {
                 ...this.state.whiteboard,
-                [each + "Whiteboard"]: { id: each + "Whiteboard", user: each, zIndex: 2, position: {x: 800, y: 150}, size: {width: 800, height: 718} }
+                [each + "Whiteboard"]: { id: each + "Whiteboard", user: each, zIndex: 2, position: {x: 820, y: 150}, size: {width: 800, height: 718} }
             }})
         }
 
@@ -84,7 +88,7 @@ class JoinedLayoutTeacher extends Component {
 
                 this.setState({whiteboard: {
                     ...this.state.whiteboard,
-                    [each + "Whiteboard"]: { id: each + "Whiteboard", user: each, zIndex: 2, position: {x: 800, y: 150}, size: {width: 800, height: 718} }
+                    [each + "Whiteboard"]: { id: each + "Whiteboard", user: each, zIndex: 2, position: {x: 810, y: 150}, size: {width: 800, height: 718} }
                 }})
             }
         }
@@ -93,6 +97,26 @@ class JoinedLayoutTeacher extends Component {
     componentWillUnmount() {
         resetGroupCards()
     }
+
+    // handleGroupStatusChange = group => {
+    //     if (prevProps.session_user.length > this.props.session_user.length) {
+    //         console.log("less")
+    //         this.props.handleNotification(each + " left")
+    //         removeUserFromGroupCards(each, this.props)
+
+    //         const tmpState = this.state
+    //         delete tmpState.whiteboard[each + "Whiteboard"]
+    //         this.setState(tmpState)
+    //     } else {
+    //         this.props.handleNotification(each + " joined")
+    //         insertUserToGroupCards(each, this.props)
+
+    //         this.setState({whiteboard: {
+    //             ...this.state.whiteboard,
+    //             [each + "Whiteboard"]: { id: each + "Whiteboard", user: each, zIndex: 2, position: {x: 800, y: 150}, size: {width: 800, height: 718} }
+    //         }})
+    //     }
+    // }
 
     bringTop = (target) => { // target: selfWebcam/etc
         let maxZ = -1
@@ -172,23 +196,47 @@ class JoinedLayoutTeacher extends Component {
                                 this.props.joined.owner : this.props.self}
                         />
                     ))}
-                    {Object.values(this.state.whiteboard).map((whiteboard) => (
+                    {Object.values(this.state.whiteboard).map((whiteboard) => {
+                        if (whiteboard.type !== 'group') {
+                            return (
+                                <Whiteboard
+                                    key={whiteboard.id}
+                                    bringTop={() => this.bringTop(whiteboard.id)}
+                                    inputRef={(id, el) => this.ref[id] = el}
+                                    lockAspectRatio={4/3}
+                                    lockAspectRatioExtraHeight={72}
+                                    enableResizing={false}
+                                    {...whiteboard}
+                                    {...other}
+                                />
+                            )
+                        }
+                        else if (whiteboard.type === 'group' && hasGroup(whiteboard.user, this.props))
+                            return (
+                                <GroupWhiteboard
+                                    key={whiteboard.id}
+                                    bringTop={() => this.bringTop(whiteboard.id)}
+                                    inputRef={(id, el) => this.ref[id] = el}
+                                    lockAspectRatio={4/3}
+                                    lockAspectRatioExtraHeight={72}
+                                    enableResizing={false}
+                                    {...whiteboard}
+                                    {...other}
+                                />
+                            )
+                    })}
+                    {/* {Object.values(this.state.whiteboard).map((whiteboard) => (
                         <Whiteboard
                             key={whiteboard.id}
-                            // id={whiteboard.id}
                             bringTop={() => this.bringTop(whiteboard.id)}
-                            // size={whiteboard.size}
-                            // position={whiteboard.position}
-                            // zIndex={whiteboard.zIndex}      
                             inputRef={(id, el) => this.ref[id] = el}
                             lockAspectRatio={4/3}
                             lockAspectRatioExtraHeight={72}
                             enableResizing={false}
-                            {...other}
                             {...whiteboard}
-                            // user={(whiteboard.id === "teacherWebcam") ? whiteboard.owner: this.props.self }   
+                            {...other}
                         />
-                    ))}
+                    ))} */}
                     <Drawer 
                         id={"selfDrawer"}
                         bringTop={() => this.bringTop('selfDrawer')}
@@ -237,6 +285,14 @@ function removeUserFromGroupCards(user, props) {
 function resetGroupCards() {
     store.dispatch({type: "updateGroupCards", groupCards: []})
 }
+
+function hasGroup(groupId, props) {
+    return props.groupCards.filter(group => group.status === groupId).length > 0
+}
+
+// function getGroupMembers(groupId, props) {
+//     return props.groupCards.filter(group => group.status === groupId).
+// }
 
 export default compose(
     withCookies,
