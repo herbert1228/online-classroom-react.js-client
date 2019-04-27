@@ -12,6 +12,7 @@ import {compose} from 'redux'
 import _ from 'lodash'
 import {store} from '../../index'
 import { ClassStatusChannel } from '../../interface/connection';
+import FindComponent from './FindComponent';
 
 const styles = theme => ({ 
     container: {
@@ -29,14 +30,14 @@ class JoinedLayoutTeacher extends Component {
             teacherWebcam: { id: "teacherWebcam", zIndex: 2, position: {x: 10, y: 5}, size: {width: 460, height: 345+41} }, 
         },
         whiteboard: {
-            "Group2Whiteboard": { type: 'group', id: "Group3Whiteboard", user: "Group3", zIndex: 2, position: {x: 810, y: 150}, size: {width: 800, height: 718} },
+            "Group3Whiteboard": { type: 'group', id: "Group3Whiteboard", user: "Group3", zIndex: 2, position: {x: 810, y: 150}, size: {width: 800, height: 718} },
             "Group2Whiteboard": { type: 'group', id: "Group2Whiteboard", user: "Group2", zIndex: 2, position: {x: 810, y: 150}, size: {width: 800, height: 718} },
             "Group1Whiteboard": { type: 'group', id: "Group1Whiteboard", user: "Group1", zIndex: 2, position: {x: 810, y: 150}, size: {width: 800, height: 718} },
             teacherWhiteboard: { id: "teacherWhiteboard", user: this.props.joined.owner, zIndex: 3, position: {x: 10, y: 150}, size: {width: 800, height: 718} }, 
         },
         drawer: {
             selfDrawer: { id: "selfDrawer", zIndex: 0, position: {x: 660, y: 5}, size: {width: 450, height: 550} }, 
-            classDrawer: { id: "classDrawer", zIndex: 0, position: {x: 0, y: 5} },// to distribute/receive files class esources
+            // classDrawer: { id: "classDrawer", zIndex: 0, position: {x: 0, y: 5} },// to distribute/receive files class esources
         },
         other: {
             PList: { id: "PList", zIndex: 1, position: {x: 1450, y: 5}, size: {width: 0, height: 0} }, 
@@ -98,26 +99,6 @@ class JoinedLayoutTeacher extends Component {
         resetGroupCards()
     }
 
-    // handleGroupStatusChange = group => {
-    //     if (prevProps.session_user.length > this.props.session_user.length) {
-    //         console.log("less")
-    //         this.props.handleNotification(each + " left")
-    //         removeUserFromGroupCards(each, this.props)
-
-    //         const tmpState = this.state
-    //         delete tmpState.whiteboard[each + "Whiteboard"]
-    //         this.setState(tmpState)
-    //     } else {
-    //         this.props.handleNotification(each + " joined")
-    //         insertUserToGroupCards(each, this.props)
-
-    //         this.setState({whiteboard: {
-    //             ...this.state.whiteboard,
-    //             [each + "Whiteboard"]: { id: each + "Whiteboard", user: each, zIndex: 2, position: {x: 800, y: 150}, size: {width: 800, height: 718} }
-    //         }})
-    //     }
-    // }
-
     bringTop = (target) => { // target: selfWebcam/etc
         let maxZ = -1
         Object.values(this.state).forEach(outer => {
@@ -158,14 +139,9 @@ class JoinedLayoutTeacher extends Component {
                 <AppBar position="static" color="default">
                     <Toolbar variant="dense">
                         <ClassMenu {...other} />
-                        {Object.keys(this.state).map(
-                            (outer) => Object.keys(this.state[outer]).map((inner) => (
-                                <Button onClick={()=>this.bringTop(inner)} key={inner}>
-                                    {inner}
-                                </Button>
-                        )))}
-                        <Button onClick={()=>this.testfunc()}>update position</Button>
-                        <Button onClick={()=>this.saveLayout()}>saveLayout</Button>
+                        <FindComponent components={this.state} bringTop={this.bringTop}/>
+                        <Button onClick={()=>this.testfunc()}>Find Student List</Button>
+                        {/* <Button onClick={()=>this.saveLayout()}>saveLayout</Button> */}
                     </Toolbar>
                 </AppBar>
                 <div className={classes.container}>

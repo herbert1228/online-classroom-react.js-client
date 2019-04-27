@@ -11,6 +11,7 @@ import _ from 'lodash'
 import {ClassStatusChannel} from '../../interface/connection'
 import {store} from '../../index'
 import GroupStatus from './GroupStatus';
+import FindComponent from './FindComponent';
 
 const styles = theme => ({ 
     container: {
@@ -33,10 +34,10 @@ class JoinedLayoutStudent extends Component {
         },
         drawer: {
             selfDrawer: { id: "Personal Drawer", zIndex: 0, position: {x: 660, y: 5}, size: {width: 450, height: 550} }, 
-            classDrawer: { id: "Class Resources", zIndex: 0, position: {x: 10, y: 5} },// to distribute/receive files class esources
+            // classDrawer: { id: "Class Resources", zIndex: 0, position: {x: 10, y: 5} },// to distribute/receive files class esources
         },
         other: {
-            PList: { id: "PList", zIndex: 1, position: {x: 480, y: 5}, size: {width: 0, height: 0} }, 
+            StudentList: { id: "StudentList", zIndex: 1, position: {x: 480, y: 5}, size: {width: 0, height: 0} }, 
         }
     }
     componentDidMount() {
@@ -93,8 +94,8 @@ class JoinedLayoutStudent extends Component {
         })
     }
     testfunc = () => {
-        this.ref["PList"].updatePosition({x: 825, y: 230})
-        this.bringTop("PList")
+        this.ref["StudentList"].updatePosition({x: 825, y: 230})
+        this.bringTop("StudentList")
     }
     render() {
         const { classes, ...other } = this.props
@@ -103,23 +104,18 @@ class JoinedLayoutStudent extends Component {
                 <AppBar position="static" color="default">
                     <Toolbar variant="dense">
                         <ClassMenu {...other} />
-                        {Object.keys(this.state).map(
-                            (outer) => Object.keys(this.state[outer]).map((inner) => (
-                                <Button onClick={()=>this.bringTop(inner)} key={inner}>
-                                    {inner}
-                                </Button>
-                        )))}
+                        <FindComponent components={this.state} bringTop={this.bringTop}/>
+                        {/* <Button onClick={()=>this.testfunc()}>update position</Button> */}
                         <GroupStatus {...other}/>
-                        <Button onClick={()=>this.testfunc()}>update position</Button>
                     </Toolbar>
                 </AppBar>
                 <div className={classes.container}>
                     <ParticipantList 
-                        id={"PList"}
-                        bringTop={() => this.bringTop('PList')}
-                        size={this.state.other["PList"].size}
-                        position={this.state.other["PList"].position}
-                        zIndex={this.state.other["PList"].zIndex}
+                        id={"StudentList"}
+                        bringTop={() => this.bringTop('StudentList')}
+                        size={this.state.other["StudentList"].size}
+                        position={this.state.other["StudentList"].position}
+                        zIndex={this.state.other["StudentList"].zIndex}
                         inputRef={(id, el) => this.ref[id] = el}
                         enableResizing={false}
                         minWidth={0}

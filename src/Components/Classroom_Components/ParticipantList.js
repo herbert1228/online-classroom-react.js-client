@@ -3,7 +3,8 @@ import { withStyles } from '@material-ui/core'
 import UserCardSmall from '../Content_Components/UserCardSmall'
 import { Grid, Button } from '@material-ui/core'
 import RndContainer from './RndContainer';
-import ManageGroup from './GroupingMenu/ManageGroup';
+import ManageGroup from './GroupingMenu/ManageGroup'
+import {SignalingChannel} from '../../interface/connection'
 
 const styles = theme => ({
     grid_item: {

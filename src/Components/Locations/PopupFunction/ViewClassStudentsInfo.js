@@ -1,4 +1,4 @@
-import Popover from '../../Popover'
+import Popover from '../../PopoverNarrow'
 import React, { Fragment } from 'react';
 import { Grid, DialogContent, Button, withStyles, Typography} from '@material-ui/core'
 import {connection as conn} from '../../../interface/connection'
